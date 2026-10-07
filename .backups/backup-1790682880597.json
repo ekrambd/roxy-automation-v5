@@ -1,0 +1,88 @@
+{
+  "metadata": {
+    "id": "backup-1790682880597",
+    "timestamp": "2026-09-29T11:54:40.597Z",
+    "collections": {
+      "productsCount": 4,
+      "ordersCount": 0,
+      "settingsIncluded": true
+    }
+  },
+  "data": {
+    "products": [
+      {
+        "id": "fantine-cream",
+        "title": "Ultimate Calming Solution Cream",
+        "author": "FANTINE Laboratory",
+        "regularPrice": 24.99,
+        "price": 20.99,
+        "discountPercentage": 16,
+        "stockQuantity": 45,
+        "category": "Creams",
+        "coverImage": "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=800&auto=format&fit=crop&q=85",
+        "description": "Ultimate Calming Solution Face Cream with Aloe Vera, Centella Asiatica, and botanical Hanbang phyto-extracts. Soothes irritation and locks in 48h hydration.",
+        "badge": "Best Seller",
+        "isFeatured": true
+      },
+      {
+        "id": "fantine-cleanser",
+        "title": "Ultimate Calming Solution Face Cleanser",
+        "author": "FANTINE Laboratory",
+        "regularPrice": 14.8,
+        "price": 12.18,
+        "discountPercentage": 18,
+        "stockQuantity": 60,
+        "category": "Cleansers",
+        "coverImage": "https://images.unsplash.com/photo-1556228722-d9b3be373b5f?w=800&auto=format&fit=crop&q=85",
+        "description": "Mild micro-foam foaming cleanser with amino acids and calming tea tree extract. Gently melts impurities while preserving the delicate skin moisture barrier.",
+        "badge": "Popular",
+        "isFeatured": true
+      },
+      {
+        "id": "fantine-toner",
+        "title": "Ultimate Calming Solution Toner",
+        "author": "FANTINE Laboratory",
+        "regularPrice": 18.8,
+        "price": 16.68,
+        "discountPercentage": 11,
+        "stockQuantity": 50,
+        "category": "Toners",
+        "coverImage": "https://images.unsplash.com/photo-1608248597359-0098f98a329d?w=800&auto=format&fit=crop&q=85",
+        "description": "Botanical essence toner balancing skin pH with green tea leaf infusion and 8-layer hyaluronic acid for instant dewy glass-skin glow.",
+        "badge": "Trending",
+        "isFeatured": true
+      },
+      {
+        "id": "fantine-essence",
+        "title": "Ultimate Calming Solution Essence",
+        "author": "FANTINE Laboratory",
+        "regularPrice": 22.5,
+        "price": 19.8,
+        "discountPercentage": 12,
+        "stockQuantity": 40,
+        "category": "Serums",
+        "coverImage": "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=800&auto=format&fit=crop&q=85",
+        "description": "Concentrated antioxidant pearl elixir infused with Korean Red Ginseng and fermented rice extract for cellular renewal and antioxidant barrier shield.",
+        "badge": "Hanbang Care",
+        "isFeatured": true
+      }
+    ],
+    "orders": [],
+    "settings": {
+      "storeName": "FANTINE Korea (Brandini Co., Ltd.)",
+      "storeTagline": "Luxury Hanbang Skincare & Clinical Botanical Whitening Solutions",
+      "gtmId": "",
+      "deliveryChargeInsideDhaka": 0,
+      "deliveryChargeOutsideDhaka": 0,
+      "bkashNumber": "",
+      "nagadNumber": "",
+      "categories": [
+        "Cleansers",
+        "Toners",
+        "Serums",
+        "Creams",
+        "Sets"
+      ]
+    }
+  }
+}
