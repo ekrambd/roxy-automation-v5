@@ -7,7 +7,7 @@ import { app } from "./src/server/app";
 // Vercel injects production variables. Local development reads the ignored file.
 dotenv.config({ path: '.env.local' });
 
-const PORT = Number(process.env.PORT) || 3000;
+const PORT = Number(process.env.PORT) || 3004;
 
 // ==================== VITE / STATIC SERVER ====================
 async function startServer() {
