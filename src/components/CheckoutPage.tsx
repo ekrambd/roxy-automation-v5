@@ -465,6 +465,7 @@ export default function CheckoutPage({
       }
 
       setOrderSuccess(confirmedOrder);
+      trackEvent('Purchase', { value: finalTotal, currency: 'BDT', num_items: cartItems.length });
       onClearCart();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {

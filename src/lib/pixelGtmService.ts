@@ -24,16 +24,13 @@ export const initPixelAndGtm = (pixelId?: string, gtmId?: string) => {
         if (fbq.callMethod) fbq.callMethod.apply(fbq, args);
         else fbq.queue.push(args);
       };
-
       fbq.push = fbq;
       fbq.loaded = true;
       fbq.version = '2.0';
       fbq.queue = [];
-
       window.fbq = fbq;
       window._fbq = fbq;
     }
-
     // init immediately so PageView and other events bind to this ID
     window.fbq('init', normalizedPixelId);
   }
@@ -41,39 +38,25 @@ export const initPixelAndGtm = (pixelId?: string, gtmId?: string) => {
   // 2. Setup the GTM dataLayer stub synchronously
   if (normalizedGtmId && !initializedGtmIds.has(normalizedGtmId)) {
     window.dataLayer = window.dataLayer || [];
-
-    window.dataLayer.push({
-      'gtm.start': Date.now(),
-      event: 'gtm.js'
-    });
+    window.dataLayer.push({ 'gtm.start': Date.now(), event: 'gtm.js' });
   }
 
   // Defer downloading the heavy third-party scripts to save LCP and TBT
   setTimeout(() => {
-    if (
-      normalizedPixelId &&
-      !initializedPixelIds.has(normalizedPixelId)
-    ) {
+    if (normalizedPixelId && !initializedPixelIds.has(normalizedPixelId)) {
       const script = document.createElement('script');
-
       script.id = 'fb-pixel-script';
       script.async = true;
       script.src = 'https://connect.facebook.net/en_US/fbevents.js';
-
       document.head.appendChild(script);
       initializedPixelIds.add(normalizedPixelId);
     }
 
-    if (
-      normalizedGtmId &&
-      !initializedGtmIds.has(normalizedGtmId)
-    ) {
+    if (normalizedGtmId && !initializedGtmIds.has(normalizedGtmId)) {
       const script = document.createElement('script');
-
       script.id = 'gtm-script';
       script.async = true;
       script.src = `https://www.googletagmanager.com/gtm.js?id=${encodeURIComponent(normalizedGtmId)}`;
-
       document.head.appendChild(script);
       initializedGtmIds.add(normalizedGtmId);
     }
@@ -81,34 +64,20 @@ export const initPixelAndGtm = (pixelId?: string, gtmId?: string) => {
 };
 
 export const createEventId = (prefix: string) => {
-  const randomPart =
-    typeof crypto !== 'undefined' && 'randomUUID' in crypto
-      ? crypto.randomUUID()
-      : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-
+  const randomPart = typeof crypto !== 'undefined' && 'randomUUID' in crypto
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
   return `${prefix}-${randomPart}`;
 };
 
-export const trackEvent = (
-  eventName: string,
-  data: Record<string, any> = {},
-  eventId?: string
-) => {
+export const trackEvent = (eventName: string, data: Record<string, any> = {}, eventId?: string) => {
   if (typeof window === 'undefined') return;
 
   // 1. Meta Pixel track
   if (window.fbq) {
     try {
-      if (eventId) {
-        window.fbq(
-          'track',
-          eventName,
-          data,
-          { eventID: eventId }
-        );
-      } else {
-        window.fbq('track', eventName, data);
-      }
+      if (eventId) window.fbq('track', eventName, data, { eventID: eventId });
+      else window.fbq('track', eventName, data);
     } catch (e) {
       console.warn('Pixel event track failed:', e);
     }
@@ -116,7 +85,6 @@ export const trackEvent = (
 
   // 2. GTM dataLayer push
   window.dataLayer = window.dataLayer || [];
-
   try {
     const gtmEventNames: Record<string, string> = {
       PageView: 'page_view',
@@ -125,7 +93,6 @@ export const trackEvent = (
       InitiateCheckout: 'begin_checkout',
       Purchase: 'purchase'
     };
-
     window.dataLayer.push({
       event: gtmEventNames[eventName] || eventName.toLowerCase(),
       event_id: eventId,

@@ -9,6 +9,7 @@ import {
   Building2, BookOpen, Microscope, Quote, Sprout, FlaskConical, CreditCard, Smartphone, Copy, Tag,
   Play, Pause, Volume2, VolumeX, Menu
 } from 'lucide-react';
+import { trackEvent } from '../lib/pixelGtmService';
 import { Product, BookOrder, EcomSettings, InstituteInfo, ContactMessage, AboutPageSettings, DeliveryMethodItem, PaymentGatewayItem, Coupon } from '../types';
 import { publicStoreService } from '../lib/publicStoreService';
 import { DEFAULT_ABOUT_SETTINGS, DEFAULT_DELIVERY_METHODS, DEFAULT_PAYMENT_GATEWAYS } from '../lib/constants';
@@ -674,6 +675,7 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
 
   // Add to Cart Helper
   const handleAddToCart = useCallback((product: Product, quantity = 1) => {
+    trackEvent('AddToCart', { content_name: product.title, content_ids: [product.id], value: product.price * quantity, currency: 'BDT' });
     addToCartAction({ product, quantity });
     setShowNotificationToast({ show: true, msg: `Added ${product.title} to your bag.` });
     setTimeout(() => setShowNotificationToast({ show: false, msg: '' }), 3500);
@@ -982,6 +984,7 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
       }
 
       setOrderSuccess(confirmedOrder);
+      trackEvent('Purchase', { value: cartTotal, currency: 'BDT', num_items: cartItems.length });
       clearCartAction();
       setIsCartOpen(false);
       setCheckoutName('');
