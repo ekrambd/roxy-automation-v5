@@ -1,3 +1,4 @@
+import { trackEvent } from '../lib/pixelGtmService';
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
   ShoppingBag, 
