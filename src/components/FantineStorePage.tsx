@@ -1,4 +1,5 @@
 import { dbService } from "../lib/dbService";
+//fix pixel event 2
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { 
