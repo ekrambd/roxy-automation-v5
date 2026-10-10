@@ -1,5 +1,5 @@
 import { Product, BookOrder, EcomSettings } from '../types';
-
+//mycomment
 export class ApiClient {
   private static async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
     let idToken: string | null = null;
