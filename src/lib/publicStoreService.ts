@@ -34,7 +34,7 @@ export function getResponsiveImageProps(url?: string, baseWidth = 800) {
   return { src: optimizedSrc };
 }
 
-function readCache<T>(key: string, fallback: T): T {
+export function readStorefrontCache<T>(key: string, fallback?: T): T | null {
   const mem = memoryCache.get(key);
   if (mem && (Date.now() - mem.timestamp < CACHE_TTL_MS)) {
     return mem.data as T;
@@ -49,7 +49,11 @@ function readCache<T>(key: string, fallback: T): T {
   } catch {
     // quota/parse failure
   }
-  return fallback;
+  return fallback !== undefined ? fallback : null;
+}
+
+function readCache<T>(key: string, fallback: T): T {
+  return readStorefrontCache<T>(key, fallback) ?? fallback;
 }
 
 function writeCache<T>(key: string, data: T): void {
@@ -181,5 +185,9 @@ export const publicStoreService = {
     }
 
     return msg;
+  },
+
+  async submitContactMessage(message: Partial<ContactMessage>): Promise<ContactMessage> {
+    return this.saveContactMessage(message);
   }
 };
