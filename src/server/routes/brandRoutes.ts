@@ -6,7 +6,7 @@ import { requireAdmin } from '../middleware/adminAuth';
 export const brandRouter = Router();
 
 // GET all
-brandRouter.get('/', async (req, res) => {
+brandRouter.get('/', cacheResponse({ ttlSeconds: 120, staleWhileRevalidateSeconds: 300, tag: 'brands' }), async (req, res) => {
   try {
     const items = await prisma.brand.findMany();
     res.json(items);
@@ -16,7 +16,7 @@ brandRouter.get('/', async (req, res) => {
 });
 
 // GET by ID
-brandRouter.get('/:id', async (req, res) => {
+brandRouter.get('/:id', cacheResponse({ ttlSeconds: 120, staleWhileRevalidateSeconds: 300, tag: 'brands' }), async (req, res) => {
   try {
     const item = await prisma.brand.findUnique({ where: { id: req.params.id } });
     if (item) res.json(item);

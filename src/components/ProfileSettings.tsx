@@ -4,8 +4,6 @@ import {
   Building2, KeyRound, QrCode, Receipt, ChevronDown, Download,
   Image as ImageIcon, Upload, X, Palette, Store, Check, Sparkles, Share2
 } from 'lucide-react';
-import { updatePassword, updateProfile } from 'firebase/auth';
-import { auth, isFirebaseEnabled } from '../lib/firebase';
 import { dbService } from '../lib/dbService';
 import { CircularProgress } from './LoadingSkeleton';
 import { compressImage } from '../lib/imageUtils';
@@ -120,11 +118,7 @@ export default function ProfileSettings({ adminEmail }: ProfileSettingsProps) {
       }
     }
 
-    if (isFirebaseEnabled) {
-      loadData();
-    } else {
-      setTimeout(() => setIsLoading(false), 500);
-    }
+    loadData();
   }, []);
 
   const handleLogoUpload = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -134,18 +128,8 @@ export default function ProfileSettings({ adminEmail }: ProfileSettingsProps) {
     try {
       setIsUploadingLogo(true);
       const compressedFile = await compressImage(file, 500);
-      
-      if (isFirebaseEnabled) {
-        try {
-          const downloadUrl = await uploadDataUrlToStorage(compressedFile, `store_assets/logo_${Date.now()}.jpg`);
-          setStoreLogo(downloadUrl);
-        } catch (storageErr) {
-          console.warn('Firebase Storage upload failed, falling back to data URL:', storageErr);
-          setStoreLogo(compressedFile);
-        }
-      } else {
-        setStoreLogo(compressedFile);
-      }
+      const downloadUrl = await uploadDataUrlToStorage(compressedFile, `store_assets/logo_${Date.now()}.jpg`);
+      setStoreLogo(downloadUrl);
       setSuccessMsg('Logo loaded successfully! Click "Update Settings" to save.');
     } catch (err: any) {
       console.error('Error uploading logo:', err);
@@ -248,23 +232,32 @@ export default function ProfileSettings({ adminEmail }: ProfileSettingsProps) {
     setIsChangingPass(true);
 
     try {
-      if (auth?.currentUser) {
-        await updatePassword(auth.currentUser, newPassword);
-        setSuccessMsg('Password changed successfully!');
-        setNewPassword('');
-        setConfirmPassword('');
-      } else {
-        setSuccessMsg('Password updated (Demo Mode).');
-        setNewPassword('');
-        setConfirmPassword('');
+      const res = await fetch('/api/auth/change-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('admin_token') || ''}`
+        },
+        body: JSON.stringify({ currentPassword: currentPassword || '', newPassword })
+      });
+
+      if (!res.ok) {
+        let msg = 'Failed to change password';
+        try {
+          const data = await res.json();
+          msg = data.message || msg;
+        } catch {
+          // fallback
+        }
+        throw new Error(msg);
       }
+
+      setSuccessMsg('Password changed successfully!');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
     } catch (err: any) {
-      console.error('Password change error:', err);
-      if (err.code === 'auth/requires-recent-login') {
-        setErrorMsg('Please log in again to change your password for security reasons.');
-      } else {
-        setErrorMsg('Password change failed: ' + (err.message || 'Please try again.'));
-      }
+      setErrorMsg('Password change failed: ' + (err.message || 'Please try again.'));
     } finally {
       setIsChangingPass(false);
     }

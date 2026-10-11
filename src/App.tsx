@@ -1,5 +1,5 @@
 import { useState, useEffect, Suspense, lazy } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useAppStore } from './store/useAppStore';
 import { initPixelAndGtm, trackEvent } from './lib/pixelGtmService';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -70,16 +70,26 @@ function GlobalBrandingFix() {
 
 function AppRoutes() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { adminEmail, setAdminEmail, logoutAdmin, ecomSettings } = useAppStore();
   
   useEffect(() => {
     // Globally initialize the Meta Pixel as soon as settings load
     const pixelId = ecomSettings?.pixelId || import.meta.env.VITE_META_PIXEL_ID || '1111677938108529';
-    if (pixelId) {
-      initPixelAndGtm(pixelId);
-      trackEvent('PageView');
+    const gtmId = ecomSettings?.gtmId || import.meta.env.VITE_GTM_ID;
+    if (pixelId || gtmId) {
+      initPixelAndGtm(pixelId, gtmId);
     }
-  }, [ecomSettings?.pixelId]);
+  }, [ecomSettings?.pixelId, ecomSettings?.gtmId]);
+
+  useEffect(() => {
+    // Track PageView on route change (SPA support)
+    trackEvent('PageView', {
+      page_path: location.pathname,
+      page_location: window.location.href,
+      page_title: document.title
+    });
+  }, [location.pathname]);
 
   useEffect(() => {
     // Check initial cached admin session
@@ -91,29 +101,24 @@ function AppRoutes() {
     let unsubscribe: (() => void) | undefined;
     let cancelled = false;
 
-    // Non-blocking background auth initialization
+    // Native background auth check
     const timer = setTimeout(() => {
-      void Promise.all([
-        import('firebase/auth'),
-        import('./lib/firebase')
-      ]).then(([{ onAuthStateChanged }, { auth, isFirebaseEnabled }]) => {
+      void import('./lib/authService').then(({ authService }) => {
         if (cancelled) return;
-        if (isFirebaseEnabled && auth) {
-          unsubscribe = onAuthStateChanged(auth, (user) => {
-            if (cancelled) return;
-            if (user) {
-              localStorage.setItem('noor_admin_session_email', user.email || '');
-              setAdminEmail(user.email);
-            } else {
-              const email = localStorage.getItem('noor_admin_session_email');
-              setAdminEmail(email || null);
-            }
-          });
-        }
+        unsubscribe = authService.onAuthStateChanged((user) => {
+          if (cancelled) return;
+          if (user) {
+            localStorage.setItem('noor_admin_session_email', user.email || '');
+            setAdminEmail(user.email);
+          } else {
+            const email = localStorage.getItem('noor_admin_session_email');
+            setAdminEmail(email || null);
+          }
+        });
       }).catch((error) => {
         console.warn('Background admin auth check completed:', error);
       });
-    }, 500);
+    }, 100);
 
     return () => {
       cancelled = true;
@@ -164,17 +169,13 @@ function AppRoutes() {
 
   const handleLogout = async () => {
     try {
-      const [{ signOut }, { auth, isFirebaseEnabled }] = await Promise.all([
-        import('firebase/auth'),
-        import('./lib/firebase')
-      ]);
-      if (isFirebaseEnabled && auth) {
-        await signOut(auth);
-      }
+      const { authService } = await import('./lib/authService');
+      await authService.logout();
     } catch (err) {
       console.error('Logout error:', err);
     } finally {
       localStorage.removeItem('noor_admin_session_email');
+      localStorage.removeItem('admin_token');
       logoutAdmin();
       navigate('/');
     }

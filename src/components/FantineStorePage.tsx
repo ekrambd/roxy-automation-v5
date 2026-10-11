@@ -10,9 +10,9 @@ import {
   Building2, BookOpen, Microscope, Quote, Sprout, FlaskConical, CreditCard, Smartphone, Copy, Tag,
   Play, Pause, Volume2, VolumeX, Menu
 } from 'lucide-react';
-import { trackEvent } from '../lib/pixelGtmService';
+import { trackEvent, createEventId } from '../lib/pixelGtmService';
 import { Product, BookOrder, EcomSettings, InstituteInfo, ContactMessage, AboutPageSettings, DeliveryMethodItem, PaymentGatewayItem, Coupon } from '../types';
-import { publicStoreService } from '../lib/publicStoreService';
+import { publicStoreService, optimizeImageUrl } from '../lib/publicStoreService';
 import { DEFAULT_ABOUT_SETTINGS, DEFAULT_DELIVERY_METHODS, DEFAULT_PAYMENT_GATEWAYS } from '../lib/constants';
 import { ProductSearchEngine, HANBANG_INGREDIENT_DATABASE, IngredientMeta } from '../lib/searchIndex';
 import { useAppStore } from '../store/useAppStore';
@@ -622,6 +622,16 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
         window.location.href
       );
       updateProductSchema(activeProductDetail, window.location.href, displayStoreName);
+
+      // Track ViewContent for Meta Pixel & GTM
+      const eventId = createEventId('view');
+      trackEvent('ViewContent', {
+        content_name: activeProductDetail.title,
+        content_ids: [activeProductDetail.id],
+        content_type: 'product',
+        value: activeProductDetail.price,
+        currency: 'BDT'
+      }, eventId);
     } else if (activeNav === 'shop' || activeNav === 'home') {
       updateMetaTags(
         `${displayStoreName} | Official Store`,
@@ -632,6 +642,16 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
       updateProductSchema(null, window.location.href, displayStoreName);
     }
   }, [activeNav, activeProductDetail, displayStoreName, displayStoreLogo, aboutSettings?.description]);
+
+  // Track Search event on search query input (debounced)
+  useEffect(() => {
+    const q = searchTerm.trim();
+    if (!q || q.length < 2) return;
+    const timer = setTimeout(() => {
+      trackEvent('Search', { search_string: q });
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   // Transparent Header on initial top view, solid white on scroll
   const [isScrolled, setIsScrolled] = useState(false);
@@ -676,7 +696,21 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
 
   // Add to Cart Helper
   const handleAddToCart = useCallback((product: Product, quantity = 1) => {
-    trackEvent('AddToCart', { content_name: product.title, content_ids: [product.id], value: product.price * quantity, currency: 'BDT' });
+    const eventId = createEventId('cart');
+    trackEvent('AddToCart', {
+      content_name: product.title,
+      content_ids: [product.id],
+      content_type: 'product',
+      value: (product.price || 0) * quantity,
+      currency: 'BDT',
+      num_items: quantity,
+      contents: [{
+        id: product.id,
+        name: product.title,
+        quantity: quantity,
+        item_price: product.price
+      }]
+    }, eventId);
     addToCartAction({ product, quantity });
     setShowNotificationToast({ show: true, msg: `Added ${product.title} to your bag.` });
     setTimeout(() => setShowNotificationToast({ show: false, msg: '' }), 3500);
@@ -984,8 +1018,25 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
         await dbService.saveBookOrder(confirmedOrder);
       }
 
+      // Track Purchase event before clearing cart
+      const purchaseEventId = createEventId('purchase');
+      const totalItemsPurchased = cart.reduce((acc, item) => acc + item.quantity, 0);
+      trackEvent('Purchase', {
+        content_name: cart.map(i => i.product.title).join(', '),
+        content_ids: cart.map(i => i.product.id),
+        content_type: 'product',
+        value: cartGrandTotal || cartSubtotal,
+        currency: 'BDT',
+        num_items: totalItemsPurchased,
+        contents: cart.map(item => ({
+          id: item.product.id,
+          name: item.product.title,
+          quantity: item.quantity,
+          item_price: item.product.price
+        }))
+      }, purchaseEventId);
+
       setOrderSuccess(confirmedOrder);
-      trackEvent('Purchase', { value: cartTotal, currency: 'BDT', num_items: cartItems.length });
       clearCartAction();
       setIsCartOpen(false);
       setCheckoutName('');
@@ -1022,6 +1073,7 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
       });
 
       setContactSubmitted(true);
+      trackEvent('Contact', { content_name: 'Customer Contact Form' });
       setContactSenderName('');
       setContactEmail('');
       setContactPhone('');
@@ -1947,11 +1999,11 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
       {activeNav === 'home' && (
         <>
           {/* ============================================================
-              1. TOP HERO BACKGROUND VIDEO (Local Blazing-Fast Brand Video)
+              1. TOP HERO BACKGROUND VIDEO (9:16 Mobile & 16:9 Desktop)
               ============================================================ */}
-          <section className="relative overflow-hidden -mt-[84px] sm:-mt-[92px] md:-mt-[100px] pt-[84px] sm:pt-[92px] md:pt-[100px] min-h-[520px] sm:min-h-[600px] lg:min-h-[680px] flex items-center justify-start bg-slate-950 text-white border-b border-slate-900 group">
-            {/* Background Media Container with pointer-events-none */}
-            <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
+          <section className="relative overflow-hidden -mt-[84px] sm:-mt-[92px] md:-mt-[100px] pt-[84px] sm:pt-[92px] md:pt-[100px] min-h-[520px] sm:min-h-[600px] lg:min-h-[680px] flex items-center justify-start bg-slate-950 text-white border-b border-slate-900 group aspect-[9/16] sm:aspect-auto md:aspect-[16/9]">
+            {/* Background Media Container (9:16 Mobile & 16:9 Desktop) */}
+            <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none aspect-[9/16] sm:aspect-auto md:aspect-[16/9]">
               <video
                 autoPlay
                 loop
@@ -1992,7 +2044,15 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
                     className="group flex flex-col bg-white rounded-none border border-transparent hover:border-slate-200 transition-all duration-300 p-1.5 sm:p-2"
                   >
                     <div className="relative aspect-square w-full bg-[#f6f5f2] rounded-none overflow-hidden mb-2.5 sm:mb-4 cursor-pointer" onClick={() => openProductDetail(product)}>
-                      <img loading="lazy" width={286} height={286} src={product.coverImage} alt={product.title}
+                      <img 
+                        loading="lazy" 
+                        decoding="async"
+                        width={286} 
+                        height={286} 
+                        src={optimizeImageUrl(product.coverImage, 400)} 
+                        srcSet={`${optimizeImageUrl(product.coverImage, 360)} 360w, ${optimizeImageUrl(product.coverImage, 600)} 600w`}
+                        sizes="(max-width: 640px) 50vw, 286px"
+                        alt={product.title}
                         onError={(e) => {
                           e.currentTarget.onerror = null;
                           e.currentTarget.src = DEFAULT_FANTINE_FALLBACK_IMAGE;
@@ -2059,7 +2119,15 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
                     className="group flex flex-col bg-white rounded-none border border-slate-200/80 hover:shadow-xl transition-all duration-300 p-3 sm:p-4"
                   >
                     <div className="relative aspect-square w-full bg-[#f6f5f2] rounded-none overflow-hidden mb-3 sm:mb-4 cursor-pointer" onClick={() => openProductDetail(product)}>
-                      <img loading="lazy" width={286} height={286} src={product.coverImage} alt={product.title}
+                      <img 
+                        loading="lazy" 
+                        decoding="async"
+                        width={286} 
+                        height={286} 
+                        src={optimizeImageUrl(product.coverImage, 400)} 
+                        srcSet={`${optimizeImageUrl(product.coverImage, 360)} 360w, ${optimizeImageUrl(product.coverImage, 600)} 600w`}
+                        sizes="(max-width: 640px) 50vw, 286px"
+                        alt={product.title}
                         onError={(e) => {
                           e.currentTarget.onerror = null;
                           e.currentTarget.src = DEFAULT_FANTINE_FALLBACK_IMAGE;
@@ -2541,6 +2609,23 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
                     <button 
                       type="button"
                       onClick={() => {
+                        if (cart.length > 0) {
+                          const eventId = createEventId('initiate_checkout');
+                          trackEvent('InitiateCheckout', {
+                            content_name: cart.map(i => i.product.title).join(', '),
+                            content_ids: cart.map(i => i.product.id),
+                            content_type: 'product',
+                            value: cartGrandTotal || cartSubtotal,
+                            currency: 'BDT',
+                            num_items: cart.reduce((acc, item) => acc + item.quantity, 0),
+                            contents: cart.map(item => ({
+                              id: item.product.id,
+                              name: item.product.title,
+                              quantity: item.quantity,
+                              item_price: item.product.price
+                            }))
+                          }, eventId);
+                        }
                         setIsCartOpen(false);
                         setActiveNav('checkout');
                         scrollToTop();

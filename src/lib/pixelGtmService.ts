@@ -41,26 +41,24 @@ export const initPixelAndGtm = (pixelId?: string, gtmId?: string) => {
     window.dataLayer.push({ 'gtm.start': Date.now(), event: 'gtm.js' });
   }
 
-  // Defer downloading the heavy third-party scripts to save LCP and TBT
-  setTimeout(() => {
-    if (normalizedPixelId && !initializedPixelIds.has(normalizedPixelId)) {
-      const script = document.createElement('script');
-      script.id = 'fb-pixel-script';
-      script.async = true;
-      script.src = 'https://connect.facebook.net/en_US/fbevents.js';
-      document.head.appendChild(script);
-      initializedPixelIds.add(normalizedPixelId);
-    }
+  // Load scripts immediately without 3.5-second delay so tracker catches all early events
+  if (normalizedPixelId && !document.getElementById('fb-pixel-script')) {
+    const script = document.createElement('script');
+    script.id = 'fb-pixel-script';
+    script.async = true;
+    script.src = 'https://connect.facebook.net/en_US/fbevents.js';
+    document.head.appendChild(script);
+    initializedPixelIds.add(normalizedPixelId);
+  }
 
-    if (normalizedGtmId && !initializedGtmIds.has(normalizedGtmId)) {
-      const script = document.createElement('script');
-      script.id = 'gtm-script';
-      script.async = true;
-      script.src = `https://www.googletagmanager.com/gtm.js?id=${encodeURIComponent(normalizedGtmId)}`;
-      document.head.appendChild(script);
-      initializedGtmIds.add(normalizedGtmId);
-    }
-  }, 3500); // 3.5 seconds delay
+  if (normalizedGtmId && !document.getElementById('gtm-script')) {
+    const script = document.createElement('script');
+    script.id = 'gtm-script';
+    script.async = true;
+    script.src = `https://www.googletagmanager.com/gtm.js?id=${encodeURIComponent(normalizedGtmId)}`;
+    document.head.appendChild(script);
+    initializedGtmIds.add(normalizedGtmId);
+  }
 };
 
 export const createEventId = (prefix: string) => {
@@ -73,14 +71,26 @@ export const createEventId = (prefix: string) => {
 export const trackEvent = (eventName: string, data: Record<string, any> = {}, eventId?: string) => {
   if (typeof window === 'undefined') return;
 
+  // Ensure FB stub exists so queued events are never dropped
+  if (!window.fbq) {
+    const fbq: any = function (...args: any[]) {
+      if (fbq.callMethod) fbq.callMethod.apply(fbq, args);
+      else fbq.queue.push(args);
+    };
+    fbq.push = fbq;
+    fbq.loaded = true;
+    fbq.version = '2.0';
+    fbq.queue = [];
+    window.fbq = fbq;
+    window._fbq = fbq;
+  }
+
   // 1. Meta Pixel track
-  if (window.fbq) {
-    try {
-      if (eventId) window.fbq('track', eventName, data, { eventID: eventId });
-      else window.fbq('track', eventName, data);
-    } catch (e) {
-      console.warn('Pixel event track failed:', e);
-    }
+  try {
+    if (eventId) window.fbq('track', eventName, data, { eventID: eventId });
+    else window.fbq('track', eventName, data);
+  } catch (e) {
+    console.warn('Pixel event track failed:', e);
   }
 
   // 2. GTM dataLayer push
@@ -91,16 +101,31 @@ export const trackEvent = (eventName: string, data: Record<string, any> = {}, ev
       ViewContent: 'view_item',
       AddToCart: 'add_to_cart',
       InitiateCheckout: 'begin_checkout',
-      Purchase: 'purchase'
+      Purchase: 'purchase',
+      Search: 'search',
+      Contact: 'contact',
+      Lead: 'generate_lead'
     };
-    window.dataLayer.push({
-      event: gtmEventNames[eventName] || eventName.toLowerCase(),
+
+    const gtmEvent = gtmEventNames[eventName] || eventName.toLowerCase();
+    const payload: Record<string, any> = {
+      event: gtmEvent,
       event_id: eventId,
       ...data
-    });
+    };
+
+    // Standard GA4 ecommerce object
+    if (['ViewContent', 'AddToCart', 'InitiateCheckout', 'Purchase'].includes(eventName)) {
+      payload.ecommerce = {
+        currency: data.currency || 'BDT',
+        value: data.value,
+        items: data.contents || [],
+        ...(eventName === 'Purchase' ? { transaction_id: eventId } : {})
+      };
+    }
+
+    window.dataLayer.push(payload);
   } catch (e) {
     console.warn('GTM dataLayer push failed:', e);
   }
 };
-
-//chnaged here 

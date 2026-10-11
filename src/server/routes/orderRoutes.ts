@@ -5,12 +5,32 @@ import { cacheResponse } from '../middleware/cacheMiddleware';
 import { globalCache } from '../services/cacheEngine';
 import { shardService } from '../services/shardService';
 import { redundancyService } from '../services/redundancyService';
+import { prisma } from '../db';
 
 export const orderRouter = Router();
 
-// GET All Orders with cache
-orderRouter.get('/', cacheResponse({ ttlSeconds: 15, staleWhileRevalidateSeconds: 30, tag: 'orders' }), (_req, res) => {
-  res.json(storeOrders);
+// GET All Orders with cache & Eager Loading (Zero N+1 queries)
+orderRouter.get('/', cacheResponse({ ttlSeconds: 15, staleWhileRevalidateSeconds: 30, tag: 'orders' }), async (req, res) => {
+  const includeCustomer = req.query.include === 'customer' || req.query.withCustomer === 'true';
+
+  let orders = [...storeOrders];
+
+  // Eager load customer data in 1 single batch query (Zero N+1 queries)
+  if (includeCustomer && orders.length > 0) {
+    const phones = Array.from(new Set(orders.map(o => o.phone).filter(Boolean)));
+    try {
+      const customers = await prisma.customer.findMany({
+        where: { phone: { in: phones } }
+      });
+      const customerMap = new Map(customers.map(c => [c.phone, c]));
+      orders = orders.map(o => ({
+        ...o,
+        customerDetails: o.phone ? (customerMap.get(o.phone) || null) : null
+      }));
+    } catch {}
+  }
+
+  res.json(orders);
 });
 
 // GET Sharding & Partition info for Orders
@@ -31,7 +51,7 @@ orderRouter.get('/shards/stats', (_req, res) => {
   });
 });
 
-// POST /api/orders/checkout - Secure Server-Side Atomic Order Validation & Placement
+// POST /api/orders/checkout - Secure Server-Side Atomic Order Validation & Placement (N+1 queries prevented)
 orderRouter.post('/checkout', async (req, res) => {
   try {
     const { items, customerName, phone, address, deliveryZone, paymentMethod, senderPhone, trxId, couponCode } = req.body;
@@ -43,15 +63,16 @@ orderRouter.post('/checkout', async (req, res) => {
       return res.status(400).json({ error: 'Customer name, phone number, and delivery address are required.' });
     }
 
-    // 1. Authoritative Server-Side Stock & Price Verification
+    // 1. Authoritative Server-Side Stock & Price Verification (Indexed O(1) Map - Zero N+1 queries)
     let calculatedSubtotal = 0;
     const validatedItems: any[] = [];
+    const productLookupMap = new Map(storeProducts.map(p => [p.id, p]));
 
     for (const item of items) {
       const productId = item.productId || item.product?.id || item.id;
       const quantity = Math.max(1, parseInt(item.quantity || 1, 10));
 
-      const matchedProduct = storeProducts.find(p => p.id === productId);
+      const matchedProduct = productLookupMap.get(productId);
       const unitPrice = matchedProduct ? Number(matchedProduct.price || 0) : Number(item.price || item.product?.price || 0);
       const regularPrice = matchedProduct ? Number(matchedProduct.regularPrice || unitPrice) : Number(item.regularPrice || unitPrice);
       const title = matchedProduct?.title || item.product?.title || item.title || 'Product';

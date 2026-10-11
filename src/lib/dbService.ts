@@ -1,21 +1,6 @@
-import { 
-  collection, 
-  getDocs, 
-  getDoc,
-  setDoc, 
-  deleteDoc, 
-  doc, 
-  updateDoc,
-  onSnapshot,
-  query,
-  orderBy,
-  where,
-  deleteField,
-  increment,
-  limit,
-  startAfter
-} from 'firebase/firestore';
-import { db, isFirebaseEnabled, auth } from './firebase';
+const db = null;
+const isFirebaseEnabled = false;
+const auth = null;
 import { BookOrder, Product, EcomSettings, Customer, PaymentGatewayItem, DeliveryMethodItem, Coupon, LandingPageData, InstituteInfo, Review, Brand, ContactMessage } from '../types';
 import { ApiClient } from '../services/apiClient';
 

@@ -4,12 +4,59 @@ import { Product } from '../../types';
 import { cacheResponse } from '../middleware/cacheMiddleware';
 import { globalCache } from '../services/cacheEngine';
 import { shardService } from '../services/shardService';
+import { prisma } from '../db';
 
 export const productRouter = Router();
 
-// GET All Products - High-speed cached with ETag & SWR
-productRouter.get('/', cacheResponse({ ttlSeconds: 60, staleWhileRevalidateSeconds: 120, tag: 'products' }), (req, res) => {
-  res.json(storeProducts);
+// GET All Products - High-speed cached with ETag, SWR & Eager Loading (Zero N+1 Queries)
+productRouter.get('/', cacheResponse({ ttlSeconds: 60, staleWhileRevalidateSeconds: 120, tag: 'products' }), async (req, res) => {
+  const includeReviews = req.query.include === 'reviews' || req.query.withReviews === 'true';
+  const includeBrand = req.query.include === 'brand' || req.query.withBrand === 'true';
+
+  let products = [...storeProducts];
+
+  // Eager load related data in a single batch query (Zero N+1 queries)
+  if (includeReviews || includeBrand) {
+    const productIds = products.map(p => p.id);
+
+    const reviewsMap = new Map<string, any[]>();
+    if (includeReviews) {
+      try {
+        const allReviews = await prisma.review.findMany({
+          where: { productId: { in: productIds } }
+        });
+        for (const rev of allReviews) {
+          if (!reviewsMap.has(rev.productId)) reviewsMap.set(rev.productId, []);
+          reviewsMap.get(rev.productId)!.push(rev);
+        }
+      } catch {}
+    }
+
+    const brandsMap = new Map<string, any>();
+    if (includeBrand) {
+      try {
+        const allBrands = await prisma.brand.findMany();
+        for (const b of allBrands) brandsMap.set(b.id, b);
+      } catch {}
+    }
+
+    products = products.map(p => ({
+      ...p,
+      reviews: includeReviews ? (reviewsMap.get(p.id) || []) : undefined,
+      brandDetails: (includeBrand && p.brandId) ? (brandsMap.get(p.brandId) || null) : undefined
+    }));
+  }
+
+  res.json(products);
+});
+
+// GET Batch Products by IDs in 1 query (Prevents N+1 frontend requests)
+productRouter.get('/batch', cacheResponse({ ttlSeconds: 60, staleWhileRevalidateSeconds: 120, tag: 'products' }), (req, res) => {
+  const idsQuery = (req.query.ids as string) || '';
+  if (!idsQuery) return res.json([]);
+  const ids = idsQuery.split(',').map(s => s.trim()).filter(Boolean);
+  const matched = storeProducts.filter(p => ids.includes(p.id));
+  res.json(matched);
 });
 
 // GET Product by ID with sharded view counter tracking

@@ -433,6 +433,16 @@ export default function BookLandingPage({ onNavigateHome }: BookLandingPageProps
   };
 
   const scrollToOrder = () => {
+    const eventId = createEventId('initiate_checkout');
+    trackEvent('InitiateCheckout', {
+      content_name: chosenItemTitle,
+      content_ids: [product?.id || landingConfig?.productId || 'landing_product'],
+      content_type: 'product',
+      value: totalPrice || displayPrice,
+      currency: 'BDT',
+      num_items: quantity
+    }, eventId);
+
     const el = document.getElementById('order-form-section');
     if (el) {
       el.scrollIntoView({ behavior: 'smooth' });
@@ -440,6 +450,7 @@ export default function BookLandingPage({ onNavigateHome }: BookLandingPageProps
   };
 
   const handleWhatsAppClick = () => {
+    trackEvent('Contact', { content_name: 'WhatsApp Order Inquiry' });
     if (!cleanWhatsAppNumber || cleanWhatsAppNumber.length < 10) {
       scrollToOrder();
       return;
@@ -614,9 +625,9 @@ export default function BookLandingPage({ onNavigateHome }: BookLandingPageProps
             />
           </div>
 
-          {/* Embedded YouTube Video (if configured in Section 2) */}
+          {/* Embedded YouTube Video (9:16 Mobile & 16:9 Desktop) */}
           {embedVideoUrl && (
-            <div className="relative rounded-2xl overflow-hidden border border-[#b8863b]/30 shadow-2xl bg-black aspect-video w-full my-3">
+            <div className="relative rounded-2xl overflow-hidden border border-[#b8863b]/30 shadow-2xl bg-black aspect-[9/16] md:aspect-video w-full max-w-sm md:max-w-none mx-auto my-3">
               <iframe
                 src={embedVideoUrl}
                 title="Product Video Review"

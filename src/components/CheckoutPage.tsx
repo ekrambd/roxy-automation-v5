@@ -1,4 +1,4 @@
-import { trackEvent } from '../lib/pixelGtmService';
+import { trackEvent, createEventId } from '../lib/pixelGtmService';
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
   ShoppingBag, 
@@ -287,6 +287,27 @@ export default function CheckoutPage({
   const gatewayFee = selectedPaymentGateway?.transactionFee ? Number(selectedPaymentGateway.transactionFee) : 0;
   const grandTotal = Math.max(0, cartSubtotal + deliveryCost + gatewayFee - gatewayDiscount - couponDiscountAmount);
 
+  // Track InitiateCheckout on checkout page entry
+  useEffect(() => {
+    if (cart.length > 0) {
+      const eventId = createEventId('initiate_checkout');
+      trackEvent('InitiateCheckout', {
+        content_name: cart.map(i => i.product.title).join(', '),
+        content_ids: cart.map(i => i.product.id),
+        content_type: 'product',
+        value: grandTotal || cartSubtotal,
+        currency: 'BDT',
+        num_items: totalItemCount,
+        contents: cart.map(item => ({
+          id: item.product.id,
+          name: item.product.title,
+          quantity: item.quantity,
+          item_price: item.product.price
+        }))
+      }, eventId);
+    }
+  }, []);
+
   const handleApplyCoupon = (codeToApply?: string) => {
     const targetCode = (codeToApply || couponCodeInput).trim();
     if (!targetCode) return;
@@ -465,8 +486,25 @@ export default function CheckoutPage({
         await dbService.saveBookOrder(confirmedOrder);
       }
 
+      // Track Purchase event before clearing cart
+      const purchaseEventId = createEventId('purchase');
+      const totalItemsPurchased = cart.reduce((sum, item) => sum + item.quantity, 0);
+      trackEvent('Purchase', {
+        content_name: cart.map(i => i.product.title).join(', '),
+        content_ids: cart.map(i => i.product.id),
+        content_type: 'product',
+        value: grandTotal || cartSubtotal,
+        currency: 'BDT',
+        num_items: totalItemsPurchased,
+        contents: cart.map(item => ({
+          id: item.product.id,
+          name: item.product.title,
+          quantity: item.quantity,
+          item_price: item.product.price
+        }))
+      }, purchaseEventId);
+
       setOrderSuccess(confirmedOrder);
-      trackEvent('Purchase', { value: finalTotal, currency: 'BDT', num_items: cartItems.length });
       onClearCart();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
@@ -606,6 +644,10 @@ export default function CheckoutPage({
                           <img
                             src={item.product.coverImage || 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=200'}
                             alt={item.product.title}
+                            loading="lazy"
+                            decoding="async"
+                            width={56}
+                            height={56}
                             className="w-14 h-14 object-cover rounded-xl border border-slate-100 bg-slate-50 shrink-0"
                           />
                           <div className="min-w-0 space-y-1">

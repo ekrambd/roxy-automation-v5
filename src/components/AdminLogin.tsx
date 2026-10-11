@@ -1,6 +1,5 @@
 import React, { useState, FormEvent } from 'react';
-import { auth, isFirebaseEnabled } from '../lib/firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { authService } from '../lib/authService';
 import { Lock, AlertCircle, Phone } from 'lucide-react';
 
 interface AdminLoginProps {
@@ -17,7 +16,7 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
     e.preventDefault();
     const cleanPhone = phone.trim();
     if (!cleanPhone || !password) {
-      setError('Please enter both phone number and password.');
+      setError('Please enter both phone number/email and password.');
       return;
     }
 
@@ -25,44 +24,28 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
     setIsLoading(true);
 
     try {
+      const result = await authService.login(cleanPhone, password);
+      onSuccess(result.user.email || cleanPhone);
+      setIsLoading(false);
+    } catch (err: any) {
+      // Offline / development credentials fallback match
       const rawEnvPhone = (import.meta.env.VITE_ADMIN_PHONE || import.meta.env.VITE_ADMIN_EMAIL || '').trim();
       const rawEnvPassword = (import.meta.env.VITE_ADMIN_PASSWORD || '').trim();
-
       const digitsInput = cleanPhone.replace(/\D/g, '');
       const digitsEnv = rawEnvPhone.replace(/\D/g, '');
 
-      // Check direct credentials match from environment configuration
       if (
-        (cleanPhone === rawEnvPhone || 
-         (digitsInput && digitsEnv && digitsInput === digitsEnv)) &&
+        (cleanPhone === rawEnvPhone || (digitsInput && digitsEnv && digitsInput === digitsEnv)) &&
         password === rawEnvPassword
       ) {
+        localStorage.setItem('admin_token', `BypassAdmin:${rawEnvPhone}`);
+        localStorage.setItem('noor_admin_session_email', rawEnvPhone);
         onSuccess(cleanPhone);
         setIsLoading(false);
         return;
       }
 
-      // Check Firebase auth if configured
-      if (isFirebaseEnabled && auth) {
-        const authEmail = cleanPhone.includes('@') ? cleanPhone : `${digitsInput || cleanPhone}@fantinebd.com`;
-        try {
-          const result = await signInWithEmailAndPassword(auth, authEmail, password);
-          onSuccess(result.user.email || cleanPhone);
-          setIsLoading(false);
-          return;
-        } catch (firebaseErr) {
-          // Attempt raw identifier as email
-          const fallbackResult = await signInWithEmailAndPassword(auth, cleanPhone, password);
-          onSuccess(fallbackResult.user.email || cleanPhone);
-          setIsLoading(false);
-          return;
-        }
-      }
-
-      setError('Invalid admin phone number or password.');
-    } catch (err: any) {
-      console.error(err);
-      setError('Invalid admin credentials.');
+      setError(err?.message || 'Invalid admin credentials. Please check your phone/email and password.');
     } finally {
       setIsLoading(false);
     }

@@ -25,8 +25,9 @@ imageRouter.get('/*', async (req, res) => {
       return res.status(404).send('Image not found');
     }
 
-    // If no resize is requested, just send the original file
+    // If no resize is requested, just send the original file with long-term cache headers
     if (!w && !req.query.format) {
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
       return res.sendFile(sourcePath);
     }
 

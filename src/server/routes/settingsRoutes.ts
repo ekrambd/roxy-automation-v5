@@ -175,8 +175,8 @@ facebookRouter.post('/capi', async (req, res) => {
     res.status(400).json({ success: false, message: 'eventName, eventId, and eventSourceUrl are required' });
     return;
   }
-  const forwardedFor = req.header('x-forwarded-for');
-  const clientIpAddress = (forwardedFor?.split(',')[0] || req.ip || req.socket.remoteAddress || '').trim();
+  const forwardedFor = req.header('cf-connecting-ip') || req.header('x-forwarded-for');
+  const clientIpAddress = (req.header('cf-connecting-ip') || forwardedFor?.split(',')[0] || req.ip || req.socket.remoteAddress || '').trim();
 
   try {
     const result = await circuitBreakerRegistry.metaPixel.execute(async () => {

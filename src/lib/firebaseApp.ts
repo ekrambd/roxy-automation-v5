@@ -1,15 +1,6 @@
-import { initializeApp, getApp, getApps, type FirebaseApp } from 'firebase/app';
-import { firebaseConfig, isFirebaseConfigured } from './firebaseConfig';
-
-export const isFirebaseAppEnabled = isFirebaseConfigured;
-
-let app: FirebaseApp | null = null;
-if (isFirebaseAppEnabled) {
-  try {
-    app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
-  } catch (error) {
-    console.error('Firebase app initialization failed:', error);
-  }
-}
-
-export { app };
+/**
+ * Firebase App Stub
+ * Fully disabled in favor of 100% self-hosted VPS engine.
+ */
+export const isFirebaseAppEnabled = false;
+export const app = null;

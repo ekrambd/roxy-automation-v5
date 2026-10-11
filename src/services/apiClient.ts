@@ -3,11 +3,9 @@ import { Product, BookOrder, EcomSettings } from '../types';
 export class ApiClient {
   private static async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
     let idToken: string | null = null;
-    // Public conversion tracking must not load Firebase Auth on storefront startup.
-    // Protected admin requests resolve the token only when an API action occurs.
     if (!endpoint.startsWith('/facebook/capi')) {
-      const { auth } = await import('../lib/firebase');
-      idToken = auth?.currentUser ? await auth.currentUser.getIdToken() : null;
+      const { authService } = await import('../lib/authService');
+      idToken = authService.getToken();
 
       if (!idToken) {
         const storedEmail = localStorage.getItem('noor_admin_session_email');

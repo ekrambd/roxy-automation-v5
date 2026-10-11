@@ -41,38 +41,53 @@ function slugify(value) {
 }
 
 async function generateSitemap() {
-  console.log(`Generating sitemap for project: ${projectId}...`);
+  console.log(`Generating sitemap...`);
   const urls = [
-    { loc: 'https://fantinebd.com/', priority: '1.0', changefreq: 'daily' }
+    { loc: 'https://fantinebd.com/', priority: '1.0', changefreq: 'daily' },
+    { loc: 'https://fantinebd.com/shop', priority: '0.9', changefreq: 'daily' },
+    { loc: 'https://fantinebd.com/checkout', priority: '0.7', changefreq: 'weekly' }
   ];
 
-  try {
-    const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/ecom_products?pageSize=1000`;
-    const response = await fetch(url);
-    if (response.ok) {
-      const data = await response.json();
-      if (data.documents) {
-        data.documents.forEach(doc => {
-          const fields = doc.fields || {};
-          const id = doc.name.split('/').pop();
-          const title = fields.title ? fields.title.stringValue : '';
-          const slugField = fields.slug ? fields.slug.stringValue : '';
-          
-          const slug = slugify(slugField || title || id);
-          if (slug && id) {
-             urls.push({
-               loc: `https://fantinebd.com/product/${encodeURIComponent(slug)}/${encodeURIComponent(id)}/`,
-               priority: '0.8',
-               changefreq: 'weekly'
-             });
-          }
-        });
+  // Default store catalog products for offline/Firestore-free builds
+  const defaultProducts = [
+    { id: 'fantine-cream', title: 'Ultimate Calming Solution Cream', slug: 'ultimate-calming-solution-cream' },
+    { id: 'fantine-cleanser', title: 'Ultimate Calming Solution Face Cleanser', slug: 'ultimate-calming-solution-face-cleanser' },
+    { id: 'fantine-toner', title: 'Ultimate Calming Solution Toner', slug: 'ultimate-calming-solution-toner' }
+  ];
+
+  defaultProducts.forEach(prod => {
+    const slug = slugify(prod.slug || prod.title || prod.id);
+    urls.push({
+      loc: `https://fantinebd.com/product/${encodeURIComponent(slug)}/${encodeURIComponent(prod.id)}/`,
+      priority: '0.8',
+      changefreq: 'weekly'
+    });
+  });
+
+  // Optional online fetch only if Firestore project is explicitly configured and reachable
+  if (process.env.ENABLE_FIRESTORE_SITEMAP === 'true' && projectId) {
+    try {
+      const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/ecom_products?pageSize=1000`;
+      const response = await fetch(url, { signal: AbortSignal.timeout(3000) });
+      if (response.ok) {
+        const data = await response.json();
+        if (data.documents) {
+          data.documents.forEach(doc => {
+            const fields = doc.fields || {};
+            const id = doc.name.split('/').pop();
+            const title = fields.title ? fields.title.stringValue : '';
+            const slugField = fields.slug ? fields.slug.stringValue : '';
+            const slug = slugify(slugField || title || id);
+            const loc = `https://fantinebd.com/product/${encodeURIComponent(slug)}/${encodeURIComponent(id)}/`;
+            if (slug && id && !urls.some(u => u.loc === loc)) {
+              urls.push({ loc, priority: '0.8', changefreq: 'weekly' });
+            }
+          });
+        }
       }
-    } else {
-      console.warn('Firestore REST API fetch failed. Using fallback URLs.');
+    } catch {
+      // offline/disabled fallback already populated
     }
-  } catch (e) {
-    console.error('Error fetching products for sitemap:', e);
   }
 
   // Generate XML

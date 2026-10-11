@@ -1,5 +1,7 @@
 import express from 'express';
 import os from 'os';
+import path from 'path';
+import fs from 'fs';
 import { productRouter } from './routes/productRoutes';
 import { orderRouter } from './routes/orderRoutes';
 import { settingsRouter, courierRouter, facebookRouter } from './routes/settingsRoutes';
@@ -7,6 +9,7 @@ import { backupRouter } from './routes/backupRoutes';
 import { benchmarkRouter } from './routes/benchmarkRoutes';
 import { aiRouter } from './routes/aiRoutes';
 import { uploadRouter } from './routes/uploadRoutes';
+import { authRouter } from './routes/authRoutes';
 import { categoryRouter } from './routes/categoryRoutes';
 import { sliderRouter } from './routes/sliderRoutes';
 import { customerRouter } from './routes/customerRoutes';
@@ -25,6 +28,9 @@ import { backupEngine } from './services/backupEngine';
 import { telemetryService } from './services/telemetryService';
 
 export const app = express();
+
+// Trust reverse proxies (Cloudflare & Nginx) for real client IP and HTTPS protocol detection
+app.set('trust proxy', true);
 
 // ==========================================
 // COMPREHENSIVE SECURITY HEADERS (Helmet Equivalent)
@@ -110,6 +116,7 @@ app.use('/api/admin/backups', backupRouter);
 app.use('/api/system', benchmarkRouter);
 app.use('/api/ai', aiRouter);
 app.use('/api/upload', uploadRouter);
+app.use('/api/auth', authRouter);
 app.use('/api/categories', categoryRouter);
 app.use('/api/sliders', sliderRouter);
 app.use('/api/customers', customerRouter);
@@ -121,55 +128,22 @@ app.use('/api/landing-pages', landingRouter);
 app.use('/api/institute', instituteRouter);
 app.use('/cdn', imageRouter);
 
+// Local media static file serving
+const publicUploadsDir = path.join(process.cwd(), 'public', 'uploads');
+if (!fs.existsSync(publicUploadsDir)) {
+  fs.mkdirSync(publicUploadsDir, { recursive: true });
+}
+app.use('/uploads', express.static(publicUploadsDir, {
+  maxAge: '1y',
+  immutable: true
+}));
 
-// Dynamic Firebase Messaging Service Worker
+// Service Worker endpoint
 app.get('/firebase-messaging-sw.js', (req, res) => {
   res.setHeader('Content-Type', 'application/javascript');
   res.send(`
-    importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js');
-    importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js');
-
-    firebase.initializeApp({
-      apiKey: "${process.env.VITE_FIREBASE_API_KEY || ''}",
-      authDomain: "${process.env.VITE_FIREBASE_AUTH_DOMAIN || ''}",
-      projectId: "${process.env.VITE_FIREBASE_PROJECT_ID || ''}",
-      storageBucket: "${process.env.VITE_FIREBASE_STORAGE_BUCKET || ''}",
-      messagingSenderId: "${process.env.VITE_FIREBASE_MESSAGING_SENDER_ID || ''}",
-      appId: "${process.env.VITE_FIREBASE_APP_ID || ''}"
-    });
-
-    const messaging = firebase.messaging();
-
-    messaging.onBackgroundMessage((payload) => {
-      console.log('[firebase-messaging-sw.js] Received background message ', payload);
-      const notificationTitle = payload.notification?.title || 'ZinniaMart';
-      const notificationOptions = {
-        body: payload.notification?.body || '',
-        icon: payload.notification?.icon || '/logo.png',
-        data: {
-          url: payload.data?.url || '/'
-        }
-      };
-      self.registration.showNotification(notificationTitle, notificationOptions);
-    });
-
-    self.addEventListener('notificationclick', (event) => {
-      event.notification.close();
-      const urlToOpen = event.notification.data?.url || '/';
-      event.waitUntil(
-        clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
-          for (let i = 0; i < windowClients.length; i++) {
-            const client = windowClients[i];
-            if (client.url === urlToOpen && 'focus' in client) {
-              return client.focus();
-            }
-          }
-          if (clients.openWindow) {
-            return clients.openWindow(urlToOpen);
-          }
-        })
-      );
-    });
+    self.addEventListener('install', () => self.skipWaiting());
+    self.addEventListener('activate', () => self.clients.claim());
   `);
 });
 
