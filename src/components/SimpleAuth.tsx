@@ -1,6 +1,7 @@
 import React, { useState, FormEvent } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Smartphone, AlertCircle, ArrowLeft, Mail, Lock } from 'lucide-react';
+import { Smartphone, AlertCircle, ArrowLeft, MessageCircle, Package, Clock, CheckCircle2, Search } from 'lucide-react';
+import { BookOrder } from '../types';
 
 interface SimpleAuthProps {
   onSuccess: (identifier: string, userData?: { name?: string; photoURL?: string }) => void;
@@ -8,13 +9,13 @@ interface SimpleAuthProps {
   isModal?: boolean;
 }
 
+const WHATSAPP_HOTLINE = '8801329458568';
+
 export default function SimpleAuth({ onSuccess, onCancel, isModal = false }: SimpleAuthProps) {
-  const [step, setStep] = useState<'identifier' | 'otp' | 'password'>('identifier');
   const [identifier, setIdentifier] = useState('');
-  const [otp, setOtp] = useState('');
-  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [searchedOrders, setSearchedOrders] = useState<BookOrder[] | null>(null);
 
   const formatPhone = (phone: string) => {
     let formatted = phone.trim();
@@ -24,10 +25,11 @@ export default function SimpleAuth({ onSuccess, onCancel, isModal = false }: Sim
     return formatted;
   };
 
-  const handleNext = async (e: FormEvent) => {
+  const handleTrackOrder = async (e: FormEvent) => {
     e.preventDefault();
-    if (!identifier) {
-      setError('Please enter your phone number or email.');
+    const clean = identifier.trim();
+    if (!clean) {
+      setError('Please enter your phone number or Order ID.');
       return;
     }
 
@@ -35,73 +37,40 @@ export default function SimpleAuth({ onSuccess, onCancel, isModal = false }: Sim
     setIsLoading(true);
 
     try {
-      if (identifier.includes('@')) {
-        setStep('password');
-      } else {
-        // Phone verification flow (demo OTP sent to user)
-        setStep('otp');
+      const res = await fetch(`/api/orders/track?q=${encodeURIComponent(clean)}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.orders && Array.isArray(data.orders) && data.orders.length > 0) {
+          setSearchedOrders(data.orders);
+          localStorage.setItem('customer_session_phone', clean);
+          setIsLoading(false);
+          return;
+        }
       }
-    } catch (err: any) {
-      setError(err?.message || 'Failed to proceed. Try again.');
+      // If no order found in current active memory, show empty list with 1-click WhatsApp button
+      setSearchedOrders([]);
+    } catch {
+      setSearchedOrders([]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleVerifyOtp = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!otp) {
-      setError('Please enter the OTP code.');
-      return;
-    }
-
-    setError('');
-    setIsLoading(true);
-
-    try {
-      // In self-hosted store, any 4-6 digit code logs the customer in
-      localStorage.setItem('customer_session_phone', identifier);
-      onSuccess(formatPhone(identifier));
-    } catch (err: any) {
-      setError('Verification failed. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleEmailAuth = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!password) {
-      setError('Please enter your password.');
-      return;
-    }
-
-    setError('');
-    setIsLoading(true);
-
-    try {
-      localStorage.setItem('customer_session_email', identifier);
-      onSuccess(identifier);
-    } catch (err: any) {
-      setError(err?.message || 'Authentication failed.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleGoogleLogin = () => {
-    onSuccess('customer@gmail.com', { name: 'Google Customer' });
-  };
-
-  const handleFacebookLogin = () => {
-    onSuccess('customer@facebook.com', { name: 'Facebook Customer' });
+  const getWhatsAppTrackUrl = (orderId?: string) => {
+    const text = orderId
+      ? `Hello FANTINE BD,\nI would like an update on my order #${orderId} (Phone: ${identifier.trim()}). Please let me know the status!`
+      : `Hello FANTINE BD,\nI need assistance with my order (Phone: ${identifier.trim() || 'Not Provided'}). Please assist me!`;
+    return `https://wa.me/${WHATSAPP_HOTLINE}?text=${encodeURIComponent(text)}`;
   };
 
   return (
     <div className={`w-full max-w-md mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100 ${isModal ? 'p-6' : 'p-8'}`}>
       <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-slate-800">Welcome to FANTINE</h2>
-        <p className="text-sm text-slate-500 mt-1">Sign in to track orders and save your favorites</p>
+        <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-xs">
+          <MessageCircle className="h-6 w-6 fill-emerald-600/20" />
+        </div>
+        <h2 className="text-xl font-bold text-slate-900 tracking-tight">1-Click Order Tracking & Support</h2>
+        <p className="text-xs text-slate-500 mt-1">Instant delivery updates directly on WhatsApp & phone</p>
       </div>
 
       {error && (
@@ -111,158 +80,154 @@ export default function SimpleAuth({ onSuccess, onCancel, isModal = false }: Sim
         </div>
       )}
 
-      <AnimatePresence mode="wait">
-        {step === 'identifier' && (
-          <motion.form 
-            key="identifier"
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 10 }}
-            onSubmit={handleNext}
-            className="space-y-4"
-          >
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-2">
-                Phone Number or Email
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="01XXXXXXXXX or email@domain.com"
-                  value={identifier}
-                  onChange={(e) => setIdentifier(e.target.value)}
-                  className="w-full px-4 py-3 pl-10 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm"
-                  autoFocus
-                />
-                <Smartphone className="absolute left-3 top-3.5 h-4 w-4 text-slate-400" />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full py-3 bg-slate-900 text-white rounded-xl font-medium text-sm hover:bg-slate-800 transition-colors shadow-sm disabled:opacity-50"
-            >
-              {isLoading ? 'Checking...' : 'Continue'}
-            </button>
-
-            <div className="relative my-4">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-200"></div>
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-slate-400">Or continue with</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={handleGoogleLogin}
-                className="flex items-center justify-center gap-2 py-2.5 px-4 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors"
-              >
-                Google
-              </button>
-              <button
-                type="button"
-                onClick={handleFacebookLogin}
-                className="flex items-center justify-center gap-2 py-2.5 px-4 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors"
-              >
-                Facebook
-              </button>
-            </div>
-          </motion.form>
-        )}
-
-        {step === 'otp' && (
-          <motion.form
-            key="otp"
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 10 }}
-            onSubmit={handleVerifyOtp}
-            className="space-y-4"
-          >
-            <div className="flex items-center gap-2 mb-2 text-slate-600">
-              <button type="button" onClick={() => setStep('identifier')} className="p-1 hover:bg-slate-100 rounded-lg">
-                <ArrowLeft className="h-4 w-4" />
-              </button>
-              <span className="text-xs text-slate-500">Sent to {identifier}</span>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-2">
-                Enter Verification Code (OTP)
-              </label>
+      {/* SEARCH / TRACK INPUT */}
+      {!searchedOrders ? (
+        <form onSubmit={handleTrackOrder} className="space-y-4">
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-2">
+              Phone Number or Order ID
+            </label>
+            <div className="relative">
               <input
                 type="text"
-                placeholder="Enter 4-6 digit code"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-                className="w-full px-4 py-3 text-center tracking-widest text-lg font-bold rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                placeholder="e.g. 01XXXXXXXXX or ORD-2026-..."
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                className="w-full px-4 py-3 pl-10 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm font-medium"
                 autoFocus
               />
+              <Smartphone className="absolute left-3 top-3.5 h-4 w-4 text-slate-400" />
             </div>
+          </div>
 
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full py-3 bg-slate-900 text-white rounded-xl font-medium text-sm hover:bg-slate-800 transition-colors shadow-sm disabled:opacity-50"
-            >
-              {isLoading ? 'Verifying...' : 'Verify & Continue'}
-            </button>
-          </motion.form>
-        )}
-
-        {step === 'password' && (
-          <motion.form
-            key="password"
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 10 }}
-            onSubmit={handleEmailAuth}
-            className="space-y-4"
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-colors shadow-sm disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
           >
-            <div className="flex items-center gap-2 mb-2 text-slate-600">
-              <button type="button" onClick={() => setStep('identifier')} className="p-1 hover:bg-slate-100 rounded-lg">
-                <ArrowLeft className="h-4 w-4" />
-              </button>
-              <span className="text-xs text-slate-500">{identifier}</span>
-            </div>
+            <Search className="h-4 w-4" />
+            {isLoading ? 'Checking Orders...' : 'Track My Order (Instant)'}
+          </button>
 
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <input
-                  type="password"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 pl-10 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm"
-                  autoFocus
-                />
-                <Lock className="absolute left-3 top-3.5 h-4 w-4 text-slate-400" />
-              </div>
+          <div className="relative my-4">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-slate-200"></div>
             </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white px-2 text-slate-400 font-semibold">Or free live support</span>
+            </div>
+          </div>
 
+          {/* 1-Click WhatsApp Verification & Support */}
+          <a
+            href={getWhatsAppTrackUrl()}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full py-3 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-md shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer no-underline"
+          >
+            <MessageCircle className="h-4 w-4 fill-current" />
+            Track on WhatsApp (1-Click)
+          </a>
+
+          {identifier.trim() && (
             <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full py-3 bg-slate-900 text-white rounded-xl font-medium text-sm hover:bg-slate-800 transition-colors shadow-sm disabled:opacity-50"
+              type="button"
+              onClick={() => onSuccess(formatPhone(identifier))}
+              className="w-full text-center text-xs font-semibold text-slate-500 hover:text-slate-900 pt-2 transition-colors cursor-pointer"
             >
-              {isLoading ? 'Signing in...' : 'Sign In'}
+              Log in as Customer & Continue
             </button>
-          </motion.form>
-        )}
-      </AnimatePresence>
+          )}
+        </form>
+      ) : (
+        /* ORDER RESULTS VIEW */
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-4"
+        >
+          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+            <button
+              type="button"
+              onClick={() => setSearchedOrders(null)}
+              className="text-xs text-slate-500 hover:text-slate-800 flex items-center gap-1 font-medium cursor-pointer"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" /> Back to Search
+            </button>
+            <span className="text-xs font-bold text-slate-600">
+              {searchedOrders.length} Order(s) Found
+            </span>
+          </div>
+
+          {searchedOrders.length === 0 ? (
+            <div className="p-6 bg-slate-50 rounded-2xl text-center space-y-3 border border-slate-100">
+              <Package className="h-10 w-10 text-slate-400 mx-auto" />
+              <p className="text-xs text-slate-600 font-medium">
+                No orders found under "{identifier}". If you just ordered, please chat with us directly!
+              </p>
+              <a
+                href={getWhatsAppTrackUrl()}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow-sm transition-all cursor-pointer no-underline"
+              >
+                <MessageCircle className="h-4 w-4 fill-current" />
+                Inquire on WhatsApp
+              </a>
+            </div>
+          ) : (
+            <div className="space-y-3 max-h-[340px] overflow-y-auto pr-1">
+              {searchedOrders.map((order) => (
+                <div key={order.id} className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2 text-left">
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-xs font-bold text-slate-900">{order.id}</span>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
+                      order.status === 'Delivered' 
+                        ? 'bg-emerald-100 text-emerald-700' 
+                        : order.status === 'Cancelled'
+                        ? 'bg-rose-100 text-rose-700'
+                        : 'bg-amber-100 text-amber-700'
+                    }`}>
+                      {order.status || 'Processing'}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between text-xs text-slate-600">
+                    <span>Payable: <strong className="text-orange-600">৳{(order.totalAmount || order.totalPrice || 0).toLocaleString()}</strong></span>
+                    <span className="text-[11px] text-slate-400">
+                      {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : ''}
+                    </span>
+                  </div>
+
+                  <a
+                    href={getWhatsAppTrackUrl(order.id)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full mt-2 py-2 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl text-[11px] font-bold uppercase tracking-wider shadow-xs flex items-center justify-center gap-2 cursor-pointer no-underline transition-all"
+                  >
+                    <MessageCircle className="h-3.5 w-3.5 fill-current" />
+                    Track via WhatsApp
+                  </a>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={() => onSuccess(formatPhone(identifier))}
+            className="w-full py-2.5 bg-slate-900 text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-slate-800 transition-colors cursor-pointer"
+          >
+            Continue Shopping
+          </button>
+        </motion.div>
+      )}
 
       {onCancel && (
         <button
           type="button"
           onClick={onCancel}
-          className="w-full mt-4 text-xs text-slate-400 hover:text-slate-600 transition-colors text-center"
+          className="w-full mt-4 text-xs text-slate-400 hover:text-slate-600 transition-colors text-center cursor-pointer"
         >
           Cancel
         </button>

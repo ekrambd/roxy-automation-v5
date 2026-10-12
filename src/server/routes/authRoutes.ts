@@ -1,15 +1,16 @@
 import { Router } from 'express';
 import { generateAdminToken, verifyAdminCredentials } from '../services/authService';
 import { requireAdmin } from '../middleware/adminAuth';
+import { authRateLimiter } from '../middleware/rateLimiter';
 import { storeSettings } from '../data/store';
 
 const authRouter = Router();
 
 /**
  * POST /api/auth/login
- * Log in admin using phone or email and password.
+ * Log in admin using phone or email and password. Protected with anti-brute-force rate limiter.
  */
-authRouter.post('/login', (req, res) => {
+authRouter.post('/login', authRateLimiter, (req, res) => {
   const { identifier, password } = req.body || {};
 
   if (!identifier || !password) {

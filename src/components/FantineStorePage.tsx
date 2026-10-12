@@ -3,7 +3,7 @@ import { dbService } from "../lib/dbService";
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { 
-  ShoppingBag, Search, ChevronDown, ChevronLeft, ChevronRight,
+  ShoppingBag, User, Search, ChevronDown, ChevronLeft, ChevronRight,
   ArrowRight, ArrowLeft, Heart, Star, Check, Sparkles, X, Plus, Minus,
   ShieldCheck, Truck, RefreshCw, Send, HelpCircle, Eye, Share2, Award,
   Phone, Mail, Globe, Droplet, Sun, Moon, Zap, Flame, Layers, MessageCircle, ArrowUp, MapPin, ZoomIn, Clock,
@@ -1260,6 +1260,18 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
               )}
             </button>
 
+            {/* Customer Account / Order Tracking Button */}
+            <button 
+              onClick={() => onGoToLogin ? onGoToLogin() : undefined}
+              className={`relative p-2 sm:p-2.5 transition-transform active:scale-95 cursor-pointer ${
+                isTransparentHeader ? 'text-white hover:text-white/80' : 'text-slate-800 hover:text-slate-950'
+              }`}
+              aria-label="Customer Account / Track Orders"
+              title="Account / Track Orders"
+            >
+              <User className="w-5 h-5 sm:w-6 sm:h-6" />
+            </button>
+
             {/* Mobile Hamburger Menu Toggle Button (Visible on md:hidden) */}
             <button
               onClick={() => setIsMobileMenuOpen(prev => !prev)}
@@ -1335,6 +1347,20 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
                 }`}
               >
                 <span>Contact Us</span>
+                <ChevronRight className="w-4 h-4 opacity-70" />
+              </button>
+
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  if (onGoToLogin) onGoToLogin();
+                }}
+                className="w-full text-left px-4 py-3 rounded-xl transition flex items-center justify-between hover:bg-slate-100 text-slate-800"
+              >
+                <span className="flex items-center gap-2 font-medium">
+                  <User className="w-4 h-4 text-slate-600" />
+                  Account & Track Orders
+                </span>
                 <ChevronRight className="w-4 h-4 opacity-70" />
               </button>
             </nav>
@@ -2009,7 +2035,7 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
                 loop
                 muted
                 playsInline
-                preload="none" poster="/fantine_video_poster.jpg"
+                preload="auto"
                 disablePictureInPicture
                 controls={false}
                 tabIndex={-1}

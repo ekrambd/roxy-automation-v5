@@ -64,6 +64,9 @@ async function startServer() {
       }
     }));
 
+    // Fallback static files directly from public directory
+    app.use(express.static(path.join(process.cwd(), 'public')));
+
     // In-memory Page Cache for index.html (Ultra-fast memory serving with ETag)
     let cachedIndexHtml: string | null = null;
     let cachedIndexEtag: string | null = null;
@@ -81,7 +84,7 @@ async function startServer() {
 
     // SPA Page Route Handler with Micro-caching & 304 fast-path
     app.get('*', (req, res) => {
-      if (req.path.startsWith('/api') || req.path.startsWith('/cdn')) {
+      if (req.path.startsWith('/api') || req.path.startsWith('/cdn') || req.path.startsWith('/uploads')) {
         return res.status(404).json({ error: 'Endpoint not found' });
       }
 

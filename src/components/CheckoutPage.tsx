@@ -13,7 +13,8 @@ import {
   CreditCard, 
   Gift,
   ChevronRight,
-  CheckCircle2
+  CheckCircle2,
+  MessageCircle
 } from 'lucide-react';
 import { Product, BookOrder, EcomSettings, DeliveryMethodItem, PaymentGatewayItem, Coupon } from '../types';
 import { dbService } from '../lib/dbService';
@@ -549,6 +550,19 @@ export default function CheckoutPage({
               <span className="font-medium text-slate-800 text-right truncate max-w-[220px]">{orderSuccess.address}</span>
             </div>
           </div>
+
+          {/* 1-Click WhatsApp Order Confirmation & Tracking */}
+          <a
+            href={`https://wa.me/8801329458568?text=${encodeURIComponent(
+              `Hello FANTINE BD,\nI just placed order #${orderSuccess.id} (Amount: ${(orderSuccess.totalAmount || orderSuccess.totalPrice || 0).toLocaleString()} BDT).\nCustomer Name: ${orderSuccess.customerName}\nPhone: ${orderSuccess.customerPhone || orderSuccess.phone}\nPlease confirm my order & delivery updates!`
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full py-4 px-6 bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-sm rounded-xl shadow-lg shadow-emerald-500/25 transition-all flex items-center justify-center gap-2.5 cursor-pointer no-underline"
+          >
+            <MessageCircle className="w-5 h-5 fill-current" />
+            Track & Confirm on WhatsApp (1-Click)
+          </a>
 
           <div className="pt-2 flex flex-col sm:flex-row gap-3">
             <button

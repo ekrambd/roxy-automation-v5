@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { checkoutRateLimiter } from '../middleware/rateLimiter';
 import { storeOrders, storeProducts } from '../data/store';
 import { BookOrder } from '../../types';
 import { cacheResponse } from '../middleware/cacheMiddleware';
@@ -33,6 +34,27 @@ orderRouter.get('/', cacheResponse({ ttlSeconds: 15, staleWhileRevalidateSeconds
   res.json(orders);
 });
 
+// GET /api/orders/track - Public 1-Click Order Tracking by Phone or Order ID (Free, Zero API cost)
+orderRouter.get('/track', (req, res) => {
+  const query = String(req.query.q || req.query.phone || req.query.id || '').trim();
+  if (!query) {
+    return res.status(400).json({ success: false, message: 'Please provide a phone number or Order ID' });
+  }
+
+  const cleanDigits = query.replace(/\D/g, '');
+  const matched = storeOrders.filter(o => {
+    const orderPhone = (o.customerPhone || o.phone || '').replace(/\D/g, '');
+    const isPhoneMatch = Boolean(cleanDigits && orderPhone && (orderPhone.endsWith(cleanDigits) || cleanDigits.endsWith(orderPhone)));
+    const isIdMatch = Boolean(o.id && o.id.toLowerCase() === query.toLowerCase());
+    return isPhoneMatch || isIdMatch;
+  });
+
+  return res.json({
+    success: true,
+    orders: matched
+  });
+});
+
 // GET Sharding & Partition info for Orders
 orderRouter.get('/shards/stats', (_req, res) => {
   const counterStats = shardService.getCounterStats('orders_total');
@@ -52,7 +74,7 @@ orderRouter.get('/shards/stats', (_req, res) => {
 });
 
 // POST /api/orders/checkout - Secure Server-Side Atomic Order Validation & Placement (N+1 queries prevented)
-orderRouter.post('/checkout', async (req, res) => {
+orderRouter.post('/checkout', checkoutRateLimiter, async (req, res) => {
   try {
     const { items, customerName, phone, address, deliveryZone, paymentMethod, senderPhone, trxId, couponCode } = req.body;
 
@@ -179,7 +201,7 @@ orderRouter.post('/checkout', async (req, res) => {
 });
 
 // POST Create Order - with sharded partitioning & distributed counter
-orderRouter.post('/', (req, res) => {
+orderRouter.post('/', checkoutRateLimiter, (req, res) => {
   const orderId = req.body.id || `ORD-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
   const shardIndex = shardService.getShardIndex(orderId);
   const timePartition = shardService.getTimePartitionName('orders');
