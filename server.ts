@@ -116,7 +116,7 @@ async function startServer() {
       immutable: true,
       setHeaders: (res, filePath) => {
         if (filePath.endsWith('.html')) {
-          res.setHeader('Cache-Control', 'public, max-age=120, stale-while-revalidate=600');
+          res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
         }
       }
     }));
@@ -124,19 +124,17 @@ async function startServer() {
     // Fallback static files directly from public directory
     app.use(express.static(path.join(process.cwd(), 'public')));
 
-    // In-memory Page Cache for index.html (Ultra-fast memory serving with ETag)
-    let cachedIndexHtml: string | null = null;
-    let cachedIndexEtag: string | null = null;
-
     const getIndexHtml = () => {
-      if (!cachedIndexHtml) {
-        const filePath = path.join(distPath, 'index.html');
-        if (fs.existsSync(filePath)) {
-          cachedIndexHtml = fs.readFileSync(filePath, 'utf-8');
-          cachedIndexEtag = `"${crypto.createHash('md5').update(cachedIndexHtml).digest('hex')}"`;
-        }
+      let filePath = path.join(distPath, 'index.html');
+      if (!fs.existsSync(filePath)) {
+        filePath = path.join(process.cwd(), 'index.html');
       }
-      return { html: cachedIndexHtml, etag: cachedIndexEtag };
+      if (fs.existsSync(filePath)) {
+        const html = fs.readFileSync(filePath, 'utf-8');
+        const etag = `"${crypto.createHash('md5').update(html).digest('hex')}"`;
+        return { html, etag };
+      }
+      return { html: null, etag: null };
     };
 
     // SPA Page Route Handler with Micro-caching & Dynamic Server-side Meta Injection
@@ -147,7 +145,7 @@ async function startServer() {
 
       const { html, etag } = getIndexHtml();
       if (!html) {
-        return res.sendFile(path.join(distPath, 'index.html'));
+        return res.sendFile(path.join(process.cwd(), 'index.html'));
       }
 
       const host = req.headers.host || 'fantinebd.com';
@@ -157,7 +155,7 @@ async function startServer() {
       if (isDynamicRoute) {
         const enrichedHtml = injectServerMeta(html, req.path, host, proto);
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        res.setHeader('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
         return res.send(enrichedHtml);
       }
 
@@ -165,14 +163,14 @@ async function startServer() {
       const clientEtag = req.headers['if-none-match'];
       if (clientEtag && clientEtag === etag) {
         res.setHeader('ETag', etag);
-        res.setHeader('Cache-Control', 'public, max-age=120, stale-while-revalidate=600');
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
         res.setHeader('X-Page-Cache', 'HIT-304');
         return res.status(304).end();
       }
 
       res.setHeader('Content-Type', 'text/html; charset=utf-8');
       if (etag) res.setHeader('ETag', etag);
-      res.setHeader('Cache-Control', 'public, max-age=120, stale-while-revalidate=600');
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.setHeader('X-Page-Cache', 'HIT-MEMORY');
       res.send(html);
     });
