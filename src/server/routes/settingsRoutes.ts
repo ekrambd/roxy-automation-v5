@@ -12,8 +12,8 @@ export const settingsRouter = Router();
 export const courierRouter = Router();
 export const facebookRouter = Router();
 
-// Settings Routes - Cached with ETag
-settingsRouter.get('/ecom', cacheResponse({ ttlSeconds: 300, staleWhileRevalidateSeconds: 600, tag: 'settings' }), (_req, res) => {
+// Settings Routes - Cached with ETag (supports both / and /ecom for compatibility)
+const handleGetSettings = (_req: any, res: any) => {
   const { 
     pixelId: _pixelId, 
     metaApiToken: _metaApiToken, 
@@ -24,9 +24,9 @@ settingsRouter.get('/ecom', cacheResponse({ ttlSeconds: 300, staleWhileRevalidat
     ...publicSettings 
   } = storeSettings;
   res.json(publicSettings);
-});
+};
 
-settingsRouter.post('/ecom', requireAdmin, (req, res) => {
+const handlePostSettings = (req: any, res: any) => {
   const { 
     pixelId: _pixelId, 
     metaApiToken: _metaApiToken, 
@@ -40,7 +40,12 @@ settingsRouter.post('/ecom', requireAdmin, (req, res) => {
   globalCache.invalidateTag('settings');
 
   res.json({ success: true, settings: updated });
-});
+};
+
+settingsRouter.get('/', cacheResponse({ ttlSeconds: 300, staleWhileRevalidateSeconds: 600, tag: 'settings' }), handleGetSettings);
+settingsRouter.get('/ecom', cacheResponse({ ttlSeconds: 300, staleWhileRevalidateSeconds: 600, tag: 'settings' }), handleGetSettings);
+settingsRouter.post('/', requireAdmin, handlePostSettings);
+settingsRouter.post('/ecom', requireAdmin, handlePostSettings);
 
 // ==========================================
 // STEADFAST COURIER DISPATCH WITH CIRCUIT BREAKER
