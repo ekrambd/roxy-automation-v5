@@ -263,16 +263,18 @@ const FANTINE_PRODUCTS: FantineProductItem[] = [
   }
 ];
 
-export const DEFAULT_FANTINE_FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1608248597359-0098f98a329d?w=800&auto=format&fit=crop&q=85';
+export const DEFAULT_FANTINE_FALLBACK_IMAGE = '/uploads/file-1791830876714-429462367.jpg';
 
 export const FANTINE_CURATED_IMAGES = [
-  'https://images.unsplash.com/photo-1608248597359-0098f98a329d?w=800&auto=format&fit=crop&q=85',
-  'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=800&auto=format&fit=crop&q=85',
-  'https://images.unsplash.com/photo-1556228722-d9b3be373b5f?w=800&auto=format&fit=crop&q=85',
-  'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=800&auto=format&fit=crop&q=85',
-  'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=800&auto=format&fit=crop&q=85',
-  'https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?w=800&auto=format&fit=crop&q=85',
-  'https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=800&auto=format&fit=crop&q=85'
+  '/uploads/file-1791830876714-429462367.jpg',
+  '/uploads/file-1791830762714-399075316.jpg',
+  '/uploads/file-1791830989305-696330059.jpg',
+  '/uploads/file-1791831243256-923954313.jpg',
+  '/uploads/file-1791830588893-187058483.jpg',
+  '/uploads/file-1791826953559-621616270.jpg',
+  '/uploads/file-1791822354692-346436357.jpg',
+  '/uploads/file-1791827320010-515338106.jpg',
+  '/uploads/file-1791823814770-967689183.jpg'
 ];
 
 export const getSafeSkincareImage = (rawImg?: any, indexOrSeed?: number | string): string => {

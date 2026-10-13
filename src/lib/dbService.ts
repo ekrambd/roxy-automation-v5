@@ -758,49 +758,20 @@ export const dbService = {
   },
 
   async getProducts(): Promise<Product[]> {
-    if (isFirebaseEnabled && db) {
-      try {
-        const querySnapshot = await getDocs(query(collection(db, 'ecom_products')));
-        const productsMap = new Map<string, Product>();
-
-        querySnapshot.forEach((docSnap) => {
-          const data = docSnap.data() as Product;
-          if (!data.id?.startsWith('prod-book-01') && !data.id?.startsWith('prod-map-holder') && !data.id?.startsWith('prod-gunia') && !data.id?.startsWith('prod-tape')) {
-            productsMap.set(docSnap.id, { ...data, id: docSnap.id });
-          }
-        });
-
-        // Read the legacy collection only for stores that have not migrated yet.
-        // Established stores avoid an entire extra Firestore round trip.
-        if (productsMap.size === 0) {
-          try {
-            const legacySnap = await getDocs(query(collection(db, 'products')));
-            legacySnap.forEach((docSnap) => {
-              const data = docSnap.data() as Product;
-              if (docSnap.id && !productsMap.has(docSnap.id)) {
-                if (!data.id?.startsWith('prod-book-01') && !data.id?.startsWith('prod-map-holder') && !data.id?.startsWith('prod-gunia') && !data.id?.startsWith('prod-tape')) {
-                  productsMap.set(docSnap.id, { ...data, id: docSnap.id });
-                }
-              }
-            });
-          } catch (e) {
-            // ignore legacy read error
-          }
+    try {
+      const res = await fetch('/api/products');
+      if (res.ok) {
+        const serverProds = await res.json();
+        if (Array.isArray(serverProds) && serverProds.length > 0) {
+          setLocalData('noor_ecom_products', serverProds);
+          return serverProds;
         }
-
-        const products = Array.from(productsMap.values()).sort((a, b) => {
-          const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-          const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-          return dateB - dateA;
-        });
-        setLocalData('noor_ecom_products', products);
-        return products;
-      } catch (error) {
-        handleFirestoreError(error, OperationType.LIST, 'ecom_products');
       }
+    } catch (e) {
+      // offline / fallback
     }
+
     const local = getLocalData<Product[]>('noor_ecom_products', []);
-    // Filter out legacy seed items from local storage
     const cleanLocal = local.filter(p => 
       !p.id?.startsWith('prod-book-01') && 
       !p.id?.startsWith('prod-map-holder') && 
@@ -817,7 +788,6 @@ export const dbService = {
     });
   },
 
-
   async addProduct(product: Product): Promise<Product> {
     if (!product.id) {
       product.id = generateShortId();
@@ -826,13 +796,14 @@ export const dbService = {
       product.createdAt = new Date().toISOString();
     }
 
-    if (isFirebaseEnabled && db) {
-      try {
-        const sanitized = sanitizeForFirestore(product);
-        await setDoc(doc(db, 'ecom_products', product.id), sanitized);
-      } catch (error) {
-        throw error;
-      }
+    try {
+      await fetch('/api/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(product)
+      });
+    } catch (e) {
+      console.warn('Failed saving product to server API:', e);
     }
 
     const current = getLocalData<Product[]>('noor_ecom_products', []);
@@ -843,13 +814,14 @@ export const dbService = {
   },
 
   async updateProduct(product: Product): Promise<Product> {
-    if (isFirebaseEnabled && db) {
-      try {
-        const sanitized = sanitizeForFirestore(product);
-        await setDoc(doc(db, 'ecom_products', product.id), sanitized, { merge: true });
-      } catch (error) {
-        handleFirestoreError(error, OperationType.UPDATE, `ecom_products/${product.id}`);
-      }
+    try {
+      await fetch(`/api/products/${encodeURIComponent(product.id)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(product)
+      });
+    } catch (e) {
+      console.warn('Failed updating product on server API:', e);
     }
 
     const current = getLocalData<Product[]>('noor_ecom_products', []);
@@ -860,17 +832,12 @@ export const dbService = {
   },
 
   async deleteProduct(id: string): Promise<void> {
-    if (isFirebaseEnabled && db) {
-      try {
-        await deleteDoc(doc(db, 'ecom_products', id));
-      } catch (error) {
-        console.warn(`Error deleting product ${id} from ecom_products:`, error);
-      }
-      try {
-        await deleteDoc(doc(db, 'products', id));
-      } catch (e) {
-        // ignore legacy delete error
-      }
+    try {
+      await fetch(`/api/products/${encodeURIComponent(id)}`, {
+        method: 'DELETE'
+      });
+    } catch (e) {
+      console.warn('Failed deleting product on server API:', e);
     }
 
     const current = getLocalData<Product[]>('noor_ecom_products', []);

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { storeProducts } from '../data/store';
+import { storeProducts, saveProductsToDisk } from '../data/store';
 import { Product } from '../../types';
 import { cacheResponse } from '../middleware/cacheMiddleware';
 import { globalCache } from '../services/cacheEngine';
@@ -77,11 +77,12 @@ productRouter.get('/:id', cacheResponse({ ttlSeconds: 60, staleWhileRevalidateSe
 // POST Create Product - writes and invalidates cache
 productRouter.post('/', (req, res) => {
   const newProduct: Product = {
-    id: `prod-${Date.now()}`,
+    id: req.body.id || `prod-${Date.now()}`,
     createdAt: new Date().toISOString(),
     ...req.body
   };
   storeProducts.unshift(newProduct);
+  saveProductsToDisk(storeProducts);
 
   // Invalidate product caches across cluster
   globalCache.invalidateTag('products');
@@ -95,6 +96,7 @@ productRouter.put('/:id', (req, res) => {
   const index = storeProducts.findIndex(p => p.id === id);
   if (index !== -1) {
     storeProducts[index] = { ...storeProducts[index], ...req.body };
+    saveProductsToDisk(storeProducts);
 
     // Invalidate product caches
     globalCache.invalidateTag('products');
@@ -111,6 +113,7 @@ productRouter.delete('/:id', (req, res) => {
   const index = storeProducts.findIndex(p => p.id === id);
   if (index !== -1) {
     storeProducts.splice(index, 1);
+    saveProductsToDisk(storeProducts);
 
     // Invalidate product caches
     globalCache.invalidateTag('products');
