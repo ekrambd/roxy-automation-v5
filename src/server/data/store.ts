@@ -3,6 +3,20 @@ import { Product, BookOrder, EcomSettings } from '../../types';
 // Real store product and order storage for local Node.js Express backend
 export let storeProducts: Product[] = [
   {
+    id: 'product_385231',
+    title: 'Rapid Acne Treatment Toner',
+    author: 'FANTINE Laboratory',
+    regularPrice: 22.00,
+    price: 18.50,
+    discountPercentage: 16,
+    stockQuantity: 50,
+    category: 'Rapid Acne Treatment Series',
+    coverImage: 'https://images.unsplash.com/photo-1608248597359-0098f98a329d?w=800&auto=format&fit=crop&q=85',
+    description: 'Cleanses excess oil to promote skin metabolism, removes dead skin cells, unclogs pores, and fades acne marks',
+    badge: 'Oil Control',
+    isFeatured: true
+  },
+  {
     id: 'fantine-cream',
     title: 'Ultimate Calming Solution Cream',
     author: 'FANTINE Laboratory',

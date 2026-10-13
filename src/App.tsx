@@ -201,16 +201,33 @@ function AppRoutes() {
             <Route path="/shop" element={<FantineStorePage onGoToLogin={() => navigate('/login')} onGoToLanding={() => navigate('/book')} />} />
             <Route path="/contact" element={<FantineStorePage onGoToLogin={() => navigate('/login')} onGoToLanding={() => navigate('/book')} />} />
             <Route path="/about" element={<FantineStorePage onGoToLogin={() => navigate('/login')} onGoToLanding={() => navigate('/book')} />} />
-            <Route path="/fantine" element={<FantineStorePage onGoToLogin={() => navigate('/login')} onGoToLanding={() => navigate('/book')} />} />
+            <Route path="/quiz" element={<FantineStorePage onGoToLogin={() => navigate('/login')} onGoToLanding={() => navigate('/book')} />} />
+            <Route path="/checkout" element={<FantineStorePage onGoToLogin={() => navigate('/login')} onGoToLanding={() => navigate('/book')} />} />
             <Route path="/product/:id" element={<FantineStorePage onGoToLogin={() => navigate('/login')} onGoToLanding={() => navigate('/book')} />} />
+            <Route path="/product/:slug/:id" element={<FantineStorePage onGoToLogin={() => navigate('/login')} onGoToLanding={() => navigate('/book')} />} />
+            <Route path="/fantine" element={<Navigate to="/" replace />} />
             
             {/* Fix Duplicate Content: Canonical Redirects for legacy .html routes */}
             <Route path="/store" element={<Navigate to="/shop" replace />} />
             <Route path="/news" element={<Navigate to="/" replace />} />
             <Route path="/shop.html" element={<Navigate to="/shop" replace />} />
             <Route path="/contact.html" element={<Navigate to="/contact" replace />} />
-            <Route path="/product_385231.html" element={<Navigate to="/" replace />} />
-            <Route path="/product_*.html" element={<Navigate to="/" replace />} />
+            <Route path="/product_385231.html" element={<Navigate to="/product/rapid-acne-treatment-toner/product_385231" replace />} />
+            <Route path="/product_*.html" element={<Navigate to="/shop" replace />} />
+
+            {/* Customer Account & Order Tracking */}
+            <Route path="/track-order" element={
+              <LoginPage 
+                onLoginSuccess={handleLoginSuccess}
+                onNavigateHome={() => navigate('/')}
+              />
+            } />
+            <Route path="/my-orders" element={
+              <LoginPage 
+                onLoginSuccess={handleLoginSuccess}
+                onNavigateHome={() => navigate('/')}
+              />
+            } />
             
             <Route path="/book" element={
               <BookLandingPage 

@@ -16,7 +16,8 @@ import { publicStoreService, optimizeImageUrl } from '../lib/publicStoreService'
 import { DEFAULT_ABOUT_SETTINGS, DEFAULT_DELIVERY_METHODS, DEFAULT_PAYMENT_GATEWAYS } from '../lib/constants';
 import { ProductSearchEngine, HANBANG_INGREDIENT_DATABASE, IngredientMeta } from '../lib/searchIndex';
 import { useAppStore } from '../store/useAppStore';
-import { updateMetaTags, updateProductSchema } from '../lib/seoUtils';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
+import { updateMetaTags, updateProductSchema, getProductSlug } from '../lib/seoUtils';
 import ResponsiveImage from './ResponsiveImage';
 import CheckoutPage from './CheckoutPage';
 import { DoctorFloatingTrigger } from './ai/DoctorFloatingTrigger';
@@ -362,8 +363,23 @@ function extractYouTubeVideoId(url?: string): string | null {
 
 
 export default function FantineStorePage({ onGoToLogin, onGoToLanding }: FantineStorePageProps) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { id: routeId, slug: routeSlug } = useParams<{ id?: string; slug?: string }>();
+
   // Navigation View: 'home' | 'shop' | 'about' | 'contact' | 'product_detail' | 'checkout' | 'quiz'
-  const [activeNav, setActiveNav] = useState<'home' | 'shop' | 'about' | 'contact' | 'product_detail' | 'checkout' | 'quiz'>('home');
+  const [activeNav, setActiveNav] = useState<'home' | 'shop' | 'about' | 'contact' | 'product_detail' | 'checkout' | 'quiz'>(() => {
+    if (typeof window !== 'undefined') {
+      const p = window.location.pathname;
+      if (p.startsWith('/product')) return 'product_detail';
+      if (p.startsWith('/shop')) return 'shop';
+      if (p.startsWith('/about')) return 'about';
+      if (p.startsWith('/contact')) return 'contact';
+      if (p.startsWith('/quiz')) return 'quiz';
+      if (p.startsWith('/checkout')) return 'checkout';
+    }
+    return 'home';
+  });
   const [selectedCategoryCheckbox, setSelectedCategoryCheckbox] = useState<string>('All');
   const [selectedBrand, setSelectedBrand] = useState<string>('All');
   const [priceRange, setPriceRange] = useState<number>(50000); // Max range default
@@ -393,8 +409,64 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
     return FANTINE_PRODUCTS;
   });
 
-  // Active Selected Product for Detail Page
-  const [activeProductDetail, setActiveProductDetail] = useState<FantineProductItem>(() => products[0] || FANTINE_PRODUCTS[0]);
+  // Helper to find matching product from URL path or router params
+  const findProductFromPath = useCallback((path: string, idParam?: string, slugParam?: string, productList: FantineProductItem[] = products) => {
+    if (!productList || productList.length === 0) return null;
+    const targetId = (idParam || '').toLowerCase();
+    const targetSlug = (slugParam || '').toLowerCase();
+
+    // 1. Direct match by ID
+    if (targetId) {
+      const directMatch = productList.find(p => p.id.toLowerCase() === targetId);
+      if (directMatch) return directMatch;
+    }
+
+    // 2. Direct match by slug
+    if (targetSlug) {
+      const slugMatch = productList.find(p => {
+        const pSlug = getProductSlug(p).toLowerCase();
+        return pSlug === targetSlug || p.id.toLowerCase() === targetSlug;
+      });
+      if (slugMatch) return slugMatch;
+    }
+
+    // 3. Maybe targetId is actually a slug
+    if (targetId) {
+      const slugAsIdMatch = productList.find(p => {
+        const pSlug = getProductSlug(p).toLowerCase();
+        return pSlug === targetId;
+      });
+      if (slugAsIdMatch) return slugAsIdMatch;
+    }
+
+    // 4. Check if pathname contains any product id
+    const pathLower = path.toLowerCase();
+    const pathMatch = productList.find(p => pathLower.includes(p.id.toLowerCase()));
+    if (pathMatch) return pathMatch;
+
+    // 5. Check if pathname contains any product slug
+    const pathSlugMatch = productList.find(p => {
+      const pSlug = getProductSlug(p).toLowerCase();
+      return pSlug.length > 3 && pathLower.includes(pSlug);
+    });
+    if (pathSlugMatch) return pathSlugMatch;
+
+    return null;
+  }, [products]);
+
+  // Active Selected Product for Detail Page (Deep link aware on initial load)
+  const [activeProductDetail, setActiveProductDetail] = useState<FantineProductItem>(() => {
+    const initialList = products.length > 0 ? products : FANTINE_PRODUCTS;
+    if (typeof window !== 'undefined' && window.location.pathname.startsWith('/product')) {
+      const p = window.location.pathname;
+      const found = initialList.find(prod => {
+        const slug = getProductSlug(prod).toLowerCase();
+        return p.includes(prod.id) || (slug.length > 3 && p.toLowerCase().includes(slug));
+      });
+      if (found) return found;
+    }
+    return initialList[0] || FANTINE_PRODUCTS[0];
+  });
   const [activeImageIndex, setActiveImageIndex] = useState<number>(0);
   const [isZoomModalOpen, setIsZoomModalOpen] = useState<boolean>(false);
   const [isHoverZooming, setIsHoverZooming] = useState<boolean>(false);
@@ -445,6 +517,10 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
         const normalized = dbProds.map((p, idx) => normalizeFantineProduct(p, idx));
         setProducts(normalized);
         setActiveProductDetail(prev => {
+          if (typeof window !== 'undefined' && window.location.pathname.startsWith('/product')) {
+            const urlMatch = findProductFromPath(window.location.pathname, routeId, routeSlug, normalized);
+            if (urlMatch) return urlMatch;
+          }
           const match = normalized.find(p => p.id === prev?.id);
           return match || normalized[0];
         });
@@ -460,6 +536,10 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
         const normalized = pubProds.map((p, idx) => normalizeFantineProduct(p, idx));
         setProducts(normalized);
         setActiveProductDetail(prev => {
+          if (typeof window !== 'undefined' && window.location.pathname.startsWith('/product')) {
+            const urlMatch = findProductFromPath(window.location.pathname, routeId, routeSlug, normalized);
+            if (urlMatch) return urlMatch;
+          }
           const match = normalized.find(p => p.id === prev?.id);
           return match || normalized[0];
         });
@@ -616,8 +696,8 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
   useEffect(() => {
     if (activeNav === 'product_detail' && activeProductDetail) {
       updateMetaTags(
-        `${activeProductDetail.title} - ${displayStoreName}`,
-        activeProductDetail.subtitle || activeProductDetail.description || 'View product details',
+        `${activeProductDetail.title} | ${displayStoreName}`,
+        activeProductDetail.subtitle || activeProductDetail.description || 'View product details and clinical formulation.',
         activeProductDetail.coverImage || activeProductDetail.image,
         window.location.href
       );
@@ -632,7 +712,47 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
         value: activeProductDetail.price,
         currency: 'BDT'
       }, eventId);
-    } else if (activeNav === 'shop' || activeNav === 'home') {
+    } else if (activeNav === 'shop') {
+      updateMetaTags(
+        `Shop All Korean Skincare | ${displayStoreName}`,
+        aboutSettings?.description || 'Browse our complete catalog of Korean Hanbang botanical skincare formulations.',
+        displayStoreLogo,
+        window.location.href
+      );
+      updateProductSchema(null, window.location.href, displayStoreName);
+    } else if (activeNav === 'about') {
+      updateMetaTags(
+        `About Us & Hanbang Story | ${displayStoreName}`,
+        aboutSettings?.subtitle || aboutSettings?.description || 'Learn about our Seoul heritage, brand story, and Korean skincare philosophy.',
+        displayStoreLogo,
+        window.location.href
+      );
+      updateProductSchema(null, window.location.href, displayStoreName);
+    } else if (activeNav === 'contact') {
+      updateMetaTags(
+        `Contact Us & Customer Support | ${displayStoreName}`,
+        'Get in touch with our customer care team via WhatsApp, phone, or email.',
+        displayStoreLogo,
+        window.location.href
+      );
+      updateProductSchema(null, window.location.href, displayStoreName);
+    } else if (activeNav === 'quiz') {
+      updateMetaTags(
+        `Personalized Skin Routine Quiz | ${displayStoreName}`,
+        'Find your custom Korean skincare ritual tailored to your specific skin type and concerns.',
+        displayStoreLogo,
+        window.location.href
+      );
+      updateProductSchema(null, window.location.href, displayStoreName);
+    } else if (activeNav === 'checkout') {
+      updateMetaTags(
+        `Secure Checkout | ${displayStoreName}`,
+        'Complete your order with Fast Delivery & Cash on Delivery across Bangladesh.',
+        displayStoreLogo,
+        window.location.href
+      );
+      updateProductSchema(null, window.location.href, displayStoreName);
+    } else if (activeNav === 'home') {
       updateMetaTags(
         `${displayStoreName} | Official Store`,
         aboutSettings?.description || 'Welcome to our official store',
@@ -641,7 +761,7 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
       );
       updateProductSchema(null, window.location.href, displayStoreName);
     }
-  }, [activeNav, activeProductDetail, displayStoreName, displayStoreLogo, aboutSettings?.description]);
+  }, [activeNav, activeProductDetail, displayStoreName, displayStoreLogo, aboutSettings?.description, aboutSettings?.subtitle]);
 
   // Track Search event on search query input (debounced)
   useEffect(() => {
@@ -667,21 +787,47 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
 
   const isTransparentHeader = (activeNav === 'home' || activeNav === 'about') && !isScrolled;
 
-  // Check initial path on load
+  const scrollToTop = useCallback(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  // Central Router Navigation Helper (Syncs Browser URL with SPA Views)
+  const navigateTo = useCallback((section: 'home' | 'shop' | 'about' | 'contact' | 'checkout' | 'quiz') => {
+    setIsMobileMenuOpen(false);
+    const targetPath = section === 'home' ? '/' : `/${section}`;
+    if (location.pathname !== targetPath) {
+      navigate(targetPath);
+    }
+    setActiveNav(section);
+    scrollToTop();
+  }, [location.pathname, navigate, scrollToTop]);
+
+  // Sync React Router pathname with active store view & product
   useEffect(() => {
-    const path = window.location.pathname;
-    if (path.includes('contact')) {
-      setActiveNav('contact');
-    } else if (path.includes('shop')) {
-      setActiveNav('shop');
-    } else if (path.includes('product')) {
-      const found = products.find(p => path.includes(p.id)) || products[0];
+    const path = location.pathname;
+    if (path.startsWith('/product')) {
+      const found = findProductFromPath(path, routeId, routeSlug, products);
       if (found) {
         setActiveProductDetail(found);
         setActiveNav('product_detail');
+      } else if (products.length > 0) {
+        setActiveProductDetail(products[0]);
+        setActiveNav('product_detail');
       }
+    } else if (path.startsWith('/shop')) {
+      setActiveNav('shop');
+    } else if (path.startsWith('/about')) {
+      setActiveNav('about');
+    } else if (path.startsWith('/contact')) {
+      setActiveNav('contact');
+    } else if (path.startsWith('/quiz')) {
+      setActiveNav('quiz');
+    } else if (path.startsWith('/checkout')) {
+      setActiveNav('checkout');
+    } else if (path === '/' || path === '') {
+      setActiveNav('home');
     }
-  }, [products]);
+  }, [location.pathname, routeId, routeSlug, products, findProductFromPath]);
 
   // Bangladeshi Taka BDT Currency Formatter (Exclusive)
   const formatPrice = (priceVal: number) => {
@@ -689,10 +835,6 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
     const bdtAmount = priceVal < 100 ? Math.round(priceVal * 120) : Math.round(priceVal);
     return `Tk.${bdtAmount.toLocaleString('en-US')}`;
   };
-
-  const scrollToTop = useCallback(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, []);
 
   // Add to Cart Helper
   const handleAddToCart = useCallback((product: Product, quantity = 1) => {
@@ -728,13 +870,15 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
     updateQuantityAction(productId, quantity);
   }, [removeFromCartAction, updateQuantityAction]);
 
-  // Open Full Product Detail Page
+  // Open Full Product Detail Page with dynamic SEO deep-link URL
   const openProductDetail = useCallback((product: FantineProductItem) => {
     setActiveProductDetail(product);
     setActiveImageIndex(0);
     setActiveNav('product_detail');
+    const slug = getProductSlug(product);
+    navigate(`/product/${encodeURIComponent(slug)}/${encodeURIComponent(product.id)}`);
     scrollToTop();
-  }, [scrollToTop]);
+  }, [navigate, scrollToTop]);
 
   // Cart Subtotal
   const cartSubtotal = useMemo(() => {
@@ -1132,7 +1276,7 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
         <div className="max-w-7xl mx-auto px-4 sm:px-8 py-3.5 sm:py-4 flex items-center justify-between gap-4 sm:gap-8 flex-nowrap">
           
           {/* Logo with Korean Flag Taegeuk Emblem (Single Line, Never Wraps) */}
-          <div className="flex items-center cursor-pointer group shrink-0" onClick={() => { setActiveNav('home'); scrollToTop(); }}>
+          <div className="flex items-center cursor-pointer group shrink-0" onClick={() => navigateTo('home')}>
             <img 
               src={displayStoreLogo} 
               alt={displayStoreName} 
@@ -1150,7 +1294,7 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
             isTransparentHeader ? 'text-white/90' : 'text-slate-700'
           }`}>
             <button 
-              onClick={() => setActiveNav('quiz')}
+              onClick={() => navigateTo('quiz')}
               className={`px-3.5 lg:px-5 py-2 transition-all flex items-center gap-1 cursor-pointer whitespace-nowrap rounded-lg ${
                 activeNav === 'quiz' 
                   ? (isTransparentHeader ? 'text-white font-bold underline underline-offset-8 decoration-white' : 'text-slate-950 font-bold bg-slate-100/80') 
@@ -1163,7 +1307,7 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
             </button>
 
             <button 
-              onClick={() => setActiveNav('about')}
+              onClick={() => navigateTo('about')}
               className={`px-3.5 lg:px-5 py-2 transition-all flex items-center gap-1 cursor-pointer whitespace-nowrap rounded-lg ${
                 activeNav === 'about' 
                   ? (isTransparentHeader ? 'text-white font-bold underline underline-offset-8 decoration-white' : 'text-slate-950 font-bold bg-slate-100/80') 
@@ -1174,7 +1318,7 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
             </button>
 
             <button 
-              onClick={() => setActiveNav('shop')}
+              onClick={() => navigateTo('shop')}
               className={`px-3.5 lg:px-5 py-2 transition-all flex items-center gap-1 cursor-pointer whitespace-nowrap rounded-lg ${
                 activeNav === 'shop' || activeNav === 'product_detail' 
                   ? (isTransparentHeader ? 'text-white font-bold underline underline-offset-8 decoration-white' : 'text-slate-950 font-bold bg-slate-100/80') 
@@ -1185,7 +1329,7 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
             </button>
 
             <button 
-              onClick={() => setActiveNav('contact')}
+              onClick={() => navigateTo('contact')}
               className={`px-3.5 lg:px-5 py-2 transition-all cursor-pointer whitespace-nowrap rounded-lg ${
                 activeNav === 'contact' 
                   ? (isTransparentHeader ? 'text-white font-bold underline underline-offset-8 decoration-white' : 'text-slate-950 font-bold bg-slate-100/80') 
@@ -1213,13 +1357,13 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
                 onChange={(e) => {
                   setSearchTerm(e.target.value);
                   if (activeNav !== 'shop') {
-                    setActiveNav('shop');
+                    navigateTo('shop');
                   }
                   setCurrentPage(1);
                 }}
                 onFocus={() => {
                   if (activeNav !== 'shop' && searchTerm.trim()) {
-                    setActiveNav('shop');
+                    navigateTo('shop');
                   }
                 }}
                 placeholder="Search..."
@@ -1301,7 +1445,7 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
 
             <nav className="flex flex-col space-y-1 text-sm font-semibold">
               <button
-                onClick={() => { setActiveNav('home'); setIsMobileMenuOpen(false); scrollToTop(); }}
+                onClick={() => navigateTo('home')}
                 className={`w-full text-left px-4 py-3 rounded-xl transition flex items-center justify-between ${
                   activeNav === 'home' ? 'bg-slate-900 text-white font-bold' : 'hover:bg-slate-100 text-slate-800'
                 }`}
@@ -1311,7 +1455,7 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
               </button>
 
               <button
-                onClick={() => { setActiveNav('quiz'); setIsMobileMenuOpen(false); scrollToTop(); }}
+                onClick={() => navigateTo('quiz')}
                 className={`w-full text-left px-4 py-3 rounded-xl transition flex items-center justify-between ${
                   activeNav === 'quiz' ? 'bg-slate-900 text-white font-bold' : 'hover:bg-slate-100 text-slate-800'
                 }`}
@@ -1321,7 +1465,7 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
               </button>
 
               <button
-                onClick={() => { setActiveNav('shop'); setIsMobileMenuOpen(false); scrollToTop(); }}
+                onClick={() => navigateTo('shop')}
                 className={`w-full text-left px-4 py-3 rounded-xl transition flex items-center justify-between ${
                   activeNav === 'shop' || activeNav === 'product_detail' ? 'bg-slate-900 text-white font-bold' : 'hover:bg-slate-100 text-slate-800'
                 }`}
@@ -1331,7 +1475,7 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
               </button>
 
               <button
-                onClick={() => { setActiveNav('about'); setIsMobileMenuOpen(false); scrollToTop(); }}
+                onClick={() => navigateTo('about')}
                 className={`w-full text-left px-4 py-3 rounded-xl transition flex items-center justify-between ${
                   activeNav === 'about' ? 'bg-slate-900 text-white font-bold' : 'hover:bg-slate-100 text-slate-800'
                 }`}
@@ -1341,7 +1485,7 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
               </button>
 
               <button
-                onClick={() => { setActiveNav('contact'); setIsMobileMenuOpen(false); scrollToTop(); }}
+                onClick={() => navigateTo('contact')}
                 className={`w-full text-left px-4 py-3 rounded-xl transition flex items-center justify-between ${
                   activeNav === 'contact' ? 'bg-slate-900 text-white font-bold' : 'hover:bg-slate-100 text-slate-800'
                 }`}
@@ -1381,9 +1525,7 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
                     key={idx}
                     onClick={() => {
                       item.action();
-                      setActiveNav('shop');
-                      setIsMobileMenuOpen(false);
-                      scrollToTop();
+                      navigateTo('shop');
                     }}
                     className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-medium transition"
                   >
@@ -1405,7 +1547,9 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
         <div className="py-6 sm:py-12 lg:py-16 max-w-7xl mx-auto px-4 sm:px-8">
           
           <div className="mb-4 sm:mb-6 flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs text-slate-500">
-            <button onClick={() => setActiveNav('shop')} className="hover:text-slate-900 transition-colors">Shop</button>
+            <button onClick={() => navigateTo('home')} className="hover:text-slate-900 transition-colors cursor-pointer">Home</button>
+            <span>/</span>
+            <button onClick={() => navigateTo('shop')} className="hover:text-slate-900 transition-colors cursor-pointer">Shop</button>
             <span>/</span>
             <span className="text-slate-800 font-medium">{activeProductDetail.series}</span>
             <span>/</span>
@@ -1531,9 +1675,8 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
                 <button 
                   onClick={() => {
                     handleAddToCart(activeProductDetail);
-                    setActiveNav('checkout');
                     setIsCartOpen(false);
-                    scrollToTop();
+                    navigateTo('checkout');
                   }}
                   className="flex-1 bg-[#f97316] hover:bg-[#ea580c] text-white font-bold py-3 sm:py-3.5 px-6 text-xs uppercase tracking-widest transition-all shadow-md active:scale-95 cursor-pointer"
                 >
@@ -1964,7 +2107,7 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
 
               {/* Breadcrumb */}
               <div className="pt-2 flex items-center justify-center gap-2 text-xs text-slate-300 font-mono tracking-wider uppercase">
-                <button onClick={() => { setActiveNav('home'); scrollToTop(); }} className="hover:text-white transition-colors cursor-pointer">HOME</button>
+                <button onClick={() => navigateTo('home')} className="hover:text-white transition-colors cursor-pointer">HOME</button>
                 <span>/</span>
                 <span className="text-[#93c5fd] font-semibold">about us</span>
               </div>
@@ -1999,8 +2142,8 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
           onRemoveItem={handleRemoveFromCart}
           onClearCart={() => clearCartAction()}
           ecomSettings={ecomSettings || (DEFAULT_ABOUT_SETTINGS as any)}
-          onNavigateHome={() => { setActiveNav('home'); scrollToTop(); }}
-          onNavigateShop={() => { setActiveNav('shop'); scrollToTop(); }}
+          onNavigateHome={() => navigateTo('home')}
+          onNavigateShop={() => navigateTo('shop')}
           onOpenLoginModal={onGoToLogin}
         />
       )}
@@ -2010,14 +2153,10 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
         <SkinQuizView 
           products={products}
           onAddToCart={(product) => handleAddToCart(product, 1)}
-          onCancel={() => setActiveNav('home')}
+          onCancel={() => navigateTo('home')}
           isWishlisted={(productId) => false}
           onToggleWishlist={() => {}}
-          onOpenDetail={(product) => {
-            setActiveProductDetail(product);
-            setActiveNav('product_detail');
-            scrollToTop();
-          }}
+          onOpenDetail={(product) => openProductDetail(product)}
         />
       )}
 
@@ -2113,7 +2252,7 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
 
               <div className="flex items-center justify-center mt-8 sm:mt-10">
                 <div 
-                  onClick={() => setActiveNav('shop')}
+                  onClick={() => navigateTo('shop')}
                   className="flex items-center gap-2 sm:gap-3 text-slate-900 bg-[#f9f8f6] px-4 sm:px-5 py-2 rounded-full border border-slate-200 cursor-pointer hover:bg-slate-100 transition-colors shadow-xs"
                 >
                   <span className="text-[11px] sm:text-xs font-serif font-semibold">View All Formulations ({products.length})</span>
@@ -2302,7 +2441,7 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
                               if (targetProd) {
                                 openProductDetail(targetProd);
                               } else {
-                                setActiveNav('shop');
+                                navigateTo('shop');
                               }
                             }}
                             className="bg-slate-950 hover:bg-slate-800 text-white font-bold text-xs tracking-widest uppercase px-8 py-4 rounded-full shadow-xl shadow-slate-950/15 hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 inline-flex items-center gap-2.5 cursor-pointer group"
@@ -2392,8 +2531,7 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
                 handleAddToCart(targetProd, 1);
                 setIsCartOpen(true);
               } else {
-                setActiveNav('shop');
-                scrollToTop();
+                navigateTo('shop');
               }
             };
 
@@ -2402,11 +2540,9 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
                 openProductDetail(targetProd);
               } else if (!isProductTarget) {
                 setSelectedCategoryCheckbox(targetCat);
-                setActiveNav('shop');
-                scrollToTop();
+                navigateTo('shop');
               } else {
-                setActiveNav('shop');
-                scrollToTop();
+                navigateTo('shop');
               }
             };
 
@@ -2500,7 +2636,7 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
           displayPhone={displayPhone}
           shopCategories={shopCategories}
           socialLinks={socialLinks}
-          setActiveNav={setActiveNav}
+          setActiveNav={(nav) => navigateTo(nav as any)}
           setSelectedCategoryCheckbox={setSelectedCategoryCheckbox}
           scrollToTop={scrollToTop}
         />
@@ -2653,8 +2789,7 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
                           }, eventId);
                         }
                         setIsCartOpen(false);
-                        setActiveNav('checkout');
-                        scrollToTop();
+                        navigateTo('checkout');
                       }}
                       className="w-full bg-[#f97316] hover:bg-[#ea580c] active:scale-[0.99] text-white py-4 rounded-2xl text-xs font-bold uppercase tracking-wider transition-all shadow-lg shadow-orange-500/25 cursor-pointer flex items-center justify-center gap-2"
                     >

@@ -45,14 +45,20 @@ async function generateSitemap() {
   const urls = [
     { loc: 'https://fantinebd.com/', priority: '1.0', changefreq: 'daily' },
     { loc: 'https://fantinebd.com/shop', priority: '0.9', changefreq: 'daily' },
+    { loc: 'https://fantinebd.com/about', priority: '0.8', changefreq: 'monthly' },
+    { loc: 'https://fantinebd.com/contact', priority: '0.8', changefreq: 'monthly' },
+    { loc: 'https://fantinebd.com/quiz', priority: '0.8', changefreq: 'weekly' },
     { loc: 'https://fantinebd.com/checkout', priority: '0.7', changefreq: 'weekly' }
   ];
 
   // Default store catalog products for offline/Firestore-free builds
   const defaultProducts = [
+    { id: 'product_385231', title: 'Rapid Acne Treatment Toner', slug: 'rapid-acne-treatment-toner' },
     { id: 'fantine-cream', title: 'Ultimate Calming Solution Cream', slug: 'ultimate-calming-solution-cream' },
     { id: 'fantine-cleanser', title: 'Ultimate Calming Solution Face Cleanser', slug: 'ultimate-calming-solution-face-cleanser' },
-    { id: 'fantine-toner', title: 'Ultimate Calming Solution Toner', slug: 'ultimate-calming-solution-toner' }
+    { id: 'fantine-toner', title: 'Ultimate Calming Solution Toner', slug: 'ultimate-calming-solution-toner' },
+    { id: 'fantine-essence', title: 'Ultimate Calming Solution Essence', slug: 'ultimate-calming-solution-essence' },
+    { id: 'fantine-mask', title: 'Ultra Repair Face Mask', slug: 'ultra-repair-face-mask' }
   ];
 
   defaultProducts.forEach(prod => {
