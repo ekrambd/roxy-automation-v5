@@ -588,10 +588,10 @@ export default function ProductManager({
         <div>
           <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
             <Package className="h-6 w-6 text-teal-600" />
-            product Management
+            Product Management
           </h2>
           <p className="text-xs text-slate-500 mt-1">
-            of e-commerce stores product Duplicate, Publishing Control Manage prize setup
+            Manage e-commerce inventory, pricing, catalog categories, and stock status.
           </p>
         </div>
 
@@ -600,7 +600,7 @@ export default function ProductManager({
           className="inline-flex items-center px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-all hover:shadow-md cursor-pointer"
         >
           <Plus className="h-4 w-4 mr-1.5" />
-          new product add
+          Add New Product
         </button>
       </div>
 
@@ -714,8 +714,12 @@ export default function ProductManager({
                       <div className="flex items-center gap-3">
                         <div className="h-14 w-14 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden shrink-0 flex items-center justify-center p-1">
                           <img
-                            src={p.image}
+                            src={p.image || p.coverImage || (p.images && p.images[0]) || '/uploads/file-1791830876714-429462367.jpg'}
                             alt={p.title}
+                            onError={(e) => {
+                              e.currentTarget.onerror = null;
+                              e.currentTarget.src = '/uploads/file-1791830876714-429462367.jpg';
+                            }}
                             className="max-h-full max-w-full object-contain"
                           />
                         </div>
@@ -732,9 +736,9 @@ export default function ProductManager({
                                 SKU: {p.sku}
                               </span>
                             )}
-                            {p.authorName && (
+                            {(p.authorName || p.author) && (
                               <span className="text-[10px] text-slate-500">
-                                the writer: {p.authorName}
+                                {p.authorName || p.author}
                               </span>
                             )}
                           </div>
@@ -767,20 +771,20 @@ export default function ProductManager({
                     {/* Price */}
                     <td className="py-3 px-4 whitespace-nowrap">
                       <div className="text-sm font-extrabold text-teal-700 flex items-center gap-1">
-                        <span>Tk.{displayPrice.toLocaleString('bn-BD')}</span>
+                        <span>Tk. {displayPrice.toLocaleString('en-US')}</span>
                         {hasVar && minVarPrice !== maxVarPrice && (
-                          <span className="text-[11px] font-bold text-slate-500">- Tk.{maxVarPrice.toLocaleString('bn-BD')}</span>
+                          <span className="text-[11px] font-bold text-slate-500">- Tk. {maxVarPrice.toLocaleString('en-US')}</span>
                         )}
                       </div>
                       {displayRegPrice && displayRegPrice > displayPrice && (
                         <div className="text-[11px] text-slate-400 line-through">
-                          Tk.{displayRegPrice.toLocaleString('bn-BD')}
+                          Tk. {displayRegPrice.toLocaleString('en-US')}
                         </div>
                       )}
                       {hasVar && (
                         <div className="mt-1">
                           <span className="text-[10px] font-semibold text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded border border-teal-200">
-                            {p.variants!.length}T variant
+                            {p.variants!.length} variants
                           </span>
                         </div>
                       )}
@@ -789,15 +793,21 @@ export default function ProductManager({
                     {/* Stock & Badges */}
                     <td className="py-3 px-4 whitespace-nowrap">
                       <div className="flex flex-col gap-1 items-start">
-                        <span
-                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                            p.isAvailable && p.stock > 0
-                              ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-                              : 'bg-rose-100 text-rose-800 border border-rose-200'
-                          }`}
-                        >
-                          {p.isAvailable && p.stock > 0 ? `stock: ${p.stock}` : 'out of stock'}
-                        </span>
+                        {(() => {
+                          const stockNum = typeof p.stock === 'number' ? p.stock : (typeof p.stockQuantity === 'number' ? p.stockQuantity : 100);
+                          const isAvail = (p.isAvailable !== false) && stockNum > 0;
+                          return (
+                            <span
+                              className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                                isAvail
+                                  ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                                  : 'bg-rose-100 text-rose-800 border border-rose-200'
+                              }`}
+                            >
+                              {isAvail ? `In Stock (${stockNum})` : 'Out of Stock'}
+                            </span>
+                          );
+                        })()}
                       </div>
                     </td>
 
@@ -891,8 +901,12 @@ export default function ProductManager({
             >
               <div className="relative h-32 sm:h-36 bg-slate-50 overflow-hidden flex items-center justify-center p-2">
                 <img
-                  src={p.image}
+                  src={p.image || p.coverImage || (p.images && p.images[0]) || '/uploads/file-1791830876714-429462367.jpg'}
                   alt={p.title}
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = '/uploads/file-1791830876714-429462367.jpg';
+                  }}
                   className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300"
                 />
                 <div className="absolute top-2 left-2 flex flex-wrap gap-1 max-w-[70%]">
@@ -906,15 +920,19 @@ export default function ProductManager({
                     </span>
                   )}
                 </div>
-                <div
-                  className={`absolute top-2 right-2 text-[9px] font-bold px-1.5 py-0.5 rounded ${
-                    p.isAvailable && p.stock > 0
-                      ? 'bg-emerald-500 text-white'
-                      : 'bg-rose-500 text-white'
-                  }`}
-                >
-                  {p.isAvailable && p.stock > 0 ? `stock: ${p.stock}` : 'out of stock'}
-                </div>
+                {(() => {
+                  const stockNum = typeof p.stock === 'number' ? p.stock : (typeof p.stockQuantity === 'number' ? p.stockQuantity : 100);
+                  const isAvail = (p.isAvailable !== false) && stockNum > 0;
+                  return (
+                    <div
+                      className={`absolute top-2 right-2 text-[9px] font-bold px-1.5 py-0.5 rounded ${
+                        isAvail ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'
+                      }`}
+                    >
+                      {isAvail ? `stock: ${stockNum}` : 'out of stock'}
+                    </div>
+                  );
+                })()}
               </div>
 
               <div className="p-2.5 sm:p-3 flex-1 flex flex-col justify-between space-y-2">

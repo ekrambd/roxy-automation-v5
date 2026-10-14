@@ -244,18 +244,36 @@ export const INITIAL_REAL_PRODUCTS: Product[] = [
 
 // Load persisted products from disk or initialize with real catalog
 function loadProductsFromDisk(): Product[] {
+  let list: Product[] = [];
   try {
     if (fs.existsSync(PRODUCTS_STORAGE_FILE)) {
       const raw = fs.readFileSync(PRODUCTS_STORAGE_FILE, 'utf-8');
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed;
+        list = parsed;
       }
     }
   } catch (err) {
     console.warn('[store] Could not load products from disk:', err);
   }
-  return [...INITIAL_REAL_PRODUCTS];
+
+  if (list.length === 0) {
+    list = [...INITIAL_REAL_PRODUCTS];
+  }
+
+  return list.map(p => {
+    const img = p.image || p.coverImage || (p.images && p.images[0]) || '/uploads/file-1791830876714-429462367.jpg';
+    const stockNum = typeof p.stock === 'number' ? p.stock : (typeof p.stockQuantity === 'number' ? p.stockQuantity : 100);
+    return {
+      ...p,
+      image: img,
+      coverImage: p.coverImage || img,
+      stock: stockNum,
+      stockQuantity: stockNum,
+      isAvailable: p.isAvailable !== false,
+      authorName: p.authorName || p.author || 'FANTINE Korea'
+    };
+  });
 }
 
 export function saveProductsToDisk(products: Product[]): void {
@@ -272,10 +290,8 @@ export function saveProductsToDisk(products: Product[]): void {
 
 export let storeProducts: Product[] = loadProductsFromDisk();
 
-// Persist initial real products if file does not exist yet
-if (!fs.existsSync(PRODUCTS_STORAGE_FILE)) {
-  saveProductsToDisk(storeProducts);
-}
+// Persist normalized products to disk
+saveProductsToDisk(storeProducts);
 
 export const setStoreProducts = (newProducts: Product[]) => {
   storeProducts = newProducts;

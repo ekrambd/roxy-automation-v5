@@ -413,12 +413,12 @@ export default function BrandManager() {
               {/* Brand Name */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
-                  of the brand name (Brand Name) <span className="text-rose-500">*</span>
+                  Brand Name <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="Eg: Casio, Curren, Naviforce..."
+                  placeholder="Eg: FANTINE, COSRX, Innisfree..."
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:bg-white focus:ring-2 focus:ring-teal-500 outline-none"

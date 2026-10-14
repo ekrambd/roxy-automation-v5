@@ -125,134 +125,124 @@ const setLocalData = <T>(key: string, data: T): void => {
 
 export const DEFAULT_LANDING_PAGE_SETTINGS: LandingPageData = {
   id: 'landing-default',
-  slug: 'casio-ae-1200whl',
+  slug: 'vb5-repair-serum',
   templateTheme: 'luxury_dark',
-  bookTitle: 'CASIO ROYALE AE-1200 CHAIN VERSION',
-  bookSubtitle: 'CASIO AE-1200 Watch',
-  authorName: 'CASIO AE-1200 Watch',
-  authorDesignation: '10০% অরিজিনাল ও প্রিমিয়াম কোয়ালিT',
-  authorPhoto: '/watch.jpg',
-  mainBookImage: '/watch.jpg',
-  heroBookImage: '/watch.jpg',
-  logoUrl: '',
-  pageCount: '10 Year Battery',
-  paperQuality: '100M Water Resist',
-  regularPrice: 1650,
-  offerPrice: 999,
-  deliveryCharge: 80,
-  deliveryChargeOutside: 130,
-  deliveryAreaInsideText: 'ঢাকার ভিতরে ডেলিভারি',
-  deliveryAreaOutsideText: 'ঢাকার বাইরে ডেলিভারি',
-  bannerDeliveryText: 'Lucky coupon to win Yamaha R15 on order.',
-  heroHeadline: 'CASIO ROYALE AE-1200 CHAIN VERSION',
-  heroDescription: 'World Time (48 Cities), LED Backlight, Stopwatch (1/100 sec), 5 Daily Alarms, 100M Water Resistance। সাথে প্রতি Lucky coupon to win Yamaha R15 on order.',
+  bookTitle: 'FAИTIИE VB5 REPAIR SERUM',
+  bookSubtitle: 'Provitamin B5 (D-Panthenol) Intensive Calming Essence',
+  authorName: 'FANTINE Korea (Brandini Co., Ltd.)',
+  authorDesignation: 'Dermatologically Tested • 100% Authentic Korean Hanbang Formulation',
+  authorPhoto: '/uploads/file-1791830876714-429462367.jpg',
+  mainBookImage: '/uploads/file-1791830876714-429462367.jpg',
+  heroBookImage: '/uploads/file-1791830876714-429462367.jpg',
+  logoUrl: '/logo_transparent.webp',
+  pageCount: '30ml Full Size',
+  paperQuality: 'Korea FDA Certified',
+  regularPrice: 1800,
+  offerPrice: 1550,
+  deliveryCharge: 0,
+  deliveryChargeOutside: 0,
+  deliveryAreaInsideText: 'ঢাকার ভিতরে ফ্রি ডেলিভারি',
+  deliveryAreaOutsideText: 'ঢাকার বাইরে ফ্রি ডেলিভারি',
+  bannerDeliveryText: 'অরিজিনাল কোরিয়ান স্কিনকেয়ার — ফ্রি হোম ডেলিভারি ও চেক করে পেমেন্ট',
+  heroHeadline: 'FAИTIИE VB5 REPAIR SERUM — সংবেদনশীল ও ক্ষতিগ্রস্ত ত্বকের জাদুকরী সমাধান',
+  heroDescription: 'উচ্চ ঘনত্বের প্রো-ভিটামিন বি৫ (ডি-প্যান্থেনল) ও কোরিয়ান ভেষজ হানবাং ফর্মুলা। ত্বকের চুলকানি, লালচে ভাব ও র‍্যাশ দূর করে স্কিন ব্যারিয়ারকে করে তোলে শক্তিশালী ও উজ্জ্বল।',
   videoUrl: '',
-  campaignBadgeText: 'Yamaha R15 জিতুন',
-  campaignBannerTitle: 'অর্ডার করলেই আপনি পেয়ে যাবেন একT কুপন কার্ড যার মাধ্যমে আপনিও ক্যাম্পেইনে যুক্ত হয়ে যেতে পারবেন!',
-  campaignCouponNote: 'কুপনT অবশ্যই যত্ন সহকারে সংগ্রহ করে রাখবেন',
-  campaignTickerText: 'Lucky coupon to win Yamaha R15 on order.',
+  campaignBadgeText: 'স্পেশাল ডিসকাউন্ট অফার',
+  campaignBannerTitle: 'আজই অর্ডার করুন এবং সম্পূর্ণ ক্যাশ অন ডেলিভারিতে আসল কোরিয়ান স্কিনকেয়ার বুঝে নিন!',
+  campaignCouponNote: 'পার্সেল রিসিভ করার সময় পণ্য চেক করে মূল্য পরিশোধের সুযোগ',
+  campaignTickerText: '১০০% অরিজিনাল কোরিয়ান প্রোডাক্ট • সারাদেশে ক্যাশ অন ডেলিভারি',
   prizes: [
-    { rank: 'গ্র্যান্ড প্রাইজ', title: 'Yamaha R15 V4' }
+    { rank: 'গ্যারান্টি', title: '১০০% অরিজিনাল কোরিয়ান ফর্মুলেশন' }
   ],
-  variantSectionTitle: 'একই feeচার, তিনT ভিন্ন লুক',
-  variantSectionSubtitle: 'বেছে নিন যেটা আপনার স্টাইলের সাথে মানায়',
+  variantSectionTitle: 'আপনার পছন্দের প্যাকেজ বেছে নিন',
+  variantSectionSubtitle: 'একক বোতল অথবা কম্বো সেটে আকর্ষণীয় সাশ্রয়ী অফার',
   customVariants: [
     {
-      id: 'var-silver',
-      name: 'CASIO AE-1200WHL — সিলভার',
-      image: '/watch.jpg',
-      price: 950,
-      regularPrice: 2500,
+      id: 'var-single',
+      name: 'VB5 Repair Serum — ১ বোতল (৩০ মিলি)',
+      image: '/uploads/file-1791830876714-429462367.jpg',
+      price: 1550,
+      regularPrice: 1800,
       tag: 'Best seller'
     },
     {
-      id: 'var-black',
-      name: 'CASIO AE-1200WHL — ব্ল্যাক',
-      image: '/watch.jpg',
-      price: 950,
-      regularPrice: 2500,
-      tag: 'popular'
-    },
-    {
-      id: 'var-gold',
-      name: 'CASIO AE-1200WHL — ভিন্টেজ গোল্ড',
-      image: '/watch.jpg',
-      price: 950,
-      regularPrice: 2500,
-      tag: 'এক্সক্লুসিভ'
+      id: 'var-duo',
+      name: 'VB5 Repair Serum — ২ বোতল কম্বো প্যাক',
+      image: '/uploads/file-1791830880605-206422960.jpeg',
+      price: 2900,
+      regularPrice: 3600,
+      tag: 'Save Tk.700'
     }
   ],
   watchSpecs: [
-    { label: 'ব্যাটারি লাইফ', value: '10 বছর দীর্ঘস্থায়ী ব্যাটারি' },
-    { label: 'ওয়াটার রেজিস্ট্যান্স', value: '10০ মিটার (10 Bar) ওয়াটারপ্রুফ' },
-    { label: 'ওয়ার্ল্ড টাইম', value: '৪৮T শহর ও ৪T টাইম জোন' },
-    { label: 'অ্যালার্ম', value: '৫T ডেইলি অ্যালার্ম সিস্টেম' },
-    { label: 'ডিসপ্লে লাইট', value: 'এলইডি লাইট উইথ আফটারগ্লো' },
-    { label: 'স্টপওয়াচ ও টাইমার', value: '১/10০ সেকেন্ড প্রিসিশন টাইমার' }
+    { label: 'ফর্মুলেশন', value: 'কোরিয়ান হানবাং বোটানিক্যাল এক্সট্র্যাক্ট' },
+    { label: 'প্রধান উপাদান', value: 'প্রো-ভিটামিন বি৫ (ডি-প্যান্থেনল)' },
+    { label: 'ত্বকের ধরন', value: 'সংবেদনশীল, শুষ্ক ও ব্রণপ্রবণ সব ত্বকে উপযোগী' },
+    { label: 'কার্যকারিতা', value: 'ব্যারিয়ার রিপেয়ার ও ৪৮ ঘণ্টা ময়েশ্চার লক' },
+    { label: 'সার্টিফিকেশন', value: 'ডার্মাটোলজিক্যালি টেস্টেড ও নিরাপদ' },
+    { label: 'উৎপাদন', value: 'সিউল, দক্ষিণ কোরিয়া' }
   ],
   features: [
-    '10 বছরের ব্যাটারি লাইফ (Long Battery Life)',
-    '10০ মিটার ওয়াটার রেজিস্ট্যান্ট (100m Water Resist)',
-    'ওয়ার্ল্ড টাইম (৪৮T শহরের সময় ও ৪T টাইম জোন)',
-    '৫T ডেইলি অ্যালার্ম ও ঘণ্টা ভিত্তিক সিগন্যাল',
-    'এলইডি ব্যাকলাইট ও আফটারগ্লো সুবিধা',
-    'ডিজিটাল ও অ্যানালগ এলসিডি ডুয়াল ডিসপ্লে'
+    '১০০% খাঁটি ও আসল কোরিয়ান হানবাং ফর্মুলেশন',
+    'ত্বকের লালচে ভাব, চুলকানি ও অ্যালার্জি দ্রুত উপশম করে',
+    'ক্ষতিগ্রস্ত স্কিন ব্যারিয়ারকে ভেতর থেকে পুনর্গঠন করে',
+    'নন-স্টিকি ও দ্রুত ত্বকে শোষিত হওয়ার হালকা টেক্সচার',
+    'পণ্য হাতে পেয়ে চেক করে সম্পূর্ণ মূল্য পরিশোধের সুবিধা'
   ],
   reviews: [
-    { name: 'তানভীর আহমেদ', comment: 'watchT হাতে পাওয়ার পর সত্যি মুগ্ধ হয়েছি। কোয়ালিT ও feeনিশিং অgeneral! কুপন কার্ড পেয়েছি।', rating: 5 },
-    { name: 'রাকিব হাসান', comment: 'সিলভার কালারটা নিয়েছি, দেখতে অনেক প্রিমিয়াম লাগে। সময়মতো ডেলিভারি পেয়েছি।', rating: 5 },
-    { name: 'মাহমুদুল হক', comment: 'অরিজিনাল লুক And চমৎকার Packaging। 10০% রেকমেন্ডেড!', rating: 5 }
+    { name: 'ফারহানা চৌধুরী', comment: 'সিরামটা ব্যবহার করে আমার ত্বকের রেডনেস একদম কমে গেছে। খুবই হালকা এবং দ্রুত স্কিনে মিশে যায়। ১০০% রেকমেন্ডেড!', rating: 5 },
+    { name: 'নুসরাত জাহান', comment: 'অরিজিনাল কোরিয়ান প্রোডাক্ট পেয়ে খুবই সন্তুষ্ট। ডেলিভারিও খুব দ্রুত ছিল।', rating: 5 },
+    { name: 'তাসনিম কবির', comment: 'আমার সেনসিটিভ স্কিনের জন্য একদম পারফেক্ট। কোনো জ্বালাপোড়া নেই, ত্বক একদম হাইড্রেটেড থাকে।', rating: 5 }
   ],
   relatedProductIds: [],
-  galleryImages: [],
+  galleryImages: [
+    '/uploads/file-1791830876714-429462367.jpg',
+    '/uploads/file-1791830880605-206422960.jpeg',
+    '/uploads/file-1791830885183-155996593.jpeg'
+  ],
   paymentMethodDefault: 'COD',
   onlyCashOnDelivery: true,
 
-  // Default Vintage Story & 4 Feature Cards (exact as requested)
-  vintageTag: 'For vintage lovers',
-  vintageTitle: 'Whose eyes still get stuck on the clocks of yesteryear',
-  vintageDescription: 'A taste of real time lost in the crowd of smartwatches — this classic design is for them.',
+  vintageTag: 'কোরিয়ান বিউটি কেয়ার',
+  vintageTitle: 'ঐতিহ্যবাহী সিউল হানবাং হারবাল রহস্য',
+  vintageDescription: 'কোরিয়ান আধুনিক বিজ্ঞান ও হাজার বছরের ভেষজ ফর্মুলার অপূর্ব সমন্বয়ে তৈরি।',
   vintageFeatures: [
-    { id: 'vf-1', title: 'Classic Dial', subtitle: '40s-90s original look', icon: 'Clock' },
-    { id: 'vf-2', title: 'Durable metal body', subtitle: 'Can be used for years', icon: 'Wrench' },
-    { id: 'vf-3', title: 'Retro LED backlight', subtitle: 'Brings back old memories', icon: 'Zap' },
-    { id: 'vf-4', title: 'Fits all clothes', subtitle: 'Formal or casual', icon: 'Shirt' }
+    { id: 'vf-1', title: 'ব্যারিয়ার রিস্টোরেশন', subtitle: 'ত্বকের প্রাকৃতিক সুরক্ষা কবচ', icon: 'ShieldCheck' },
+    { id: 'vf-2', title: 'গ্লাস স্কিন গ্লো', subtitle: 'প্রাকৃতিক উজ্জ্বলতা ও স্নিগ্ধতা', icon: 'Sparkles' },
+    { id: 'vf-3', title: '৪৮ ঘণ্টা হাইড্রেশন', subtitle: 'গভীর থেকে আর্দ্রতা ধরে রাখে', icon: 'Zap' },
+    { id: 'vf-4', title: 'সকল ত্বকে নিরাপদ', subtitle: 'কোনো ক্ষতিকর কেমিক্যাল নেই', icon: 'CheckCircle2' }
   ],
 
-  // Gallery Section Defaults
-  gallerySectionTag: 'Gallery',
-  gallerySectionTitle: 'Premium from every angle',
+  gallerySectionTag: 'গ্যালারি',
+  gallerySectionTitle: 'আসল কোরিয়ান কোয়ালিটি ও প্যাকেজিং',
 
-  // Quality Section Defaults
-  qualitySectionTag: 'Why this watch?',
-  qualitySectionTitle: 'Japanese quality, amazing price',
+  qualitySectionTag: 'কেন ফ্যান্টিন?',
+  qualitySectionTitle: 'প্রিমিয়াম কোরিয়ান কোয়ালিটি, সাশ্রয়ী দাম',
   qualityItems: [
-    { id: 'qi-1', title: 'Precise timing', subtitle: 'Original movement design', icon: 'Settings' },
-    { id: 'qi-2', title: 'Premium look', subtitle: 'Classic design on metal band', icon: 'Trophy' }
+    { id: 'qi-1', title: 'ক্লিনিক্যালি পরীক্ষিত', subtitle: 'ল্যাবরেটরি গ্রেড বিশুদ্ধতা', icon: 'Settings' },
+    { id: 'qi-2', title: 'আন্তর্জাতিক মান', subtitle: 'কোরিয়া সরকারের মাননিয়ন্ত্রণ সনদপ্রাপ্ত', icon: 'Trophy' }
   ],
 
-  // Lucky Draw Section Defaults
-  luckyDrawTag: 'R15 lucky draw',
-  luckyDrawTitle: 'Order, win R15',
+  luckyDrawTag: 'স্পেশাল গ্যারান্টি',
+  luckyDrawTitle: 'নিরাপদ শপিং নিশ্চয়তা',
   luckyDrawSteps: [
-    'Order watch — receive unique lucky coupon code with parcel',
-    'Keep the coupon code safe',
-    'Winners will be selected by lottery next month',
-    'The result will be announced live on Facebook Live'
+    'ওয়েবসাইটে আপনার নাম, ফোন ও ঠিকানা দিয়ে অর্ডার কনফার্ম করুন',
+    'ডেলিভারি রাইডার আপনার বাসায় প্রোডাক্ট পৌঁছে দেবে',
+    'পার্সেল খুলে প্রোডাক্ট দেখে নিশ্চিত হয়ে মূল্য পরিশোধ করুন'
   ],
-  grandPrizeTitle: 'Yamaha R15',
-  grandPrizeSubtitle: 'Every order = a new opportunity',
-  grandPrizeLiveTag: 'FACEBOOK LIVE STREAM',
+  grandPrizeTitle: '১০০% অরিজিনাল গ্যারান্টি',
+  grandPrizeSubtitle: 'প্রোডাক্ট অপছন্দ হলে তাৎক্ষণিক রিটার্নের সুবিধা',
+  grandPrizeLiveTag: 'ORIGINAL CERTIFIED',
 
-  // Color Selection Section Defaults
-  colorSectionTag: 'Color selection',
-  colorSectionTitle: 'Click on the color button below to preview the watch and order'
+  colorSectionTag: 'প্যাকেজ সিলেকশন',
+  colorSectionTitle: 'আপনার পছন্দের প্যাকেজ সিলেক্ট করে নিচে অর্ডার ফর্ম পূরণ করুন'
 };
 
 export const createDefaultLandingForProduct = (product: Product): LandingPageData => {
   const slug = product.slug || product.id;
-  const isWatch = (product.title || '').toLowerCase().includes('watch') || (product.title || '').includes('watch') || (product.category || '').toLowerCase().includes('watch');
-  
+  const prodImg = product.coverImage || product.image || (product.images && product.images[0]) || '/uploads/file-1791830876714-429462367.jpg';
+  const additionalImgs = product.additionalImages || product.images || [prodImg];
+
   return {
     id: `landing-${product.id}`,
     slug: slug,
@@ -261,40 +251,38 @@ export const createDefaultLandingForProduct = (product: Product): LandingPageDat
     productIds: [product.id],
     templateTheme: 'luxury_dark',
     relatedProductIds: [],
-    bookTitle: product.title || 'একT watch অর্ডার করলেই Toyota Premio সহ ২T বাইক জেতার সুযোগ',
-    bookSubtitle: product.subtitle || product.shortSummary || product.title,
-    authorName: product.authorName || product.title,
-    authorDesignation: '10০% অরিজিনাল ও প্রিমিয়াম কোয়ালিT',
-    authorPhoto: product.image || '',
-    mainBookImage: product.image || '',
-    heroBookImage: product.image || '',
-    logoUrl: product.image || '',
-    regularPrice: product.regularPrice || Math.round(product.price * 1.5) || 2500,
-    offerPrice: product.price || 950,
-    deliveryCharge: 80,
-    deliveryChargeOutside: 130,
-    deliveryAreaInsideText: 'ঢাকার ভিতরে ডেলিভারি',
-    deliveryAreaOutsideText: 'ঢাকার বাইরে ডেলিভারি',
-    bannerDeliveryText: 'Lucky coupon to win Yamaha R15 on order.',
-    heroHeadline: product.title || 'একT watch অর্ডার করলেই Yamaha R15 জেতার সুযোগ',
-    heroDescription: product.description || product.shortSummary || 'প্রিমিয়াম কোয়ালিTর ঘড়ি অর্ডার করলেই আপনি পেয়ে যাচ্ছেন আকর্ষণীয় লাকি ড্র-তে অংশগ্রহণের সুযোগ। সাথে প্রতিT পার্সেল থাকছে একT Coupon code।',
+    bookTitle: product.title,
+    bookSubtitle: product.subtitle || product.shortSummary || `${product.title} — 100% Authentic Korean Skincare`,
+    authorName: product.authorName || product.author || 'FANTINE Korea',
+    authorDesignation: '100% Original Korean Hanbang Formulation',
+    authorPhoto: prodImg,
+    mainBookImage: prodImg,
+    heroBookImage: prodImg,
+    logoUrl: '/logo_transparent.webp',
+    regularPrice: product.regularPrice || Math.round(product.price * 1.3),
+    offerPrice: product.price,
+    deliveryCharge: 0,
+    deliveryChargeOutside: 0,
+    deliveryAreaInsideText: 'ঢাকার ভিতরে ফ্রি ডেলিভারি',
+    deliveryAreaOutsideText: 'ঢাকার বাইরে ফ্রি ডেলিভারি',
+    bannerDeliveryText: '১০০% অরিজিনাল কোরিয়ান স্কিনকেয়ার — ক্যাশ অন ডেলিভারি',
+    heroHeadline: product.title,
+    heroDescription: product.description || product.shortSummary || 'কোরিয়ান আধুনিক ল্যাবরেটরি টেস্টেড হানবাং ফর্মুলা। ত্বকের সুরক্ষা ও প্রাকৃতিক উজ্জ্বলতা নিশ্চিত করে।',
     videoUrl: product.pdfUrl || '',
-    campaignBadgeText: 'Yamaha R15 জিতুন',
-    campaignBannerTitle: 'অর্ডার করলেই আপনি পেয়ে যাবেন একT কুপন কার্ড যার মাধ্যমে আপনিও ক্যাম্পেইনে যুক্ত হয়ে যেতে পারবেন!',
-    campaignCouponNote: 'কুপনT অবশ্যই যত্ন সহকারে সংগ্রহ করে রাখবেন',
-    campaignTickerText: 'Lucky coupon to win Yamaha R15 on order.',
+    campaignBadgeText: 'স্পেশাল অফার',
+    campaignBannerTitle: 'আজই অর্ডার করুন এবং ১০০% আসল কোরিয়ান প্রোডাক্ট বুঝে নিন!',
+    campaignCouponNote: 'পার্সেল চেক করে সম্পূর্ণ মূল্য পরিশোধের সুবিধা',
+    campaignTickerText: '১০০% অরিজিনাল কোরিয়ান স্কিনকেয়ার • ফ্রি ডেলিভারি সারাদেশে',
     prizes: [
-      { rank: '১ম পুরস্কার', title: 'Toyota Premio' },
-      { rank: '২য় পুরস্কার', title: 'Yamaha R15 V4' },
-      { rank: '৩য় পুরস্কার', title: 'Suzuki GSXR' }
+      { rank: 'সার্টিফিকেশন', title: '100% Authentic Korean Product' }
     ],
-    variantSectionTitle: 'একই feeচার, তিনT ভিন্ন লুক',
-    variantSectionSubtitle: 'বেছে নিন যেটা আপনার স্টাইলের সাথে মানায়',
+    variantSectionTitle: 'আপনার পছন্দের প্যাকেজ বেছে নিন',
+    variantSectionSubtitle: 'একক বোতল অথবা কম্বো সেটে আকর্ষণীয় সাশ্রয়ী অফার',
     customVariants: product.variants && product.variants.length > 0
       ? product.variants.map((v, i) => ({
           id: v.id || `var-${i}`,
           name: v.name,
-          image: product.samplePages?.[i] || product.image || '',
+          image: v.image || additionalImgs[i % additionalImgs.length] || prodImg,
           price: v.price || product.price,
           regularPrice: v.regularPrice || product.regularPrice,
           tag: i === 0 ? 'Best seller' : 'popular'
@@ -302,27 +290,35 @@ export const createDefaultLandingForProduct = (product: Product): LandingPageDat
       : [
           {
             id: 'var-1',
-            name: `${product.title} — সিলভার`,
-            image: product.image || '',
+            name: `${product.title} — ১টি রেগুলার প্যাক`,
+            image: prodImg,
             price: product.price,
-            regularPrice: product.regularPrice || Math.round(product.price * 1.5),
+            regularPrice: product.regularPrice || Math.round(product.price * 1.3),
             tag: 'Best seller'
+          },
+          {
+            id: 'var-2',
+            name: `${product.title} — ২টি কম্বো প্যাক (সেভ Tk.৩০০)`,
+            image: additionalImgs[1] || prodImg,
+            price: Math.round(product.price * 2 - 300),
+            regularPrice: Math.round((product.regularPrice || product.price) * 2),
+            tag: 'Special Value'
           }
         ],
     features: product.features && product.features.length > 0
       ? product.features
       : [
-          '10০% প্রিমিয়াম ও অরিজিনাল কোয়ালিT',
-          '10 বছরের দীর্ঘস্থায়ী ব্যাটারি লাইফ',
-          '10০ মিটার ওয়াটার রেজিস্ট্যান্স সুরক্ষা',
-          'ওয়ার্ল্ড টাইম ও একাধিক অ্যালার্ম সিস্টেম',
-          'product হাতে পেয়ে চেক করে সম্পূর্ণ price পরিশোধের সুবিধা'
+          '১০০% খাঁটি ও আসল কোরিয়ান হানবাং ফর্মুলেশন',
+          'ক্লিনিক্যালি পরীক্ষিত বোটানিক্যাল একটিভ উপাদান',
+          'সংবেদনশীল ত্বকে শতভাগ নিরাপদ ও ডার্মাটোলজিস্ট এপ্রুভড',
+          '৪৮ ঘণ্টা দীর্ঘস্থায়ী ময়েশ্চার লক ও উজ্জ্বলতা',
+          'পণ্য হাতে পেয়ে চেক করে সম্পূর্ণ মূল্য পরিশোধের সুবিধা'
         ],
     reviews: [
-      { name: 'তানভীর আহমেদ', comment: 'watchT হাতে পাওয়ার পর সত্যি মুগ্ধ হয়েছি। কোয়ালিT ও feeনিশিং অgeneral!', rating: 5 },
-      { name: 'রাকিব হাসান', comment: 'সিলভার কালারটা নিয়েছি, দেখতে অনেক প্রিমিয়াম লাগে। সময়মতো ডেলিভারি পেয়েছি।', rating: 5 }
+      { name: 'ফারহানা চৌধুরী', comment: 'সিরামটা ব্যবহার করে আমার ত্বকের রেডনেস একদম কমে গেছে। খুবই হালকা এবং দ্রুত স্কিনে মিশে যায়। ১০০% রেকমেন্ডেড!', rating: 5 },
+      { name: 'নুসরাত জাহান', comment: 'অরিজিনাল কোরিয়ান প্রোডাক্ট পেয়ে খুবই সন্তুষ্ট। ডেলিভারিও খুব দ্রুত ছিল।', rating: 5 }
     ],
-    galleryImages: product.samplePages || [],
+    galleryImages: additionalImgs.length > 0 ? additionalImgs : [prodImg],
     paymentMethodDefault: 'COD',
     onlyCashOnDelivery: true
   };

@@ -202,12 +202,12 @@ export default function BookLandingPage({ onNavigateHome }: BookLandingPageProps
   }, [slug, initialTargetProduct]);
 
   const fallbackProduct = {
-    title: 'CASIO ROYALE AE-1200 CHAIN VERSION',
-    subtitle: 'CASIO AE-1200 Watch',
-    price: 999,
-    regularPrice: 1650,
-    image: '/watch.jpg',
-    description: 'World Time48 Cities, LED Backlight, Stopwatch1/100 sec, 5 Daily Alarms, 100M Water Resistance। per Lucky coupon to win Yamaha R15 on order.'
+    title: 'FAИTIИE VB5 REPAIR SERUM',
+    subtitle: 'Provitamin B5 (D-Panthenol) Intensive Calming Essence',
+    price: 1550,
+    regularPrice: 1800,
+    image: '/uploads/file-1791830876714-429462367.jpg',
+    description: 'উচ্চ ঘনত্বের প্রো-ভিটামিন বি৫ (ডি-প্যান্থেনল) ও কোরিয়ান ভেষজ হানবাং ফর্মুলা। ত্বকের লালচে ভাব ও র‍্যাশ দূর করে স্কিন ব্যারিয়ারকে করে তোলে শক্তিশালী ও উজ্জ্বল।'
   };
 
   const displayTitle = landingConfig?.bookTitle || product?.title || fallbackProduct.title;
@@ -215,10 +215,10 @@ export default function BookLandingPage({ onNavigateHome }: BookLandingPageProps
   const displayDesc = landingConfig?.heroDescription || product?.description || fallbackProduct.description;
   const displayPrice = selectedVariant?.price || landingConfig?.offerPrice || product?.price || fallbackProduct.price;
   const regularPrice = selectedVariant?.regularPrice || landingConfig?.regularPrice || product?.regularPrice || fallbackProduct.regularPrice;
-  const displayImage = selectedVariant?.image || landingConfig?.heroBookImage || landingConfig?.mainBookImage || product?.image || fallbackProduct.image || '/watch.jpg';
+  const displayImage = selectedVariant?.image || landingConfig?.heroBookImage || landingConfig?.mainBookImage || product?.coverImage || product?.image || fallbackProduct.image;
   
   // Dedicated Top Hero Banner image (uploaded in Section 2 as 'Landing page hero product image' - Original/HD)
-  const heroTopImage = landingConfig?.heroBookImage || landingConfig?.mainBookImage || landingConfig?.campaignBannerImage || product?.image || fallbackProduct.image || '/watch.jpg';
+  const heroTopImage = landingConfig?.heroBookImage || landingConfig?.mainBookImage || landingConfig?.campaignBannerImage || product?.coverImage || product?.image || fallbackProduct.image;
 
   // YouTube Video Embed URL Helper
   const getYouTubeEmbedUrl = (url?: string): string | null => {
@@ -231,11 +231,11 @@ export default function BookLandingPage({ onNavigateHome }: BookLandingPageProps
   };
   const embedVideoUrl = getYouTubeEmbedUrl(landingConfig?.videoUrl);
   
-  const campaignBadgeText = landingConfig?.campaignBadgeText || '🏆 Winner will get this bike';
+  const campaignBadgeText = landingConfig?.campaignBadgeText || '✨ ১০০% আসল কোরিয়ান স্কিনকেয়ার গ্যারান্টি';
   const rawTicker = landingConfig?.campaignTickerText || landingConfig?.bannerDeliveryText;
-  const campaignTickerText = (rawTicker && !rawTicker.includes('2 bikes and a car'))
+  const campaignTickerText = (rawTicker && !rawTicker.includes('Yamaha') && !rawTicker.includes('2 bikes and a car'))
     ? rawTicker
-    : 'Lucky coupon to win Yamaha R15 on order.';
+    : '১০০% অরিজিনাল কোরিয়ান স্কিনকেয়ার • ফ্রি ডেলিভারি সারাদেশে';
 
   // Variants list
   const variants: LandingPageVariant[] = useMemo(() => {
@@ -255,7 +255,7 @@ export default function BookLandingPage({ onNavigateHome }: BookLandingPageProps
     return [
       {
         id: 'var-default',
-        name: displayTitle || 'CASIO AE-1200 Watch',
+        name: displayTitle || 'FAИTIИE Skincare',
         image: displayImage,
         price: displayPrice,
         regularPrice: regularPrice,
@@ -347,20 +347,19 @@ export default function BookLandingPage({ onNavigateHome }: BookLandingPageProps
       return landingConfig.luckyDrawSteps;
     }
     return [
-      'Order watch — receive unique lucky coupon code with parcel',
-      'Keep the coupon code safe',
-      'Winners will be selected by lottery next month',
-      'The result will be announced live on Facebook Live'
+      'ওয়েবসাইটে আপনার নাম, ফোন ও ঠিকানা দিয়ে অর্ডার কনফার্ম করুন',
+      'ডেলিভারি রাইডার আপনার বাসায় প্রোডাক্ট পৌঁছে দেবে',
+      'পার্সেল খুলে প্রোডাক্ট দেখে নিশ্চিত হয়ে মূল্য পরিশোধ করুন'
     ];
   }, [landingConfig?.luckyDrawSteps]);
 
-  const grandPrizeTitle = landingConfig?.grandPrizeTitle ?? 'Yamaha R15';
-  const grandPrizeSubtitle = landingConfig?.grandPrizeSubtitle ?? 'Every order = a new opportunity';
-  const grandPrizeLiveTag = landingConfig?.grandPrizeLiveTag ?? 'FACEBOOK LIVE STREAM';
+  const grandPrizeTitle = landingConfig?.grandPrizeTitle ?? '১০০% অরিজিনাল গ্যারান্টি';
+  const grandPrizeSubtitle = landingConfig?.grandPrizeSubtitle ?? 'প্রোডাক্ট অপছন্দ হলে তাৎক্ষণিক রিটার্নের সুবিধা';
+  const grandPrizeLiveTag = landingConfig?.grandPrizeLiveTag ?? 'ORIGINAL CERTIFIED';
 
   // Color Section Titles
-  const colorSectionTag = landingConfig?.colorSectionTag ?? 'Color selection';
-  const colorSectionTitle = landingConfig?.colorSectionTitle ?? 'Click on the color button below to preview the watch and order';
+  const colorSectionTag = landingConfig?.colorSectionTag ?? 'প্যাকেজ সিলেকশন';
+  const colorSectionTitle = landingConfig?.colorSectionTitle ?? 'আপনার পছন্দের প্যাকেজ সিলেক্ট করে নিচে অর্ডার ফর্ম পূরণ করুন';
 
   // Icon Helper for Dynamic Cards
   const renderFeatureIcon = (iconName?: string) => {
@@ -610,15 +609,15 @@ export default function BookLandingPage({ onNavigateHome }: BookLandingPageProps
           {/* Top Graphic Poster Banner (Hero Top Image) */}
           <div className="relative rounded-2xl overflow-hidden border border-[#b8863b]/30 shadow-2xl bg-[#16120e]">
             <img 
-              src={heroTopImage || '/watch.jpg'} 
+              src={heroTopImage || '/uploads/file-1791830876714-429462367.jpg'} 
               alt={displayTitle} 
               loading="eager"
               fetchPriority="high"
               decoding="async"
               onError={(e) => {
                 const target = e.currentTarget;
-                if (!target.src.endsWith('/watch.jpg')) {
-                  target.src = '/watch.jpg';
+                if (!target.src.includes('/uploads/')) {
+                  target.src = '/uploads/file-1791830876714-429462367.jpg';
                 }
               }}
               className="w-full h-auto max-h-[480px] object-cover mx-auto"
@@ -748,14 +747,14 @@ export default function BookLandingPage({ onNavigateHome }: BookLandingPageProps
             onTouchEnd={handleTouchEnd}
           >
             <img 
-              src={galleryImages[galleryIndex] || displayImage || '/watch.jpg'} 
-              alt="Watch Gallery" 
+              src={galleryImages[galleryIndex] || displayImage || '/uploads/file-1791830876714-429462367.jpg'} 
+              alt="Product Gallery" 
               loading="lazy"
               decoding="async"
               onError={(e) => {
                 const target = e.currentTarget;
-                if (!target.src.endsWith('/watch.jpg')) {
-                  target.src = '/watch.jpg';
+                if (!target.src.includes('/uploads/')) {
+                  target.src = '/uploads/file-1791830876714-429462367.jpg';
                 }
               }}
               className="w-full h-full object-cover transition-all duration-300"
@@ -885,8 +884,8 @@ export default function BookLandingPage({ onNavigateHome }: BookLandingPageProps
                           alt={v.name} 
                           onError={(e) => {
                             const target = e.currentTarget;
-                            if (!target.src.endsWith('/watch.jpg')) {
-                              target.src = '/watch.jpg';
+                            if (!target.src.includes('/uploads/')) {
+                              target.src = '/uploads/file-1791830876714-429462367.jpg';
                             }
                           }}
                           className="w-6 h-6 object-contain rounded" 
@@ -904,7 +903,7 @@ export default function BookLandingPage({ onNavigateHome }: BookLandingPageProps
             <div className="space-y-2.5 max-w-md mx-auto px-2">
               <p className="text-xs font-bold text-[#e0562e] flex items-center justify-center gap-2">
                 <span className="w-6 h-[1px] bg-[#e0562e]"></span>
-                <span>{colorSectionTag || 'colorselection'}</span>
+                <span>{colorSectionTag || 'প্যাকেজ সিলেকশন'}</span>
                 <span className="w-6 h-[1px] bg-[#e0562e]"></span>
               </p>
 
@@ -912,12 +911,12 @@ export default function BookLandingPage({ onNavigateHome }: BookLandingPageProps
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-12 h-12 rounded-xl bg-[#0f0c08] border border-[#382d22] p-1 shrink-0 flex items-center justify-center">
                     <img
-                      src={selectedVariant?.image || displayImage || '/watch.jpg'}
+                      src={selectedVariant?.image || displayImage || '/uploads/file-1791830876714-429462367.jpg'}
                       alt={selectedVariant?.name || displayTitle}
                       onError={(e) => {
                         const target = e.currentTarget;
-                        if (!target.src.endsWith('/watch.jpg')) {
-                          target.src = '/watch.jpg';
+                        if (!target.src.includes('/uploads/')) {
+                          target.src = '/uploads/file-1791830876714-429462367.jpg';
                         }
                       }}
                       className="w-full h-full object-contain"
@@ -956,16 +955,16 @@ export default function BookLandingPage({ onNavigateHome }: BookLandingPageProps
                   </p>
                 </div>
 
-                {/* Golden Yamaha R15 Lucky Draw Coupon Ticket Card */}
+                {/* Golden Special Offer / Guarantee Coupon Ticket Card */}
                 {placedLuckyCoupon && (
                   <div className="relative overflow-hidden rounded-2xl border-2 border-[#f5b842] bg-gradient-to-b from-[#2d1e0d] via-[#1c150c] to-[#120e0a] p-4 text-center shadow-2xl space-y-2.5">
                     <div className="absolute -top-10 -right-10 w-28 h-28 bg-[#f5b842]/10 rounded-full blur-xl pointer-events-none" />
                     <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#f5b842]/20 border border-[#f5b842]/40 text-[#f5b842] text-[11px] font-bold">
                       <Trophy className="w-3.5 h-3.5 text-[#f5b842]" />
-                      <span>Yamaha R15 Mega Lucky Draw Coupon</span>
+                      <span>{grandPrizeTitle} • স্পেশাল অফার কুপন</span>
                     </div>
                     
-                    <p className="text-[11px] text-[#d8c8b8]">Your Confirmed Lucky Draw Coupon Number:</p>
+                    <p className="text-[11px] text-[#d8c8b8]">আপনার স্পেশাল ডিসকাউন্ট কুপন নম্বর:</p>
                     
                     <div className="py-2.5 px-4 bg-black/60 border border-dashed border-[#f5b842]/70 rounded-xl flex items-center justify-center gap-3">
                       <span className="font-mono text-xl sm:text-2xl font-black text-[#f5b842] tracking-wider selection:bg-amber-500">

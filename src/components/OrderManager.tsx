@@ -1083,7 +1083,7 @@ export default function OrderManager({
                       <div className="mt-8 mb-4 bg-amber-50/50 border border-amber-200 p-4 rounded-lg flex items-center justify-between">
                         <div>
                           <p className="text-xs font-bold text-amber-600 uppercase tracking-widest">Special Offer</p>
-                          <p className="text-sm font-semibold text-slate-800 mt-1">Yamaha R15 Lucky Draw Coupon: <span className="font-mono text-amber-600 ml-1">{ord.luckyCouponCode}</span></p>
+                          <p className="text-sm font-semibold text-slate-800 mt-1">Promotional Campaign Coupon: <span className="font-mono text-amber-600 ml-1">{ord.luckyCouponCode}</span></p>
                         </div>
                         <div className="h-10 w-10 bg-amber-100 rounded-full flex items-center justify-center text-amber-600">
                           🎟️
