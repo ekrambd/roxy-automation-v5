@@ -52,9 +52,45 @@ export const INITIAL_REAL_PRODUCTS: Product[] = [
       '/uploads/file-1791830766725-465711461.jpeg',
       '/uploads/file-1791830769792-761661464.jpeg'
     ],
-    description: 'Stabilized Pure Vitamin C antioxidant formula. Fades pigmentation, lightens sun spots, and illuminates fatigued skin with natural radiance.',
-    benefitsHighlights: 'Pure Vitamin C complex • Stronger antioxidant efficacy • Non-oxidizing formula • Instant dewy glow',
-    howToUse: 'Apply morning and night after toner. Follow with moisturizer and sunscreen in the morning.',
+    description: `Powerful antioxidant capacity with a high concentration of pure Vitamin C, delivering a true Vitamin C serum.
+
+পণ্যের বিবরণ:
+বিশুদ্ধ ভিটামিন সি-এর উচ্চ ঘনত্বের সমন্বয়ে গঠিত এই সিরামটি শক্তিশালী অ্যান্টি-অক্সিডেন্ট কার্যকারিতা প্রদান করে।`,
+    benefitsHighlights: `Pure Vitamin C,
+Stronger efficacy,
+Greater stability,
+Easier absorption.
+
+⭐ Overall
+• 🎯 Pigmentation/brightening: 8.5/10
+• 🛡️ Antioxidant: 9.5/10
+• 💧 Hydration: 7/10
+• 🧴 Nourishment/barrier: 6/10
+• ✨ Texture/pores: 7/10
+
+প্রধান সুবিধাসমূহ:
+বিশুদ্ধ ভিটামিন সি,
+অধিক কার্যকারিতা,
+উন্নত স্থায়িত্ব,
+সহজ শোষণ ক্ষমতা।
+
+⭐ সামগ্রিক মূল্যায়ন
+🎯 পিগমেন্টেশন/উজ্জ্বলতা বৃদ্ধি: ৮.৫/১০
+🛡️ অ্যান্টি-অক্সিডেন্ট: ৯.৫/১০
+💧 আর্দ্রতা প্রদান (Hydration): ৭/১০
+🧴 পুষ্টি/ত্বকের সুরক্ষা স্তর (Barrier): ৬/১০
+✨ টেক্সচার/লোমকূপ: ৭/১০`,
+    howToUse: `After cleansing in the morning and evening, use your fingertips to apply three pumps of serum to damp skin. Gently press the serum into the skin with your palms to enhance absorption.
+
+ব্যবহারবিধি:
+সকাল ও সন্ধ্যায় ত্বক পরিষ্কার করার পর, আঙুলের সাহায্যে তিন পাম্প পরিমাণ সিরাম ভেজা ত্বকে লাগান। সিরামটি ভালোভাবে শোষিত হতে সাহায্য করার জন্য হাতের তালু দিয়ে আলতোভাবে ত্বকে চেপে দিন।`,
+    howToUseIt: `After cleansing in the morning and evening, use your fingertips to apply three pumps of serum to damp skin. Gently press the serum into the skin with your palms to enhance absorption.
+
+ব্যবহারবিধি:
+সকাল ও সন্ধ্যায় ত্বক পরিষ্কার করার পর, আঙুলের সাহায্যে তিন পাম্প পরিমাণ সিরাম ভেজা ত্বকে লাগান। সিরামটি ভালোভাবে শোষিত হতে সাহায্য করার জন্য হাতের তালু দিয়ে আলতোভাবে ত্বকে চেপে দিন।`,
+    ingredients: `WATER, ETHOXYDIGLYCOL, ASCORBIC ACID, PROPANEDIOL, DIPROPYL-ENE GLYCOL, PEG-8, BETAINE, 1,2-HEXANE-DIOL, PANTHENOL, SODIUM HYDROXIDE, FERULIC ACID, HYDROXYACETOPHENONE, SALICYLIC ACID, XANTHAN GUM OTHER TRACE COMPONENTS: SODIUM HYALURONATE
+
+উপাদানসমূহ: পানি, ইথোক্সিডাইগ্লাইকল, অ্যাসকরবিক অ্যাসিড, প্রোপেনডিওল, ডাইপ্রোপিলিন গ্লাইকল, পিইজি-৮ (PEG-8), বেটেইন, ১,২-হেক্সেনডিওল, প্যানথেনল, সোডিয়াম হাইড্রোক্সাইড, ফেরুলিক অ্যাসিড, হাইড্রোক্সিয়াসিটোফেনন, স্যালিসাইলিক অ্যাসিড, জ্যান্থান গাম। অন্যান্য অতি সামান্য উপাদান: সোডিয়াম হায়ালুরোনেট।`,
     badge: 'Popular',
     isFeatured: true
   },
@@ -262,10 +298,16 @@ function loadProductsFromDisk(): Product[] {
   }
 
   return list.map(p => {
-    const img = p.image || p.coverImage || (p.images && p.images[0]) || '/uploads/file-1791830876714-429462367.jpg';
+    const initialMatch = INITIAL_REAL_PRODUCTS.find(init => init.id === p.id);
+    const img = p.image || p.coverImage || (p.images && p.images[0]) || initialMatch?.image || '/uploads/file-1791830876714-429462367.jpg';
     const stockNum = typeof p.stock === 'number' ? p.stock : (typeof p.stockQuantity === 'number' ? p.stockQuantity : 100);
     return {
       ...p,
+      description: p.description || initialMatch?.description || '',
+      benefitsHighlights: p.benefitsHighlights || initialMatch?.benefitsHighlights || '',
+      howToUse: p.howToUse || (p as any).howToUseIt || initialMatch?.howToUse || '',
+      howToUseIt: (p as any).howToUseIt || p.howToUse || initialMatch?.howToUseIt || '',
+      ingredients: p.ingredients || initialMatch?.ingredients || '',
       image: img,
       coverImage: p.coverImage || img,
       stock: stockNum,

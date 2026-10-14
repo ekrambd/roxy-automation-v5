@@ -37,6 +37,7 @@ export interface FantineProductItem extends Product {
   isSet?: boolean;
   benefitsHighlights?: string;
   howToUse?: string;
+  ingredients?: string;
 }
 
 
@@ -329,8 +330,9 @@ export const normalizeFantineProduct = (p: Product, index: number = 0): FantineP
     coverImage,
     additionalImages,
     description: p.description || p.shortSummary || 'Clinically formulated luxury Korean skincare powered by traditional Hanbang botanical extracts.',
-    benefitsHighlights: (p as any).benefitsHighlights || p.shortSummary || 'Offers high-potency cellular nourishment, barrier restoration, and long-lasting glass-skin radiance.',
-    howToUse: (p as any).howToUse || 'Apply gently onto cleansed face and neck in morning and evening skincare routine until fully absorbed.',
+    benefitsHighlights: (p as any).benefitsHighlights || '',
+    howToUse: (p as any).howToUse || (p as any).howToUseIt || 'Apply gently onto cleansed face and neck in morning and evening skincare routine until fully absorbed.',
+    ingredients: (p as any).ingredients || '',
     badge: (p as any).badge || (p.isFeatured ? 'Featured' : undefined),
     rating: p.rating || 4.9,
     reviewsCount: p.reviewsCount || 88,
@@ -1790,20 +1792,44 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
               </button>
 
               {/* Product Description */}
-              <div className="space-y-1.5 pt-2">
-                <h2 className="font-serif text-base font-semibold text-slate-900">Product Description:</h2>
-                <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-normal text-justify whitespace-pre-line">
-                  {activeProductDetail.description || activeProductDetail.benefitsHighlights}
-                </p>
-              </div>
+              {(activeProductDetail.description || activeProductDetail.shortSummary) && (
+                <div className="space-y-2 pt-3 border-t border-slate-100">
+                  <h2 className="font-serif text-base font-semibold text-slate-900 tracking-wide">Product Description :</h2>
+                  <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-normal whitespace-pre-line">
+                    {activeProductDetail.description || activeProductDetail.shortSummary}
+                  </p>
+                </div>
+              )}
+
+              {/* Benefits Highlights */}
+              {activeProductDetail.benefitsHighlights && (
+                <div className="space-y-2 pt-3 border-t border-slate-100">
+                  <h2 className="font-serif text-base font-semibold text-slate-900 tracking-wide">Benefits Highlights :</h2>
+                  <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-normal whitespace-pre-line">
+                    {activeProductDetail.benefitsHighlights}
+                  </p>
+                </div>
+              )}
 
               {/* How to use it */}
-              <div className="space-y-1.5">
-                <h2 className="font-serif text-base font-semibold text-slate-900">How to use it :</h2>
-                <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-normal text-justify whitespace-pre-line">
-                  {activeProductDetail.howToUse || 'Pour one teaspoon directly into the palm of your hand and gently pat it onto the skin until fully absorbed.'}
-                </p>
-              </div>
+              {(activeProductDetail.howToUse || (activeProductDetail as any).howToUseIt) && (
+                <div className="space-y-2 pt-3 border-t border-slate-100">
+                  <h2 className="font-serif text-base font-semibold text-slate-900 tracking-wide">How to use it :</h2>
+                  <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-normal whitespace-pre-line">
+                    {activeProductDetail.howToUse || (activeProductDetail as any).howToUseIt}
+                  </p>
+                </div>
+              )}
+
+              {/* Ingredients */}
+              {activeProductDetail.ingredients && (
+                <div className="space-y-2 pt-3 border-t border-slate-100">
+                  <h2 className="font-serif text-base font-semibold text-slate-900 tracking-wide">INGREDIENT :</h2>
+                  <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-normal whitespace-pre-line">
+                    {activeProductDetail.ingredients}
+                  </p>
+                </div>
+              )}
 
             </div>
 

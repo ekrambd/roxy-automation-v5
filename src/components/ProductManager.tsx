@@ -71,6 +71,9 @@ export default function ProductManager({
   const [barcode, setBarcode] = useState('');
   const [shortSummary, setShortSummary] = useState('');
   const [description, setDescription] = useState('');
+  const [benefitsHighlights, setBenefitsHighlights] = useState('');
+  const [howToUse, setHowToUse] = useState('');
+  const [ingredients, setIngredients] = useState('');
   const [subtitle, setSubtitle] = useState('');
   const [category, setCategory] = useState('');
   const [subCategory, setSubCategory] = useState('');
@@ -187,6 +190,9 @@ export default function ProductManager({
       setBarcode(product.barcode || '');
       setShortSummary(product.shortSummary || '');
       setDescription(product.description || '');
+      setBenefitsHighlights(product.benefitsHighlights || '');
+      setHowToUse((product as any).howToUse || product.howToUseIt || '');
+      setIngredients(product.ingredients || '');
       setSubtitle(product.subtitle || '');
       setCategory(product.category || 'general');
       setSubCategory(product.subCategory || '');
@@ -246,6 +252,9 @@ export default function ProductManager({
       setBarcode(`BAR-${Math.floor(Math.random() * 899999 + 100000)}`);
       setShortSummary('');
       setDescription('');
+      setBenefitsHighlights('');
+      setHowToUse('');
+      setIngredients('');
       setSubtitle('');
       setCategory(storeCategories[0]?.name || '');
       setSubCategory('');
@@ -484,7 +493,12 @@ export default function ProductManager({
       addBarcodeToImage,
       giftWrapEnabled,
       giftWrapPrice: Number(giftWrapPrice) || 0,
-      description: description.trim(),
+      description: description.trim() || shortSummary.trim(),
+      shortSummary: shortSummary.trim() || description.trim(),
+      benefitsHighlights: benefitsHighlights.trim(),
+      howToUse: howToUse.trim(),
+      howToUseIt: howToUse.trim(),
+      ingredients: ingredients.trim(),
       specs: [],
       tableOfContents: [],
       // book metadata
@@ -1140,29 +1154,90 @@ export default function ProductManager({
                     <div className="grid grid-cols-1 md:grid-cols-10 gap-4">
                       {/* Title */}
                       <div className="md:col-span-10">
-                        <label className="block text-[11px] font-bold text-slate-700 mb-1">Product Titleproductof name *</label>
+                        <label className="block text-[11px] font-bold text-slate-700 mb-1">Product Title / পণ্যের নাম *</label>
                         <input
                           type="text"
                           required
-                          placeholder="Eg: Easy Quran Majeed"
+                          placeholder="Eg: VC Brightening Serum"
                           value={title}
                           onChange={(e) => setTitle(e.target.value)}
                           className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:ring-2 focus:ring-teal-500 outline-none"
                         />
                       </div>
 
-                      {/* Short Summary (as Description size) */}
+                      {/* Detailed Description */}
                       <div className="md:col-span-10">
                         <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                          <span>Short SummaryBrief summary *</span>
+                          <span>Product Description / পণ্যের বিবরণ *</span>
+                          <span className="text-slate-400 font-normal ml-1.5">(Supports English and Bengali detailed descriptions)</span>
                         </label>
                         <textarea
                           required
+                          rows={5}
+                          placeholder="Write full product description, action mechanism, and details in English and/or Bengali..."
+                          value={description}
+                          onChange={(e) => setDescription(e.target.value)}
+                          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-normal text-slate-900 focus:ring-2 focus:ring-teal-500 outline-none resize-y leading-relaxed font-sans"
+                        />
+                      </div>
+
+                      {/* Benefits Highlights */}
+                      <div className="md:col-span-10">
+                        <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                          <span>Benefits Highlights / প্রধান সুবিধাসমূহ ও রেটিং</span>
+                          <span className="text-slate-400 font-normal ml-1.5">(Key bullet points, overall rating breakdown)</span>
+                        </label>
+                        <textarea
                           rows={6}
-                          placeholder="Write details about product details, specifications or features..."
+                          placeholder={"Pure Vitamin C,\nStronger efficacy,\nGreater stability,\nEasier absorption.\n⭐ Overall\n• 🎯 Pigmentation: 8.5/10\n• 🛡️ Antioxidant: 9.5/10"}
+                          value={benefitsHighlights}
+                          onChange={(e) => setBenefitsHighlights(e.target.value)}
+                          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-normal text-slate-900 focus:ring-2 focus:ring-teal-500 outline-none resize-y leading-relaxed font-sans"
+                        />
+                      </div>
+
+                      {/* How to use it */}
+                      <div className="md:col-span-10">
+                        <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                          <span>How to use it / ব্যবহারবিধি</span>
+                          <span className="text-slate-400 font-normal ml-1.5">(Application steps & usage frequency)</span>
+                        </label>
+                        <textarea
+                          rows={4}
+                          placeholder={"After cleansing in the morning and evening, use your fingertips to apply three pumps...\n\nব্যবহারবিধি:\nসকাল ও সন্ধ্যায় ত্বক পরিষ্কার করার পর..."}
+                          value={howToUse}
+                          onChange={(e) => setHowToUse(e.target.value)}
+                          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-normal text-slate-900 focus:ring-2 focus:ring-teal-500 outline-none resize-y leading-relaxed font-sans"
+                        />
+                      </div>
+
+                      {/* Key Ingredients */}
+                      <div className="md:col-span-10">
+                        <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                          <span>Key Ingredients / উপাদানসমূহ</span>
+                          <span className="text-slate-400 font-normal ml-1.5">(Full INCI formula or key active ingredients)</span>
+                        </label>
+                        <textarea
+                          rows={4}
+                          placeholder={"WATER, ETHOXYDIGLYCOL, ASCORBIC ACID, PROPANEDIOL...\n\nউপাদানসমূহ: পানি, ইথোক্সিডাইগ্লাইকল..."}
+                          value={ingredients}
+                          onChange={(e) => setIngredients(e.target.value)}
+                          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-normal text-slate-900 focus:ring-2 focus:ring-teal-500 outline-none resize-y leading-relaxed font-sans"
+                        />
+                      </div>
+
+                      {/* Short Summary (Optional excerpt) */}
+                      <div className="md:col-span-10">
+                        <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                          <span>Short Summary / সংক্ষিপ্ত বিবরণ</span>
+                          <span className="text-slate-400 font-normal ml-1.5">(Optional quick excerpt for cards/previews)</span>
+                        </label>
+                        <textarea
+                          rows={2}
+                          placeholder="Brief one-line summary..."
                           value={shortSummary}
                           onChange={(e) => setShortSummary(e.target.value)}
-                          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:ring-2 focus:ring-teal-500 outline-none resize-y leading-relaxed"
+                          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-normal text-slate-900 focus:ring-2 focus:ring-teal-500 outline-none resize-y leading-relaxed"
                         />
                       </div>
 

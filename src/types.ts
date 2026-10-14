@@ -42,6 +42,7 @@ export interface Product {
   ingredients?: string;
   benefitsHighlights?: string;
   howToUseIt?: string;
+  howToUse?: string;
 
   specs?: string[];
   features?: string[];
