@@ -275,6 +275,61 @@ Easier absorption.
     howToUse: 'Apply generously to face and neck morning and evening before face cream.',
     badge: 'Elasticity',
     isFeatured: true
+  },
+  {
+    id: 'prod-botox-anti-wrinkle-essence',
+    title: 'Botox Anti-Wrinkle Essence',
+    author: 'FANTINE Korea',
+    authorName: 'FANTINE Korea',
+    brand: 'FANTINE',
+    brandId: 'brand-fantine',
+    regularPrice: 3200,
+    price: 2200,
+    discountPercentage: 31,
+    stockQuantity: 100,
+    category: 'Serums',
+    series: 'Ultra Repair Series',
+    coverImage: '/uploads/file-1791822783298-380226454.jpg',
+    images: [
+      '/uploads/file-1791822783298-380226454.jpg'
+    ],
+    additionalImages: [
+      '/uploads/file-1791822783298-380226454.jpg'
+    ],
+    description: `Dual-signal peptide anti-wrinkle lifting essence. Stimulates natural collagen synthesis, relaxes fine facial expression lines, and visibly restores skin firmness and youthful elasticity.
+
+পণ্যের বিবরণ:
+ডুয়াল-সিগন্যাল পেপটাইড সমৃদ্ধ বোটক্স অ্যান্টি-রিঙ্কেল এসেন্স। এটি ত্বকের গভীরে কোলাজেন উৎপাদন বৃদ্ধি করে, বলিরেখা ও ফাইন লাইনস দূর করে ত্বককে টানটান, মসৃণ ও উজ্জ্বল করে তোলে।`,
+    benefitsHighlights: `Dual-Signal Peptide Complex,
+Botox-like expression line smoothing,
+Enhanced dermal firmness,
+Deep skin plumping & lifting.
+
+⭐ Overall
+• 🎯 Anti-Wrinkle / Firming: 9.5/10
+• 🛡️ Lifting & Elasticity: 9.0/10
+• 💧 Hydration: 8.0/10
+• 🧴 Barrier & Nourishment: 8.5/10
+• ✨ Smooth Texture: 9.0/10
+
+প্রধান সুবিধাসমূহ:
+ডুয়াল-সিগন্যাল পেপটাইড,
+বলিরেখা হ্রাস ও মসৃণতা,
+ত্বকের টানটান ভাব ও ইলাস্টিসিটি বৃদ্ধি,
+গভীর আর্দ্রতা ও তারুণ্যোজ্জ্বল আভা।`,
+    howToUse: `After cleansing and toning, dispense 2-3 pumps onto fingertips and gently massage into face and neck with upward lifting motions until fully absorbed.
+
+ব্যবহারবিধি:
+সকাল ও সন্ধ্যায় ত্বক পরিষ্কার ও টোনার ব্যবহারের পর, ২-৩ পাম্প এসেন্স আঙুলে নিয়ে নিচ থেকে উপরের দিকে আলতোভাবে ম্যাসাজ করে ত্বকে মিলিয়ে দিন।`,
+    howToUseIt: `After cleansing and toning, dispense 2-3 pumps onto fingertips and gently massage into face and neck with upward lifting motions until fully absorbed.
+
+ব্যবহারবিধি:
+সকাল ও সন্ধ্যায় ত্বক পরিষ্কার ও টোনার ব্যবহারের পর, ২-৩ পাম্প এসেন্স আঙুলে নিয়ে নিচ থেকে উপরের দিকে আলতোভাবে ম্যাসাজ করে ত্বকে মিলিয়ে দিন।`,
+    ingredients: `WATER, GLYCERIN, ACETYL HEXAPEPTIDE-8, PALMITOYL PENTAPEPTIDE-4, COPPER TRIPEPTIDE-1, NIACINAMIDE, ADENOSINE, SODIUM HYALURONATE, BUTYLENE GLYCOL, 1,2-HEXANEDIOL, BETAINE, PANTHENOL, ALLANTOIN, CARBOMER, ARGININE, ETHYLHEXYLGLYCERIN.
+
+উপাদানসমূহ: পানি, গ্লিসারিন, অ্যাসিটাইল হেক্সাপেপটাইড-৮, পালমিটয়েল পেন্টাপেপটাইড-৪, কপার ট্রাইপেপটাইড-১, নিয়াসিনামাইড, অ্যাডিনোসিন, সোডিয়াম হায়ালুরোনেট, বিউটিলিন গ্লাইকল, ১,২-হেক্সেনডিওল, বেটেইন, প্যানথেনল, অ্যালানটয়েন।`,
+    badge: 'Anti-Wrinkle',
+    isFeatured: true
   }
 ];
 
@@ -295,6 +350,13 @@ function loadProductsFromDisk(): Product[] {
 
   if (list.length === 0) {
     list = [...INITIAL_REAL_PRODUCTS];
+  } else {
+    // Ensure all authentic default catalog products exist in the active catalog
+    for (const initProd of INITIAL_REAL_PRODUCTS) {
+      if (!list.some(p => p.id === initProd.id)) {
+        list.push(initProd);
+      }
+    }
   }
 
   return list.map(p => {
