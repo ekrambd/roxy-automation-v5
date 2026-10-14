@@ -286,7 +286,7 @@ export default function ProfileSettings({ adminEmail }: ProfileSettingsProps) {
       )}
 
       <div className="max-w-4xl mx-auto space-y-6">
-        <form onSubmit={handleSaveSettings} className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-7 shadow-xs space-y-6">
+        <form onSubmit={handleSaveSettings} noValidate className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-7 shadow-xs space-y-6">
           <div>
             <h3 className="text-xl font-bold text-slate-900 tracking-tight">Store & Footer Identity</h3>
             <p className="text-slate-500 text-xs mt-1">Changes here will immediately appear in the website header, footer, and Contact Us page.</p>
@@ -367,7 +367,7 @@ export default function ProfileSettings({ adminEmail }: ProfileSettingsProps) {
                     <Mail className="h-5 w-5 text-slate-400" />
                   </div>
                   <input
-                    type="email"
+                    type="text"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="block w-full pl-10 pr-4 py-3 bg-transparent text-sm text-slate-900 focus:outline-none font-mono"
@@ -423,7 +423,7 @@ export default function ProfileSettings({ adminEmail }: ProfileSettingsProps) {
                 <div className="space-y-1">
                   <label className="text-xs font-bold text-slate-700">Instagram Profile URL</label>
                   <input
-                    type="url"
+                    type="text"
                     value={instagramUrl}
                     onChange={(e) => setInstagramUrl(e.target.value)}
                     placeholder="https://instagram.com/fantine"
@@ -434,7 +434,7 @@ export default function ProfileSettings({ adminEmail }: ProfileSettingsProps) {
                 <div className="space-y-1">
                   <label className="text-xs font-bold text-slate-700">YouTube Channel URL</label>
                   <input
-                    type="url"
+                    type="text"
                     value={youtubeUrl}
                     onChange={(e) => setYoutubeUrl(e.target.value)}
                     placeholder="https://youtube.com/@fantine"
@@ -445,7 +445,7 @@ export default function ProfileSettings({ adminEmail }: ProfileSettingsProps) {
                 <div className="space-y-1">
                   <label className="text-xs font-bold text-slate-700">Twitter / X Profile URL</label>
                   <input
-                    type="url"
+                    type="text"
                     value={twitterUrl}
                     onChange={(e) => setTwitterUrl(e.target.value)}
                     placeholder="https://twitter.com/fantine"
@@ -456,7 +456,7 @@ export default function ProfileSettings({ adminEmail }: ProfileSettingsProps) {
                 <div className="space-y-1">
                   <label className="text-xs font-bold text-slate-700">TikTok Profile URL</label>
                   <input
-                    type="url"
+                    type="text"
                     value={tiktokUrl}
                     onChange={(e) => setTiktokUrl(e.target.value)}
                     placeholder="https://tiktok.com/@fantine"
@@ -467,7 +467,7 @@ export default function ProfileSettings({ adminEmail }: ProfileSettingsProps) {
                 <div className="space-y-1">
                   <label className="text-xs font-bold text-slate-700">Facebook Page URL</label>
                   <input
-                    type="url"
+                    type="text"
                     value={facebookUrl}
                     onChange={(e) => setFacebookUrl(e.target.value)}
                     placeholder="https://facebook.com/fantine"
@@ -554,13 +554,13 @@ export default function ProfileSettings({ adminEmail }: ProfileSettingsProps) {
                 </div>
 
                 <div className="space-y-1 max-w-lg">
-                  <label className="text-[11px] font-semibold text-slate-500">Or Direct Logo Image Link (URL):</label>
+                  <label className="text-[11px] font-semibold text-slate-500">Or Direct Logo Image Link / Path (Optional):</label>
                   <input
-                    type="url"
+                    type="text"
                     value={storeLogo}
                     onChange={(e) => setStoreLogo(e.target.value)}
-                    placeholder="https://example.com/logo.png"
-                    className="block w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:border-blue-500"
+                    placeholder="/logo_transparent.webp or https://example.com/logo.png"
+                    className="block w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:border-blue-500 font-mono"
                   />
                 </div>
               </div>
