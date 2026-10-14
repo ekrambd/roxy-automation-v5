@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const storageFile = path.join(__dirname, '..', '..', 'prisma', 'products.json');
+const storageFile = path.join(__dirname, '..', 'prisma', 'products.json');
 if (!fs.existsSync(storageFile)) {
   console.log('No products.json file found at', storageFile);
   process.exit(0);
