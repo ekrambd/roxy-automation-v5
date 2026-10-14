@@ -460,7 +460,6 @@ export default function ProductManager({
       barcode: barcode.trim(),
       translation: translation.trim(),
       productType,
-      shortSummary: shortSummary.trim(),
       // Clear the retired legacy field so unrelated static book features can
       // never reappear after this product is saved.
       features: [],
