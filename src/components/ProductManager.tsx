@@ -689,6 +689,7 @@ export default function ProductManager({
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50 border-b border-slate-200/80 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
                 <tr>
+                  <th className="py-3 px-3 text-center w-12 font-bold">SL</th>
                   <th className="py-3 px-4">Products and titles</th>
                   <th className="py-3 px-4">category</th>
                   <th className="py-3 px-4">Price</th>
@@ -697,7 +698,7 @@ export default function ProductManager({
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {filteredProducts.map((p) => {
+                {filteredProducts.map((p, idx) => {
                   const hasVar = Boolean(p.hasVariants && p.variants && p.variants.length > 0);
                   const validVariants = hasVar ? p.variants!.filter(v => v.price > 0) : [];
                   const variantPrices = validVariants.map(v => v.price);
@@ -709,6 +710,13 @@ export default function ProductManager({
 
                   return (
                   <tr key={p.id} className="hover:bg-slate-50/80 transition-colors">
+                    {/* Serial Number */}
+                    <td className="py-3 px-3 text-center">
+                      <span className="inline-flex items-center justify-center min-w-[24px] px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600 font-mono font-bold text-[11px] border border-slate-200/60">
+                        {idx + 1}
+                      </span>
+                    </td>
+
                     {/* Thumbnail & Product Info */}
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-3">
@@ -881,7 +889,7 @@ export default function ProductManager({
 
                 {filteredProducts.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="py-12 text-center">
+                    <td colSpan={6} className="py-12 text-center">
                       <Package className="h-12 w-12 text-slate-300 mx-auto mb-3" />
                       <p className="text-slate-600 font-medium text-sm">No products found</p>
                     </td>
@@ -894,7 +902,7 @@ export default function ProductManager({
       ) : (
         /* Products Grid Mode — Compact Card Layout */
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
-          {filteredProducts.map((p) => (
+          {filteredProducts.map((p, idx) => (
             <div
               key={p.id}
               className="bg-white rounded-xl border border-slate-200/90 overflow-hidden shadow-2xs hover:shadow-md hover:border-slate-300 transition-all flex flex-col group text-xs"
@@ -910,6 +918,9 @@ export default function ProductManager({
                   className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300"
                 />
                 <div className="absolute top-2 left-2 flex flex-wrap gap-1 max-w-[70%]">
+                  <span className="bg-slate-900/90 text-white text-[9px] font-mono font-bold px-1.5 py-0.5 rounded shadow-xs">
+                    #{idx + 1}
+                  </span>
                   <span className="bg-slate-900/80 backdrop-blur-md text-white text-[9px] font-bold px-1.5 py-0.5 rounded truncate">
                     {p.category}
                   </span>

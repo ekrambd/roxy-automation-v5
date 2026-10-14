@@ -196,6 +196,7 @@ export function InvoicePreview({ order }: Props) {
           <table className="w-full mb-8">
             <thead>
               <tr className="border-y-2 border-slate-900 text-[10px] uppercase tracking-widest text-slate-900">
+                <th className="py-3 text-center font-bold w-12">SL</th>
                 <th className="py-3 text-left font-bold">Item Description</th>
                 <th className="py-3 text-right font-bold w-32">Price</th>
                 <th className="py-3 text-center font-bold w-20">Qty</th>
@@ -208,6 +209,7 @@ export function InvoicePreview({ order }: Props) {
                 const qty = item.quantity || 1;
                 return (
                   <tr key={idx}>
+                    <td className="py-4 text-center font-mono font-bold text-xs text-slate-500">{idx + 1}</td>
                     <td className="py-4">
                       <p className="font-bold text-slate-900">{item.product?.title || item.title}</p>
                       <p className="text-xs text-slate-500 mt-1">{item.variant?.name || item.sku || 'default'}</p>
@@ -219,6 +221,7 @@ export function InvoicePreview({ order }: Props) {
                 );
               }) : (
                 <tr>
+                  <td className="py-4 text-center font-mono font-bold text-xs text-slate-500">1</td>
                   <td className="py-4">
                     <p className="font-bold text-slate-900">{order.productTitle || 'Product'}</p>
                   </td>

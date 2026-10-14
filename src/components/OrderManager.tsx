@@ -1681,6 +1681,7 @@ export default function OrderManager({
                     className="rounded border-slate-300 text-teal-600 focus:ring-teal-500 cursor-pointer h-4 w-4"
                   />
                 </th>
+                <th className="py-3.5 px-3 text-center w-12 font-bold">SL</th>
                 <th className="py-3.5 px-4">ID & Date</th>
                 <th className="py-3.5 px-4">Type</th>
                 <th className="py-3.5 px-4">Customer information</th>
@@ -1693,13 +1694,14 @@ export default function OrderManager({
             <tbody className="divide-y divide-slate-100 text-xs font-medium text-slate-700">
               {paginatedOrders.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-slate-400 font-semibold">
+                  <td colSpan={9} className="py-12 text-center text-slate-400 font-semibold">
                     No orders found।
                   </td>
                 </tr>
               ) : (
-                paginatedOrders.map((order) => {
+                paginatedOrders.map((order, idx) => {
                   const isSelected = selectedOrderIds.includes(order.id);
+                  const serialNo = (currentPage - 1) * itemsPerPage + idx + 1;
                   return (
                     <tr 
                       key={order.id} 
@@ -1717,6 +1719,13 @@ export default function OrderManager({
                           onChange={() => handleToggleSelectOrder(order.id)}
                           className="rounded border-slate-300 text-teal-600 focus:ring-teal-500 cursor-pointer h-4 w-4"
                         />
+                      </td>
+
+                      {/* SL # */}
+                      <td className="py-3.5 px-3 text-center">
+                        <span className="inline-flex items-center justify-center min-w-[24px] px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600 font-mono font-bold text-[11px] border border-slate-200/60">
+                          {serialNo}
+                        </span>
                       </td>
 
                       {/* ID & Date */}
