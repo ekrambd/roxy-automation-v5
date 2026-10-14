@@ -301,9 +301,18 @@ export const setStoreProducts = (newProducts: Product[]) => {
 
 export let storeOrders: BookOrder[] = [];
 
-export let storeSettings: EcomSettings = {
-  storeName: 'FANTINE Korea (Brandini Co., Ltd.)',
+const SETTINGS_STORAGE_FILE = path.join(process.cwd(), 'prisma', 'settings.json');
+
+const DEFAULT_INITIAL_SETTINGS: EcomSettings = {
+  storeName: 'FAИTIИE Korea (Brandini Co., Ltd.)',
+  companyName: 'Brandini Co., Ltd.',
+  storeLogo: '/logo_transparent.webp',
   storeTagline: 'Luxury Hanbang Skincare & Clinical Botanical Whitening Solutions',
+  topAnnouncementText: 'WELCOME TO BRANDINI CO.,LTD',
+  contactEmail: 'FANTINE@BRANDINI.CO.KR',
+  contactPhone: '+82 (02) 884-9021',
+  storeAddress: '9F, Gangnamjeil Bldg, 109, Teheran-ro, Gangnam-gu, Seoul, Republic of Korea',
+  footerDescription: 'Brandini Co., Ltd. • Seoul, Republic of Korea. Clinical Hanbang Skincare & Botanical Whitening Solutions.',
   gtmId: '',
   deliveryChargeInsideDhaka: 0,
   deliveryChargeOutsideDhaka: 0,
@@ -322,8 +331,39 @@ export let storeSettings: EcomSettings = {
   ]
 };
 
+export function loadSettingsFromDisk(): EcomSettings {
+  try {
+    if (fs.existsSync(SETTINGS_STORAGE_FILE)) {
+      const raw = fs.readFileSync(SETTINGS_STORAGE_FILE, 'utf-8');
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') {
+        return { ...DEFAULT_INITIAL_SETTINGS, ...parsed };
+      }
+    }
+  } catch (err) {
+    console.error('[store] Error reading settings from disk:', err);
+  }
+  return { ...DEFAULT_INITIAL_SETTINGS };
+}
+
+export function saveSettingsToDisk(settings: EcomSettings): void {
+  try {
+    const dir = path.dirname(SETTINGS_STORAGE_FILE);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(SETTINGS_STORAGE_FILE, JSON.stringify(settings, null, 2), 'utf-8');
+  } catch (err) {
+    console.error('[store] Failed saving settings to disk:', err);
+  }
+}
+
+export let storeSettings: EcomSettings = loadSettingsFromDisk();
+saveSettingsToDisk(storeSettings);
+
 export const updateStoreSettings = (newSettings: Partial<EcomSettings>) => {
   storeSettings = { ...storeSettings, ...newSettings };
+  saveSettingsToDisk(storeSettings);
   return storeSettings;
 };
 

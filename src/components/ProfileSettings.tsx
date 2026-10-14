@@ -6,8 +6,8 @@ import {
 } from 'lucide-react';
 import { dbService } from '../lib/dbService';
 import { CircularProgress } from './LoadingSkeleton';
-import { compressImage } from '../lib/imageUtils';
-import { uploadDataUrlToStorage } from '../lib/storageService';
+import { uploadFileToStorage } from '../lib/storageService';
+import { authService } from '../lib/authService';
 
 interface ProfileSettingsProps {
   adminEmail: string;
@@ -107,8 +107,9 @@ export default function ProfileSettings({ adminEmail }: ProfileSettingsProps) {
           }
         }
 
-        if (auth?.currentUser) {
-          setDisplayName(auth.currentUser.displayName || '');
+        const currentUser = authService.getUser();
+        if (currentUser) {
+          setDisplayName(currentUser.email || '');
         }
 
       } catch (err) {
@@ -127,13 +128,13 @@ export default function ProfileSettings({ adminEmail }: ProfileSettingsProps) {
 
     try {
       setIsUploadingLogo(true);
-      const compressedFile = await compressImage(file, 500);
-      const downloadUrl = await uploadDataUrlToStorage(compressedFile, `store_assets/logo_${Date.now()}.jpg`);
+      setErrorMsg('');
+      const downloadUrl = await uploadFileToStorage(file, 'store_assets/logo');
       setStoreLogo(downloadUrl);
-      setSuccessMsg('Logo loaded successfully! Click "Update Settings" to save.');
+      setSuccessMsg('Logo uploaded successfully! Click "Update Settings" to apply changes.');
     } catch (err: any) {
       console.error('Error uploading logo:', err);
-      setErrorMsg('Logo upload failed.');
+      setErrorMsg('Logo upload failed: ' + (err.message || 'Please check file format.'));
     } finally {
       setIsUploadingLogo(false);
     }
@@ -196,13 +197,6 @@ export default function ProfileSettings({ adminEmail }: ProfileSettingsProps) {
         link.href = storeLogo;
       }
 
-      if (auth?.currentUser && displayName.trim()) {
-        try {
-          await updateProfile(auth.currentUser, { displayName: displayName.trim() });
-        } catch (profileErr) {
-          console.warn('Could not update Auth displayName:', profileErr);
-        }
-      }
 
       setIsSaving(false);
       setSuccessMsg('Store identity, company details, footer & contact info updated successfully!');

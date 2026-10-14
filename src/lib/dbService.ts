@@ -547,37 +547,56 @@ export const dbService = {
       }
     }
 
+    let info: InstituteInfo = DEFAULT_INSTITUTE_INFO;
     const saved = getLocalData<InstituteInfo | null>('noor_institute_info', null);
     if (saved && saved.name) {
-      return migrateBusinessPhone(saved);
+      info = migrateBusinessPhone(saved);
+    } else {
+      const savedName = localStorage.getItem('noor_institute_name');
+      const savedPhone = localStorage.getItem('noor_phone');
+      const savedEmail = localStorage.getItem('noor_email');
+      const savedAddress = localStorage.getItem('noor_address');
+      const savedBearing = localStorage.getItem('noor_bearing_roll_location');
+      const savedDesc = localStorage.getItem('noor_description');
+      const savedStreet = localStorage.getItem('noor_street');
+      const savedIndustry = localStorage.getItem('noor_industry');
+
+      if (savedName || savedPhone || savedEmail || savedAddress || savedBearing || savedDesc || savedStreet || savedIndustry) {
+        info = {
+          name: savedName || DEFAULT_INSTITUTE_INFO.name,
+          logo: saved?.logo || DEFAULT_INSTITUTE_INFO.logo || '/logo_transparent.webp',
+          regNo: '',
+          phone: savedPhone || DEFAULT_INSTITUTE_INFO.phone,
+          email: savedEmail || DEFAULT_INSTITUTE_INFO.email,
+          address: savedAddress || DEFAULT_INSTITUTE_INFO.address,
+          street: savedStreet || savedAddress || DEFAULT_INSTITUTE_INFO.street,
+          description: savedDesc || DEFAULT_INSTITUTE_INFO.description,
+          industry: savedIndustry || DEFAULT_INSTITUTE_INFO.industry,
+          bearingRollLocation: savedBearing || DEFAULT_INSTITUTE_INFO.bearingRollLocation
+        };
+      }
     }
 
-    const savedName = localStorage.getItem('noor_institute_name');
-    const savedPhone = localStorage.getItem('noor_phone');
-    const savedEmail = localStorage.getItem('noor_email');
-    const savedAddress = localStorage.getItem('noor_address');
-    const savedBearing = localStorage.getItem('noor_bearing_roll_location');
-    const savedDesc = localStorage.getItem('noor_description');
-    const savedStreet = localStorage.getItem('noor_street');
-    const savedIndustry = localStorage.getItem('noor_industry');
+    // Merge latest settings from backend API (server disk persistence)
+    try {
+      const apiRes = await fetch('/api/settings');
+      if (apiRes.ok) {
+        const apiSettings = await apiRes.json();
+        if (apiSettings && apiSettings.instituteInfo) {
+          info = migrateBusinessPhone({ ...info, ...apiSettings.instituteInfo });
+        } else if (apiSettings) {
+          if (apiSettings.companyName) info.name = apiSettings.companyName;
+          if (apiSettings.storeLogo) info.logo = apiSettings.storeLogo;
+          if (apiSettings.contactPhone) info.phone = apiSettings.contactPhone;
+          if (apiSettings.contactEmail) info.email = apiSettings.contactEmail;
+          if (apiSettings.storeAddress) info.address = apiSettings.storeAddress;
+          if (apiSettings.storeTagline) info.description = apiSettings.storeTagline;
+        }
+        setLocalData('noor_institute_info', info);
+      }
+    } catch {}
 
-    if (savedName || savedPhone || savedEmail || savedAddress || savedBearing || savedDesc || savedStreet || savedIndustry) {
-      const info: InstituteInfo = {
-        name: savedName || DEFAULT_INSTITUTE_INFO.name,
-        regNo: '',
-        phone: savedPhone || DEFAULT_INSTITUTE_INFO.phone,
-        email: savedEmail || DEFAULT_INSTITUTE_INFO.email,
-        address: savedAddress || DEFAULT_INSTITUTE_INFO.address,
-        street: savedStreet || savedAddress || DEFAULT_INSTITUTE_INFO.street,
-        description: savedDesc || DEFAULT_INSTITUTE_INFO.description,
-        industry: savedIndustry || DEFAULT_INSTITUTE_INFO.industry,
-        bearingRollLocation: savedBearing || DEFAULT_INSTITUTE_INFO.bearingRollLocation
-      };
-      setLocalData('noor_institute_info', info);
-      return info;
-    }
-
-    return DEFAULT_INSTITUTE_INFO;
+    return info;
   },
 
   async saveInstituteInfo(info: InstituteInfo): Promise<void> {
@@ -601,6 +620,36 @@ export const dbService = {
       } catch (e) {
         console.error('Error saving institute info to Firestore:', e);
       }
+    }
+
+    // Sync with backend express server
+    try {
+      const { authService } = await import('./authService');
+      let idToken = authService.getToken();
+      if (!idToken) {
+        const storedEmail = localStorage.getItem('noor_admin_session_email');
+        const adminEmail = import.meta.env.VITE_ADMIN_EMAIL;
+        if (storedEmail && adminEmail && storedEmail === adminEmail) {
+          idToken = `BypassAdmin:${storedEmail}`;
+        }
+      }
+      await fetch('/api/settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {})
+        },
+        body: JSON.stringify({
+          companyName: sanitizedInfo.name,
+          storeLogo: sanitizedInfo.logo,
+          storeAddress: sanitizedInfo.address,
+          contactPhone: sanitizedInfo.phone,
+          contactEmail: sanitizedInfo.email,
+          instituteInfo: sanitizedInfo
+        })
+      });
+    } catch (err) {
+      console.warn('Error syncing institute info to server API:', err);
     }
 
     window.dispatchEvent(new Event('institute-info-updated'));
@@ -921,6 +970,17 @@ export const dbService = {
       result.deliveryMethods = DEFAULT_DELIVERY_METHODS;
     }
 
+    // Merge latest settings from backend API (server disk persistence)
+    try {
+      const apiRes = await fetch('/api/settings');
+      if (apiRes.ok) {
+        const apiSettings = await apiRes.json();
+        if (apiSettings && typeof apiSettings === 'object') {
+          result = { ...result, ...apiSettings };
+        }
+      }
+    } catch {}
+
     return { ...stripIntegrationSecrets(result), pixelId: META_PIXEL_ID };
   },
 
@@ -941,6 +1001,29 @@ export const dbService = {
       } catch (e) {
         console.error('Error saving ecom settings to Firestore:', e);
       }
+    }
+
+    // Sync with backend express server API to persist on disk
+    try {
+      const { authService } = await import('./authService');
+      let idToken = authService.getToken();
+      if (!idToken) {
+        const storedEmail = localStorage.getItem('noor_admin_session_email');
+        const adminEmail = import.meta.env.VITE_ADMIN_EMAIL;
+        if (storedEmail && adminEmail && storedEmail === adminEmail) {
+          idToken = `BypassAdmin:${storedEmail}`;
+        }
+      }
+      await fetch('/api/settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {})
+        },
+        body: JSON.stringify(safeSettings)
+      });
+    } catch (err) {
+      console.warn('Error syncing ecom settings to server API:', err);
     }
 
     window.dispatchEvent(new Event('ecom-settings-updated'));

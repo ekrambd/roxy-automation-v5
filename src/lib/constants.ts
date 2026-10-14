@@ -469,7 +469,7 @@ export const DEFAULT_HIGHLIGHT_SPOTLIGHT_SETTINGS: HighlightSpotlightSettings = 
 export const DEFAULT_ECOM_SETTINGS: EcomSettings = {
   storeName: 'F A И T I И E',
   companyName: 'Brandini Co., Ltd.',
-  storeLogo: '',
+  storeLogo: '/logo_transparent.webp',
   storeTagline: 'Brandini Co., Ltd. • Seoul, Republic of Korea. Clinical Hanbang Skincare & Botanical Whitening Solutions.',
   topAnnouncementText: 'WELCOME TO BRANDINI CO.,LTD',
   contactEmail: 'FANTINE@BRANDINI.CO.KR',
@@ -506,6 +506,7 @@ export const DEFAULT_ECOM_SETTINGS: EcomSettings = {
 
 export const DEFAULT_INSTITUTE_INFO: InstituteInfo = {
   name: 'Brandini Co., Ltd.',
+  logo: '/logo_transparent.webp',
   regNo: '',
   phone: '+82 (02) 884-9021',
   email: 'FANTINE@BRANDINI.CO.KR',
