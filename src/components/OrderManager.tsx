@@ -1031,7 +1031,7 @@ export default function OrderManager({
 
                       {/* Right: Invoice Info */}
                       <div className="text-left md:text-right">
-                        <h1 className="text-4xl font-light text-slate-300 tracking-widest uppercase mb-4">Invoice</h1>
+                        <h1 className="text-4xl font-normal text-slate-400 tracking-widest uppercase mb-4">Invoice</h1>
                         <div className="grid grid-cols-2 md:grid-cols-none gap-x-6 gap-y-1 text-sm md:flex md:flex-col md:items-end">
                           <div className="flex justify-between md:w-48">
                             <span className="font-semibold text-slate-400">Invoice No:</span>

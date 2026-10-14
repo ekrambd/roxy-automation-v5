@@ -112,8 +112,8 @@ export const SkinQuizView: React.FC<SkinQuizViewProps> = ({ products, onAddToCar
     return (
       <div className="relative overflow-hidden -mt-[84px] sm:-mt-[92px] md:-mt-[100px] pt-[84px] sm:pt-[92px] md:pt-[100px] min-h-screen flex flex-col items-center justify-center bg-[#fdfdfd] px-4 py-20 text-center animate-fadeIn">
         <Loader2 className="w-12 h-12 animate-spin text-slate-800 mb-6" />
-        <h2 className="text-2xl font-serif text-slate-900 mb-2">Analyzing your skin profile...</h2>
-        <p className="text-slate-500 font-light">Crafting your personalized Korean skincare routine.</p>
+        <h2 className="text-2xl font-serif text-slate-900 mb-2 font-semibold">Analyzing your skin profile...</h2>
+        <p className="text-slate-600 font-normal">Crafting your personalized Korean skincare routine.</p>
       </div>
     );
   }
@@ -126,10 +126,10 @@ export const SkinQuizView: React.FC<SkinQuizViewProps> = ({ products, onAddToCar
             <h3 className="text-sm font-semibold text-[#8da583] mb-4 tracking-[0.15em] uppercase flex items-center justify-center gap-2">
               <Sparkles className="w-4 h-4" /> AI Personalized Routine
             </h3>
-            <h1 className="text-4xl md:text-5xl font-medium text-slate-900 mb-6 max-w-3xl mx-auto font-serif tracking-tight leading-tight">
+            <h1 className="text-4xl md:text-5xl font-semibold text-slate-900 mb-6 max-w-3xl mx-auto font-serif tracking-tight leading-tight">
               The perfect formulas for {answers.skin_type ? answers.skin_type.toLowerCase() : 'your'} skin.
             </h1>
-            <p className="text-slate-600 text-lg max-w-2xl mx-auto font-light leading-relaxed">
+            <p className="text-slate-700 text-lg max-w-2xl mx-auto font-normal leading-relaxed">
               Based on your quiz, our AI has analyzed your profile. To help you achieve a <strong className="font-semibold text-slate-800">{answers.skin_goal ? answers.skin_goal.toLowerCase() : 'healthy'}</strong> look and focus on <strong className="font-semibold text-slate-800">{answers.routine_focus ? answers.routine_focus.toLowerCase() : 'overall wellness'}</strong>, we have handpicked these specific products to work perfectly together.
             </p>
           </div>
@@ -181,7 +181,7 @@ export const SkinQuizView: React.FC<SkinQuizViewProps> = ({ products, onAddToCar
           <h1 className="text-5xl md:text-7xl font-medium text-slate-900 mb-6 max-w-3xl font-serif leading-tight animate-[slideInUp_0.7s_ease-out_forwards] opacity-0" style={{ animationDelay: '0.1s' }}>
             Find Your Daily <br/><span className="italic text-slate-800">Skin Routine</span>
           </h1>
-          <p className="text-slate-800 text-lg md:text-xl max-w-2xl mb-12 font-light animate-[slideInUp_0.9s_ease-out_forwards] opacity-0" style={{ animationDelay: '0.2s' }}>
+          <p className="text-slate-800 text-lg md:text-xl max-w-2xl mb-12 font-normal leading-relaxed animate-[slideInUp_0.9s_ease-out_forwards] opacity-0" style={{ animationDelay: '0.2s' }}>
             Answer a few quick questions and we will recommend a simple Fantine routine for your skin type, glow goals, and daily comfort.
           </p>
           <button 

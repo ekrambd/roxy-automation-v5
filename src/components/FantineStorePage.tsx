@@ -1736,7 +1736,7 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
 
             {/* Right Side: Title, Description, Benefits, How-To-Use */}
             <div className="lg:col-span-6 space-y-4 sm:space-y-6">
-              <h1 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-slate-900 font-normal tracking-tight leading-snug">
+              <h1 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-slate-900 font-semibold tracking-tight leading-snug">
                 {activeProductDetail.title}
               </h1>
 
@@ -1792,7 +1792,7 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
               {/* Product Description */}
               <div className="space-y-1.5 pt-2">
                 <h2 className="font-serif text-base font-semibold text-slate-900">Product Description:</h2>
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-light text-justify whitespace-pre-line">
+                <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-normal text-justify whitespace-pre-line">
                   {activeProductDetail.description || activeProductDetail.benefitsHighlights}
                 </p>
               </div>
@@ -1800,7 +1800,7 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
               {/* How to use it */}
               <div className="space-y-1.5">
                 <h2 className="font-serif text-base font-semibold text-slate-900">How to use it :</h2>
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-light text-justify whitespace-pre-line">
+                <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-normal text-justify whitespace-pre-line">
                   {activeProductDetail.howToUse || 'Pour one teaspoon directly into the palm of your hand and gently pat it onto the skin until fully absorbed.'}
                 </p>
               </div>
@@ -1818,8 +1818,8 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
             
             <div className="lg:col-span-4 bg-[#1e293b] text-white p-8 sm:p-10 space-y-8 flex flex-col justify-between">
               <div className="space-y-4">
-                <h2 className="font-serif text-2xl font-normal text-white">Contact information</h2>
-                <p className="text-xs text-slate-300 leading-relaxed font-light">
+                <h2 className="font-serif text-2xl font-semibold text-white">Contact information</h2>
+                <p className="text-xs text-slate-300 leading-relaxed font-normal">
                   Contact us for the latest product inquiries, international distribution, and Korean Hanbang skincare formulations.
                 </p>
               </div>
@@ -2065,7 +2065,7 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
                       <div className="text-center space-y-1 sm:space-y-1.5">
                         <h4 
                           onClick={() => openProductDetail(product)}
-                          className="font-serif text-xs sm:text-sm font-normal text-slate-900 hover:text-amber-800 transition-colors cursor-pointer truncate"
+                          className="font-serif text-xs sm:text-sm font-medium text-slate-900 hover:text-amber-800 transition-colors cursor-pointer truncate"
                         >
                           {product.title}
                         </h4>
@@ -2184,12 +2184,12 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
                 {aboutSettings.badge || 'ABOUT OUR BRAND'}
               </div>
 
-              <h1 className="font-serif text-3xl sm:text-5xl lg:text-6xl text-white font-normal uppercase leading-tight tracking-tight drop-shadow-md">
+              <h1 className="font-serif text-3xl sm:text-5xl lg:text-6xl text-white font-semibold uppercase leading-tight tracking-tight drop-shadow-md">
                 {aboutSettings.title || aboutSettings.heroTitle || 'about us'}
               </h1>
 
               {(aboutSettings.subtitle || aboutSettings.heroSubtitle) && (
-                <p className="text-slate-200 text-sm sm:text-base font-light leading-relaxed max-w-2xl mx-auto">
+                <p className="text-slate-200 text-sm sm:text-base font-normal leading-relaxed max-w-2xl mx-auto">
                   {aboutSettings.subtitle || aboutSettings.heroSubtitle}
                 </p>
               )}
@@ -2206,7 +2206,7 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
           {/* 2. MAIN STORY TEXT CONTENT */}
           <section className="py-16 sm:py-24 max-w-4xl mx-auto px-4 sm:px-8">
             <div className="bg-white p-8 sm:p-12 rounded-2xl shadow-xs border border-slate-200/80 space-y-8">
-              <div className="prose prose-slate max-w-none text-slate-700 leading-relaxed font-light text-base sm:text-lg whitespace-pre-line space-y-4 text-justify">
+              <div className="prose prose-slate max-w-none text-slate-700 leading-relaxed font-normal text-base sm:text-lg whitespace-pre-line space-y-4 text-justify">
                 {aboutSettings.content || [
                   aboutSettings.storyParagraph1,
                   aboutSettings.storyParagraph2,
@@ -2283,10 +2283,10 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
             <div className="max-w-7xl mx-auto px-4 sm:px-8">
               
               <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-14">
-                <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-slate-900 font-normal tracking-tight mb-2 sm:mb-3">
+                <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-slate-900 font-semibold tracking-tight mb-2 sm:mb-3">
                   Treat Your Skin Concern with Hanbang + Modern Ingredients
                 </h2>
-                <p className="text-slate-500 text-[11px] sm:text-sm tracking-wider uppercase font-light">
+                <p className="text-slate-600 text-[11px] sm:text-sm tracking-wider uppercase font-medium">
                   Centella Asiatica • Niacinamide • Pure Vitamin C • Red Ginseng Ferments
                 </p>
               </div>
@@ -2326,7 +2326,7 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
                     <div className="text-center flex-1 flex flex-col justify-between space-y-1 sm:space-y-1.5">
                       <h3 
                         onClick={() => openProductDetail(product)}
-                        className="font-serif text-xs sm:text-base text-slate-900 hover:text-amber-800 transition-colors cursor-pointer font-normal line-clamp-1"
+                        className="font-serif text-xs sm:text-base text-slate-900 hover:text-amber-800 transition-colors cursor-pointer font-medium line-clamp-1"
                       >
                         {product.title}
                       </h3>
@@ -2358,10 +2358,10 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
             <div className="max-w-7xl mx-auto px-4 sm:px-8">
               
               <div className="text-center mb-8 sm:mb-14">
-                <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-slate-900 font-normal tracking-tight mb-2">
+                <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-slate-900 font-semibold tracking-tight mb-2">
                   Save with Sets
                 </h2>
-                <p className="text-slate-500 text-[11px] sm:text-sm tracking-wide">
+                <p className="text-slate-600 text-[11px] sm:text-sm tracking-wide font-normal">
                   Complete multi-step skincare regimens curated with special discount savings
                 </p>
               </div>
@@ -2402,7 +2402,7 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
                     <div className="text-center space-y-1.5 sm:space-y-2 flex-1 flex flex-col justify-between">
                       <h3 
                         onClick={() => openProductDetail(product)}
-                        className="font-serif text-xs sm:text-base text-slate-900 hover:text-amber-800 transition-colors cursor-pointer font-normal line-clamp-1"
+                        className="font-serif text-xs sm:text-base text-slate-900 hover:text-amber-800 transition-colors cursor-pointer font-medium line-clamp-1"
                       >
                         {product.title}
                       </h3>
@@ -2478,12 +2478,12 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
                         </div>
 
                         {/* Punchy Title */}
-                        <h2 className="font-serif text-3xl sm:text-5xl lg:text-[54px] text-slate-900 leading-[1.12] font-normal tracking-tight">
+                        <h2 className="font-serif text-3xl sm:text-5xl lg:text-[54px] text-slate-900 leading-[1.12] font-semibold tracking-tight">
                           {title}
                         </h2>
                         
                         {/* Clean Short Subtitle */}
-                        <p className="text-slate-600 text-sm sm:text-base leading-relaxed max-w-lg mx-auto lg:mx-0 font-light line-clamp-2">
+                        <p className="text-slate-600 text-sm sm:text-base leading-relaxed max-w-lg mx-auto lg:mx-0 font-normal line-clamp-2">
                           {subtitle}
                         </p>
 
@@ -2494,17 +2494,17 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
                               <span className="font-mono text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight">{String(flashSaleTimeLeft.days).padStart(2, '0')}</span>
                               <span className="text-[10px] uppercase font-bold text-slate-500 block tracking-widest mt-0.5">DAYS</span>
                             </div>
-                            <span className="font-mono text-2xl sm:text-3xl font-light text-slate-300 -translate-y-2 sm:-translate-y-3">:</span>
+                            <span className="font-mono text-2xl sm:text-3xl font-normal text-slate-400 -translate-y-2 sm:-translate-y-3">:</span>
                             <div className="text-center lg:text-left">
                               <span className="font-mono text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight">{String(flashSaleTimeLeft.hours).padStart(2, '0')}</span>
                               <span className="text-[10px] uppercase font-bold text-slate-500 block tracking-widest mt-0.5">HOURS</span>
                             </div>
-                            <span className="font-mono text-2xl sm:text-3xl font-light text-slate-300 -translate-y-2 sm:-translate-y-3">:</span>
+                            <span className="font-mono text-2xl sm:text-3xl font-normal text-slate-400 -translate-y-2 sm:-translate-y-3">:</span>
                             <div className="text-center lg:text-left">
                               <span className="font-mono text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight">{String(flashSaleTimeLeft.minutes).padStart(2, '0')}</span>
                               <span className="text-[10px] uppercase font-bold text-slate-500 block tracking-widest mt-0.5">MINS</span>
                             </div>
-                            <span className="font-mono text-2xl sm:text-3xl font-light text-slate-300 -translate-y-2 sm:-translate-y-3">:</span>
+                            <span className="font-mono text-2xl sm:text-3xl font-normal text-slate-400 -translate-y-2 sm:-translate-y-3">:</span>
                             <div className="text-center lg:text-left">
                               <span className="font-mono text-3xl sm:text-4xl lg:text-5xl font-black text-rose-600 tracking-tight animate-pulse">{String(flashSaleTimeLeft.seconds).padStart(2, '0')}</span>
                               <span className="text-[10px] uppercase font-bold text-rose-600 block tracking-widest mt-0.5">SECS</span>
@@ -2660,11 +2660,11 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
                   </div>
 
                   <div className="md:col-span-6 flex flex-col justify-center space-y-5 text-center md:text-left py-2 sm:py-4">
-                    <h2 className="font-serif text-3xl sm:text-4xl text-slate-900 font-normal leading-tight">
+                    <h2 className="font-serif text-3xl sm:text-4xl text-slate-900 font-semibold leading-tight">
                       {title}
                     </h2>
                     
-                    <p className="text-slate-600 text-sm leading-relaxed max-w-lg mx-auto md:mx-0 font-light">
+                    <p className="text-slate-600 text-sm leading-relaxed max-w-lg mx-auto md:mx-0 font-normal">
                       {subtitle}
                     </p>
 

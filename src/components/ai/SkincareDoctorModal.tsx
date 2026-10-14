@@ -158,7 +158,7 @@ const RoutineFlowchartCard: React.FC<{
               <div className="font-bold text-slate-900 mb-0.5 flex items-center gap-1.5">
                 <span>{step.title}</span>
               </div>
-              <p className="text-slate-600 font-light">
+              <p className="text-slate-600 font-normal">
                 {formatInlineText(step.detail, true)}
               </p>
             </div>

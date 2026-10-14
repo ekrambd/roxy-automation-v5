@@ -42,10 +42,10 @@ export default function FantineFooter({
                 }}
               />
             </div>
-            <p className="text-sm text-slate-300 leading-relaxed font-light">
+            <p className="text-sm text-slate-300 leading-relaxed font-normal">
               {displayTagline}
             </p>
-            <div className="text-sm text-slate-300 space-y-1.5 pt-2 font-light">
+            <div className="text-sm text-slate-300 space-y-1.5 pt-2 font-normal">
               <div>Email: <a href={`mailto:${displayEmail}`} className="text-slate-100 hover:underline font-medium">{displayEmail}</a></div>
               <div>Customer Care: <span className="text-slate-100 font-medium">{displayPhone}</span></div>
             </div>
@@ -53,7 +53,7 @@ export default function FantineFooter({
 
           <div>
             <h4 className="text-sm font-bold tracking-widest uppercase text-slate-200 mb-5">Explore Shop</h4>
-            <ul className="space-y-3 text-sm text-slate-300 font-light">
+            <ul className="space-y-3 text-sm text-slate-300 font-normal">
               {shopCategories.filter(cat => cat !== 'All').slice(0, 3).map((cat, idx) => (
                 <li key={idx}>
                   <button 
@@ -72,7 +72,7 @@ export default function FantineFooter({
 
           <div>
             <h4 className="text-sm font-bold tracking-widest uppercase text-slate-200 mb-5">Social Media</h4>
-            <ul className="space-y-3 text-sm text-slate-300 font-light">
+            <ul className="space-y-3 text-sm text-slate-300 font-normal">
               <li>
                 <a href={socialLinks?.facebook || "https://facebook.com"} target="_blank" rel="noreferrer" className="flex items-center gap-2.5 hover:text-white transition-colors cursor-pointer group">
                   <svg className="w-4 h-4 fill-current text-slate-400 group-hover:text-blue-400 transition-colors" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
@@ -102,7 +102,7 @@ export default function FantineFooter({
 
           <div>
             <h4 className="text-sm font-bold tracking-widest uppercase text-slate-200 mb-5">Newsletter</h4>
-            <p className="text-sm text-slate-300 mb-4 font-light leading-relaxed">Join the {displayStoreName} Club for exclusive Korean skincare routines and 15% off your first order.</p>
+            <p className="text-sm text-slate-300 mb-4 font-normal leading-relaxed">Join the {displayStoreName} Club for exclusive Korean skincare routines and 15% off your first order.</p>
             <form onSubmit={(e) => { e.preventDefault(); alert(`Thank you for subscribing to ${displayStoreName}!`); }} className="flex gap-2">
               <input type="email" placeholder="Your email address" required className="bg-slate-800 text-white px-3.5 py-2.5 text-sm border border-slate-700 rounded-lg w-full focus:outline-none focus:border-slate-400 placeholder:text-slate-500" />
               <button type="submit" className="bg-[#93c5fd] hover:bg-[#7dd3fc] active:scale-95 text-slate-950 px-5 py-2.5 text-xs sm:text-sm font-bold uppercase transition-all rounded-lg cursor-pointer shrink-0">Join</button>
