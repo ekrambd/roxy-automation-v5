@@ -8,7 +8,7 @@ import {
   ShieldCheck, Truck, RefreshCw, Send, HelpCircle, Eye, Share2, Award,
   Phone, Mail, Globe, Droplet, Sun, Moon, Zap, Flame, Layers, MessageCircle, ArrowUp, MapPin, ZoomIn, Clock,
   Building2, BookOpen, Microscope, Quote, Sprout, FlaskConical, CreditCard, Smartphone, Copy, Tag,
-  Play, Pause, Volume2, VolumeX, Menu
+  Play, Pause, Volume2, VolumeX, Menu, CheckCircle2, AlertCircle, Info
 } from 'lucide-react';
 import { trackEvent, createEventId } from '../lib/pixelGtmService';
 import { Product, BookOrder, EcomSettings, InstituteInfo, ContactMessage, AboutPageSettings, DeliveryMethodItem, PaymentGatewayItem, Coupon } from '../types';
@@ -23,6 +23,7 @@ import CheckoutPage from './CheckoutPage';
 import { DoctorFloatingTrigger } from './ai/DoctorFloatingTrigger';
 import { SkincareDoctorModal } from './ai/SkincareDoctorModal';
 import { SkinQuizView } from './SkinQuizView';
+import { FeedbackDialog } from './ui/FeedbackDialog';
 
 const FantineFooter = React.lazy(() => import('./FantineFooter'));
 
@@ -580,9 +581,32 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [currency] = useState<'BDT'>('BDT');
   
-  // Modals & Drawers
+  // Modals, Feedback Dialog & Drawers
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [showNotificationToast, setShowNotificationToast] = useState<{ show: boolean; msg: string }>({ show: false, msg: '' });
+  const [showNotificationToast, setShowNotificationToast] = useState<{
+    show: boolean;
+    msg: string;
+    type?: 'success' | 'error' | 'info';
+  }>({ show: false, msg: '', type: 'success' });
+
+  const showToast = useCallback((msg: string, type: 'success' | 'error' | 'info' = 'success') => {
+    setShowNotificationToast({ show: true, msg, type });
+    setTimeout(() => {
+      setShowNotificationToast(prev => prev.msg === msg ? { show: false, msg: '', type: 'success' } : prev);
+    }, 4500);
+  }, []);
+
+  const [feedback, setFeedback] = useState<{
+    isOpen: boolean;
+    type: 'success' | 'error' | 'info';
+    title?: string;
+    message: string;
+  }>({
+    isOpen: false,
+    type: 'success',
+    title: '',
+    message: ''
+  });
 
   // 10-Minute Cart Reservation Hold State
   const [reservationSeconds, setReservationSeconds] = useState<number>(600); // 10 mins
@@ -856,9 +880,8 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
       }]
     }, eventId);
     addToCartAction({ product, quantity });
-    setShowNotificationToast({ show: true, msg: `Added ${product.title} to your bag.` });
-    setTimeout(() => setShowNotificationToast({ show: false, msg: '' }), 3500);
-  }, [addToCartAction]);
+    showToast(`Added ${product.title} to your bag.`, 'success');
+  }, [addToCartAction, showToast]);
 
   const handleRemoveFromCart = useCallback((productId: string) => {
     removeFromCartAction(productId);
@@ -1060,17 +1083,35 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!checkoutPhone.trim() || !checkoutAddress.trim() || !checkoutName.trim()) {
-      alert('Please provide your name, mobile number and full delivery address.');
+      setFeedback({
+        isOpen: true,
+        type: 'error',
+        title: 'Required Information Missing',
+        message: 'Please provide your name, mobile phone number, and complete delivery address to complete your order.'
+      });
+      showToast('Please fill in your name, phone and address.', 'error');
       return;
     }
 
     if (cart.length === 0) {
-      alert('Your shopping bag is empty.');
+      setFeedback({
+        isOpen: true,
+        type: 'info',
+        title: 'Shopping Bag Is Empty',
+        message: 'Your shopping bag is empty. Please add items before checking out.'
+      });
+      showToast('Your shopping bag is empty.', 'info');
       return;
     }
 
     if (isOnlinePayment && (!senderPhone.trim() || !trxId.trim())) {
-      alert(`please ${selectedPaymentGateway?.title || 'Payment'}-sender of mobile number and Transaction ID (TrxID) day।`);
+      setFeedback({
+        isOpen: true,
+        type: 'error',
+        title: 'Payment Details Required',
+        message: `Please provide your ${selectedPaymentGateway?.title || 'bKash/Nagad'} sender mobile number and Transaction ID (TrxID).`
+      });
+      showToast('Please provide your sender number and TrxID.', 'error');
       return;
     }
 
@@ -1193,7 +1234,13 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
       setAppliedCoupon(null);
     } catch (err) {
       console.error('Order error:', err);
-      alert('There was a problem processing the order. Please try again.');
+      setFeedback({
+        isOpen: true,
+        type: 'error',
+        title: 'Order Processing Failed',
+        message: 'There was a problem processing your order. Please try again or contact us directly on WhatsApp.'
+      });
+      showToast('Order processing failed. Please try again.', 'error');
     } finally {
       setIsSubmittingOrder(false);
     }
@@ -1202,7 +1249,13 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!contactEmail.trim()) {
-      alert('Please enter your email address.');
+      setFeedback({
+        isOpen: true,
+        type: 'error',
+        title: 'Email Address Required',
+        message: 'Please enter your email address so our customer care team can respond to your inquiry.'
+      });
+      showToast('Please enter your email address.', 'error');
       return;
     }
 
@@ -1225,7 +1278,14 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
       setContactPhone('');
       setContactSubject('');
       setContactMessage('');
-      alert(`Thank you! Your message has been received and forwarded to ${displayCompanyName}.`);
+      const successMsg = `Thank you! Your message has been received and forwarded to ${displayCompanyName}. Our customer service team will get back to you shortly.`;
+      setFeedback({
+        isOpen: true,
+        type: 'success',
+        title: 'Message Sent Successfully',
+        message: successMsg
+      });
+      showToast(`Thank you! Your message has been received.`, 'success');
     } catch (err) {
       console.error('Error submitting contact form to dbService:', err);
       try {
@@ -1243,7 +1303,14 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
       setContactPhone('');
       setContactSubject('');
       setContactMessage('');
-      alert(`Thank you! Your message has been received.`);
+      const fallbackMsg = `Thank you! Your message has been received. Our customer service team will review your message shortly.`;
+      setFeedback({
+        isOpen: true,
+        type: 'success',
+        title: 'Message Received',
+        message: fallbackMsg
+      });
+      showToast(`Thank you! Your message has been received.`, 'success');
     } finally {
       setIsSubmittingContact(false);
       setTimeout(() => setContactSubmitted(false), 3000);
@@ -1261,9 +1328,29 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
       
       {/* Toast Notification */}
       {showNotificationToast.show && (
-        <div className="fixed top-20 right-6 z-50 bg-slate-900 text-white px-5 py-3 rounded-full shadow-2xl flex items-center gap-3 border border-slate-700 animate-bounce">
-          <Sparkles className="w-5 h-5 text-amber-400" />
-          <span className="text-sm font-medium">{showNotificationToast.msg}</span>
+        <div className={`fixed top-20 right-4 sm:right-6 z-[100] px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border transition-all duration-300 transform translate-y-0 backdrop-blur-md max-w-sm sm:max-w-md ${
+          showNotificationToast.type === 'error'
+            ? 'bg-rose-950/95 border-rose-500/40 text-rose-100 shadow-rose-950/30'
+            : showNotificationToast.type === 'info'
+            ? 'bg-teal-950/95 border-teal-500/40 text-teal-100 shadow-teal-950/30'
+            : 'bg-slate-900/95 border-emerald-500/40 text-white shadow-slate-950/40'
+        }`}>
+          {showNotificationToast.type === 'error' ? (
+            <AlertCircle className="w-5 h-5 text-rose-400 shrink-0" />
+          ) : showNotificationToast.type === 'info' ? (
+            <Info className="w-5 h-5 text-teal-400 shrink-0" />
+          ) : (
+            <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+          )}
+          <span className="text-xs sm:text-sm font-semibold flex-1 leading-snug">{showNotificationToast.msg}</span>
+          <button 
+            type="button" 
+            onClick={() => setShowNotificationToast({ show: false, msg: '', type: 'success' })}
+            className="ml-1 text-slate-400 hover:text-white transition-colors cursor-pointer p-1 rounded-full hover:bg-white/10"
+            aria-label="Close notification"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
         </div>
       )}
 
@@ -2916,6 +3003,15 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
         cartProducts={cart.map(item => item.product)}
         activeProduct={aiDoctorContextProduct || (activeNav === 'product_detail' ? activeProductDetail : null)}
         initialSelectedProductIds={aiDoctorSelectedProductIds}
+      />
+
+      {/* Global User Feedback Dialog */}
+      <FeedbackDialog
+        isOpen={feedback.isOpen}
+        type={feedback.type}
+        title={feedback.title}
+        message={feedback.message}
+        onClose={() => setFeedback(prev => ({ ...prev, isOpen: false }))}
       />
 
     </div>
