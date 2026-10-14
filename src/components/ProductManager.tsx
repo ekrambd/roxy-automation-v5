@@ -78,6 +78,7 @@ export default function ProductManager({
   const [category, setCategory] = useState('');
   const [subCategory, setSubCategory] = useState('');
   const [brand, setBrand] = useState('');
+  const [brandId, setBrandId] = useState('');
   const [storeBrands, setStoreBrands] = useState<Brand[]>([]);
   const [selectedBrandFilter, setSelectedBrandFilter] = useState<string>('all');
   const [slug, setSlug] = useState('');
@@ -195,8 +196,15 @@ export default function ProductManager({
       setIngredients(product.ingredients || '');
       setSubtitle(product.subtitle || '');
       setCategory(product.category || 'general');
-      setSubCategory(product.subCategory || '');
-      setBrand(product.brand || '');
+      setBrandId(product.brandId || '');
+      const rawBrand = product.brand || product.authorName || product.author || '';
+      const matchedBrand = storeBrands.find(b => 
+        (b.name && b.name.trim().toLowerCase() === rawBrand.trim().toLowerCase()) ||
+        b.id === product.brandId ||
+        b.id === product.brand
+      );
+      setBrand(matchedBrand ? matchedBrand.name : rawBrand);
+      if (matchedBrand) setBrandId(matchedBrand.id);
       setSlug(product.slug || getProductSlug(product));
       setSeoTitle(product.seoTitle || '');
       setSeoDescription(product.seoDescription || '');
@@ -258,7 +266,8 @@ export default function ProductManager({
       setSubtitle('');
       setCategory(storeCategories[0]?.name || '');
       setSubCategory('');
-      setBrand('');
+      setBrand(storeBrands[0]?.name || '');
+      setBrandId(storeBrands[0]?.id || '');
       setSlug('');
       setSeoTitle('');
       setSeoDescription('');
@@ -293,6 +302,20 @@ export default function ProductManager({
     }
     setActiveTab('title-summary');
     setIsModalOpen(true);
+  };
+
+  const handleBrandChange = (selectedBrandValue: string) => {
+    setBrand(selectedBrandValue);
+    const matched = storeBrands.find(b => 
+      b.name.trim().toLowerCase() === selectedBrandValue.trim().toLowerCase() ||
+      b.id === selectedBrandValue
+    );
+    if (matched) {
+      setBrandId(matched.id);
+      setAuthorName(matched.name);
+    } else {
+      setBrandId('');
+    }
   };
 
   // Quick Discount Buttons (-10%, -15%, -20%, -25%, -50%)
@@ -449,11 +472,21 @@ export default function ProductManager({
       .map(keyword => keyword.trim())
       .filter(Boolean);
 
+    const matchedBrand = storeBrands.find(b => 
+      b.name.trim().toLowerCase() === brand.trim().toLowerCase() ||
+      b.id === brandId ||
+      b.id === brand
+    );
+    const finalBrandName = brand.trim() || matchedBrand?.name || undefined;
+    const finalBrandId = matchedBrand?.id || brandId || undefined;
+    const finalAuthor = finalBrandName || authorName.trim() || 'FANTINE Korea';
+
     return {
       id: editingProduct ? editingProduct.id : `prod-${Date.now()}`,
       title: title.trim() || 'untitled goods',
       subtitle: subtitle.trim(),
-      authorName: authorName.trim(),
+      authorName: finalAuthor,
+      author: finalAuthor,
       pdfUrl: pdfUrl.trim(),
       isFlashSale: isFlashPrice,
       sku: sku.trim(),
@@ -474,7 +507,8 @@ export default function ProductManager({
       image: image.trim() || 'https://images.unsplash.com/photo-1608248597359-0098f98a329d?w=800&auto=format&fit=crop&q=85',
       category: category.trim() || 'general',
       subCategory: subCategory.trim(),
-      brand: brand.trim() || undefined,
+      brand: finalBrandName,
+      brandId: finalBrandId,
       stock: stock !== '' ? Number(stock) : 0,
       isAvailable,
       isPrivate,
@@ -578,14 +612,30 @@ export default function ProductManager({
   };
 
   const filteredProducts = products.filter(p => {
-    const matchesSearch = p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (p.subtitle && p.subtitle.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (p.sku && p.sku.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (p.brand && p.brand.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (p.slug && p.slug.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (p.seoKeywords && p.seoKeywords.some(keyword => keyword.toLowerCase().includes(searchTerm.toLowerCase())));
-    const matchesCat = selectedCategory === 'all' || p.category === selectedCategory;
-    const matchesBrand = selectedBrandFilter === 'all' || p.brand === selectedBrandFilter;
+    const term = searchTerm.toLowerCase();
+    const matchesSearch = !term ||
+      p.title.toLowerCase().includes(term) ||
+      (p.subtitle && p.subtitle.toLowerCase().includes(term)) ||
+      (p.sku && p.sku.toLowerCase().includes(term)) ||
+      (p.brand && p.brand.toLowerCase().includes(term)) ||
+      (p.authorName && p.authorName.toLowerCase().includes(term)) ||
+      (p.author && p.author.toLowerCase().includes(term)) ||
+      (p.slug && p.slug.toLowerCase().includes(term)) ||
+      (p.seoKeywords && p.seoKeywords.some(keyword => keyword.toLowerCase().includes(term)));
+
+    const matchesCat = selectedCategory === 'all' || 
+      (p.category && p.category.trim().toLowerCase() === selectedCategory.trim().toLowerCase());
+
+    let matchesBrand = selectedBrandFilter === 'all';
+    if (!matchesBrand) {
+      const targetBrand = selectedBrandFilter.trim().toLowerCase();
+      matchesBrand = Boolean(
+        (p.brand && p.brand.trim().toLowerCase() === targetBrand) ||
+        (p.brandId && p.brandId.trim().toLowerCase() === targetBrand) ||
+        (p.authorName && p.authorName.trim().toLowerCase() === targetBrand) ||
+        (p.author && p.author.trim().toLowerCase() === targetBrand)
+      );
+    }
     return matchesSearch && matchesCat && matchesBrand;
   });
 
@@ -773,11 +823,11 @@ export default function ProductManager({
                         <span className="inline-block bg-teal-50 text-teal-800 text-[11px] font-bold px-2.5 py-1 rounded-lg border border-teal-200">
                           {p.category}
                         </span>
-                        {p.brand && (
+                        {(p.brand || p.authorName || (p.author && p.author !== 'FANTINE Laboratory' ? p.author : '')) && (
                           <div>
                             <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-md border border-amber-200">
                               <Bookmark className="h-2.5 w-2.5" />
-                              {p.brand}
+                              {p.brand || p.authorName || p.author}
                             </span>
                           </div>
                         )}
@@ -937,10 +987,10 @@ export default function ProductManager({
                   <span className="bg-slate-900/80 backdrop-blur-md text-white text-[9px] font-bold px-1.5 py-0.5 rounded truncate">
                     {p.category}
                   </span>
-                  {p.brand && (
+                  {(p.brand || p.authorName || (p.author && p.author !== 'FANTINE Laboratory' ? p.author : '')) && (
                     <span className="bg-amber-400/90 backdrop-blur-md text-slate-950 text-[9px] font-black px-1.5 py-0.5 rounded flex items-center gap-0.5">
                       <Bookmark className="h-2 w-2" />
-                      {p.brand}
+                      {p.brand || p.authorName || p.author}
                     </span>
                   )}
                 </div>
@@ -1162,6 +1212,44 @@ export default function ProductManager({
                           onChange={(e) => setTitle(e.target.value)}
                           className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:ring-2 focus:ring-teal-500 outline-none"
                         />
+                      </div>
+
+                      {/* Main Category & Brand right in Tab 1 */}
+                      <div className="md:col-span-5">
+                        <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1">
+                          <Tag className="h-3.5 w-3.5 text-teal-600" />
+                          <span>Main Category / ক্যাটাগরি *</span>
+                        </label>
+                        <select
+                          value={category}
+                          onChange={(e) => {
+                            setCategory(e.target.value);
+                            setSubCategory('');
+                          }}
+                          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:ring-2 focus:ring-teal-500 outline-none"
+                        >
+                          <option value="">Select Category...</option>
+                          {storeCategories.map(cat => (
+                            <option key={cat.id} value={cat.name}>{cat.name}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="md:col-span-5">
+                        <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1">
+                          <Bookmark className="h-3.5 w-3.5 text-amber-600" />
+                          <span>Brand / ব্র্যান্ড</span>
+                        </label>
+                        <select
+                          value={brand}
+                          onChange={(e) => handleBrandChange(e.target.value)}
+                          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:ring-2 focus:ring-teal-500 outline-none"
+                        >
+                          <option value="">Select brand...</option>
+                          {storeBrands.map(b => (
+                            <option key={b.id} value={b.name}>{b.name}</option>
+                          ))}
+                        </select>
                       </div>
 
                       {/* Detailed Description */}
@@ -1548,7 +1636,7 @@ export default function ProductManager({
                         </label>
                         <select
                           value={brand}
-                          onChange={(e) => setBrand(e.target.value)}
+                          onChange={(e) => handleBrandChange(e.target.value)}
                           className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:ring-2 focus:ring-teal-500 outline-none"
                         >
                           <option value="">Select brand...</option>

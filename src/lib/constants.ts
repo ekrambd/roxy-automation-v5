@@ -277,58 +277,17 @@ Easier absorption.
   }
 ];
 
-export const DEFAULT_COUPONS: Coupon[] = [
+export const DEFAULT_COUPONS: Coupon[] = [];
+
+export const DEFAULT_BRANDS: Brand[] = [
   {
-    id: 'cpn-1',
-    code: 'DIS2000',
-    title: '2000',
-    discount: 2500,
-    type: 'fixed',
-    status: 'Active',
-    visibility: 'Private',
-    usageCount: 2,
-    usageLimit: 10000,
-    updatedAt: '16 days ago'
-  },
-  {
-    id: 'cpn-2',
-    code: 'TEST20',
-    title: 'TEST20',
-    discount: 780,
-    type: 'fixed',
-    status: 'Active',
-    visibility: 'Private',
-    usageCount: 1,
-    usageLimit: 10,
-    updatedAt: '2 months ago'
-  },
-  {
-    id: 'cpn-3',
-    code: 'TEST10',
-    title: 'TEST10',
-    discount: 1990,
-    type: 'fixed',
-    status: 'Active',
-    visibility: 'Private',
-    usageCount: 1,
-    usageLimit: 100,
-    updatedAt: '2 months ago'
-  },
-  {
-    id: 'cpn-4',
-    code: 'old790',
-    title: 'mobile course',
-    discount: 100,
-    type: 'percentage',
-    status: 'Active',
-    visibility: 'Private',
-    usageCount: 0,
-    usageLimit: 10000,
-    updatedAt: '2 months ago'
+    id: 'brand-fantine',
+    name: 'FANTINE Korea',
+    isActive: true,
+    createdAt: '2026-01-01T00:00:00.000Z',
+    updatedAt: '2026-01-01T00:00:00.000Z'
   }
 ];
-
-export const DEFAULT_BRANDS: Brand[] = [];
 
 export const DEFAULT_PAYMENT_GATEWAYS: PaymentGatewayItem[] = [
   {

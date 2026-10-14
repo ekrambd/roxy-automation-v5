@@ -308,6 +308,8 @@ function loadProductsFromDisk(): Product[] {
       howToUse: p.howToUse || (p as any).howToUseIt || initialMatch?.howToUse || '',
       howToUseIt: (p as any).howToUseIt || p.howToUse || initialMatch?.howToUseIt || '',
       ingredients: p.ingredients || initialMatch?.ingredients || '',
+      brand: p.brand || initialMatch?.brand || p.authorName || p.author || 'FANTINE Korea',
+      brandId: p.brandId || initialMatch?.brandId || 'brand-fantine',
       image: img,
       coverImage: p.coverImage || img,
       stock: stockNum,

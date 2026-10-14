@@ -1246,19 +1246,51 @@ export const dbService = {
           return list;
         }
       } catch (e) {
-        console.warn('Firestore coupons fetch failed, using local/defaults:', e);
+        console.warn('Firestore coupons fetch failed:', e);
       }
     }
 
-    const local = getLocalData<Coupon[]>('noor_coupons', []);
-    if (local && local.length > 0) return local;
+    try {
+      const res = await fetch('/api/coupons');
+      if (res.ok) {
+        const serverCoupons = await res.json();
+        if (Array.isArray(serverCoupons)) {
+          setLocalData('noor_coupons', serverCoupons);
+          return serverCoupons;
+        }
+      }
+    } catch {}
 
-    return DEFAULT_COUPONS;
+    const local = getLocalData<Coupon[]>('noor_coupons', []);
+    if (Array.isArray(local)) {
+      // Purge any legacy dummy seed coupons (e.g. cpn-1, cpn-2, DIS2000, TEST20)
+      const clean = local.filter(c => 
+        c && 
+        !c.id?.startsWith('cpn-') && 
+        !['DIS2000', 'TEST20', 'TEST10', 'OLD790'].includes((c.code || '').toUpperCase())
+      );
+      if (clean.length !== local.length) {
+        setLocalData('noor_coupons', clean);
+      }
+      return clean;
+    }
+
+    return [];
   },
 
   async addCoupon(couponData: Omit<Coupon, 'id'> & { id?: string }): Promise<Coupon> {
     const id = couponData.id || `cpn_${Date.now()}`;
     const newCoupon: Coupon = { ...couponData, id };
+
+    try {
+      await fetch('/api/coupons', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newCoupon)
+      });
+    } catch (e) {
+      console.warn('Failed saving coupon to server API:', e);
+    }
 
     if (isFirebaseEnabled && db) {
       try {
@@ -1275,6 +1307,16 @@ export const dbService = {
   },
 
   async updateCoupon(coupon: Coupon): Promise<Coupon> {
+    try {
+      await fetch(`/api/coupons/${encodeURIComponent(coupon.id)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(coupon)
+      });
+    } catch (e) {
+      console.warn('Failed updating coupon on server API:', e);
+    }
+
     if (isFirebaseEnabled && db) {
       try {
         await setDoc(doc(db, 'coupons', coupon.id), coupon, { merge: true });
@@ -1290,6 +1332,14 @@ export const dbService = {
   },
 
   async deleteCoupon(id: string): Promise<boolean> {
+    try {
+      await fetch(`/api/coupons/${encodeURIComponent(id)}`, {
+        method: 'DELETE'
+      });
+    } catch (e) {
+      console.warn('Failed deleting coupon on server API:', e);
+    }
+
     if (isFirebaseEnabled && db) {
       try {
         await deleteDoc(doc(db, 'coupons', id));
@@ -1432,8 +1482,23 @@ export const dbService = {
       }
     }
 
-    const list = getLocalData<Brand[]>('noor_brands', []);
-    return list || [];
+    try {
+      const res = await fetch('/api/brands');
+      if (res.ok) {
+        const serverBrands = await res.json();
+        if (Array.isArray(serverBrands) && serverBrands.length > 0) {
+          setLocalData('noor_brands', serverBrands);
+          return serverBrands;
+        }
+      }
+    } catch {}
+
+    const list = getLocalData<Brand[]>('noor_brands', DEFAULT_BRANDS);
+    if (!list || list.length === 0) {
+      setLocalData('noor_brands', DEFAULT_BRANDS);
+      return DEFAULT_BRANDS;
+    }
+    return list;
   },
 
   async saveBrand(brand: Brand): Promise<Brand> {
@@ -1443,6 +1508,16 @@ export const dbService = {
       createdAt: brand.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
+
+    try {
+      await fetch('/api/brands', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(finalBrand)
+      });
+    } catch (e) {
+      console.warn('Failed saving brand to server API:', e);
+    }
 
     if (isFirebaseEnabled && db) {
       try {
@@ -1469,6 +1544,14 @@ export const dbService = {
   },
 
   async deleteBrand(id: string): Promise<void> {
+    try {
+      await fetch(`/api/brands/${encodeURIComponent(id)}`, {
+        method: 'DELETE'
+      });
+    } catch (e) {
+      console.warn('Failed deleting brand from server API:', e);
+    }
+
     if (isFirebaseEnabled && db) {
       try {
         await deleteDoc(doc(db, 'brands', id));
