@@ -1,18 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  Zap, 
   Clock, 
   Save, 
-  RefreshCw, 
   CheckCircle2, 
   AlertCircle, 
-  Eye, 
   Package, 
-  Sparkles,
-  ArrowRight,
-  Flame,
+  Flame, 
   Calendar,
-  DollarSign
+  Sparkles
 } from 'lucide-react';
 import { Product, EcomSettings, FlashSaleSettings } from '../types';
 import { dbService } from '../lib/dbService';
@@ -39,7 +34,7 @@ export default function FlashSaleManager({ products, onSettingsUpdated }: FlashS
     seconds: 0
   });
 
-  // Load Settings from Firestore
+  // Load Settings from DB
   useEffect(() => {
     async function fetchSettings() {
       try {
@@ -90,29 +85,27 @@ export default function FlashSaleManager({ products, onSettingsUpdated }: FlashS
     return products.find(p => p.id === flashSale.productId) || products[0] || null;
   }, [products, flashSale.productId]);
 
-  // Auto-fill from Product
-  const handleAutoFillFromProduct = () => {
-    if (!selectedProduct) return;
-    setFlashSale(prev => ({
-      ...prev,
-      title: selectedProduct.title,
-      subtitle: selectedProduct.description ? selectedProduct.description.slice(0, 160) + '...' : prev.subtitle,
-      customImage: selectedProduct.coverImage || selectedProduct.images?.[0] || prev.customImage,
-      originalPrice: selectedProduct.regularPrice || selectedProduct.price,
-      flashPrice: selectedProduct.regularPrice ? selectedProduct.price : Math.round(selectedProduct.price * 0.8),
-      badgeTag: selectedProduct.category ? `${selectedProduct.category.toUpperCase()} FLASH DEAL` : 'LIMITED FLASH SALE'
-    }));
-  };
-
   // Calculate discount percentage
   const discountPercent = useMemo(() => {
-    const orig = flashSale.originalPrice || 0;
-    const flash = flashSale.flashPrice || 0;
+    const orig = flashSale.originalPrice || selectedProduct?.regularPrice || selectedProduct?.price || 0;
+    const flash = flashSale.flashPrice || selectedProduct?.price || 0;
     if (orig > flash && orig > 0) {
       return Math.round(((orig - flash) / orig) * 100);
     }
     return 0;
-  }, [flashSale.originalPrice, flashSale.flashPrice]);
+  }, [flashSale.originalPrice, flashSale.flashPrice, selectedProduct]);
+
+  // Handle Product Selection change
+  const handleSelectProduct = (pid: string) => {
+    const prod = products.find(p => p.id === pid);
+    if (!prod) return;
+    setFlashSale(prev => ({
+      ...prev,
+      productId: pid,
+      flashPrice: prod.price,
+      originalPrice: prod.regularPrice || prod.price
+    }));
+  };
 
   // Handle Save
   const handleSave = async (e: React.FormEvent) => {
@@ -121,11 +114,17 @@ export default function FlashSaleManager({ products, onSettingsUpdated }: FlashS
       setSaving(true);
       setErrorMsg('');
       const current = await dbService.getEcomSettings();
+      const targetId = flashSale.productId || (selectedProduct?.id || '');
+      const prod = products.find(p => p.id === targetId) || selectedProduct;
+
       const updated: EcomSettings = {
         ...current,
         flashSale: {
-          ...flashSale,
-          productId: flashSale.productId || (selectedProduct?.id || '')
+          enabled: flashSale.enabled,
+          productId: targetId,
+          flashPrice: flashSale.flashPrice || prod?.price || 0,
+          originalPrice: flashSale.originalPrice || prod?.regularPrice || prod?.price || 0,
+          endDate: flashSale.endDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
         }
       };
 
@@ -146,13 +145,13 @@ export default function FlashSaleManager({ products, onSettingsUpdated }: FlashS
     return (
       <div className="p-8 text-center space-y-3">
         <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-        <p className="text-xs font-medium text-slate-500">Loading flash cell settings...</p>
+        <p className="text-xs font-medium text-slate-500">Loading flash sale settings...</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8 font-sans max-w-6xl pb-16">
+    <div className="space-y-8 font-sans max-w-4xl pb-16">
       
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-2xs">
@@ -162,13 +161,13 @@ export default function FlashSaleManager({ products, onSettingsUpdated }: FlashS
           </div>
           <div>
             <h1 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-              Flash Cell PRoDuct Management
+              Flash Sale Product Management
               <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-800 uppercase tracking-wider">
                 1 Target Product
               </span>
             </h1>
             <p className="text-xs text-slate-500 mt-0.5">
-              Single target p on home pageRoInteresting live countdown for Duct and discount Section Confeegar
+              Select any product for the home page flash sale spotlight. All titles, descriptions, and images are displayed dynamically from the selected product.
             </p>
           </div>
         </div>
@@ -197,7 +196,7 @@ export default function FlashSaleManager({ products, onSettingsUpdated }: FlashS
       {saveSuccess && (
         <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-3 text-emerald-800 text-xs font-semibold animate-fadeIn">
           <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-          <span>Flash sale settings successfully saved and updated on store page!</span>
+          <span>Flash sale settings saved! Live storefront is now updated dynamically.</span>
         </div>
       )}
 
@@ -209,69 +208,98 @@ export default function FlashSaleManager({ products, onSettingsUpdated }: FlashS
       )}
 
       {/* Main Configuration Form */}
-      <form onSubmit={handleSave} className="max-w-3xl space-y-6">
+      <form onSubmit={handleSave} className="space-y-6">
         
-        {/* Card 1: Select 1 Target Product */}
+        {/* Card 1: Select Target Product & Dynamic Preview */}
         <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-2xs space-y-5">
           <div className="flex items-center justify-between border-b border-slate-100 pb-4">
             <div className="flex items-center gap-2">
               <Package className="w-5 h-5 text-orange-500" />
-              <h2 className="text-sm font-bold text-slate-900">Only 1 Product</h2>
+              <h2 className="text-sm font-bold text-slate-900">Select Target Product</h2>
             </div>
-            <button
-              type="button"
-              onClick={handleAutoFillFromProduct}
-              className="text-xs font-bold text-orange-600 hover:text-orange-700 inline-flex items-center gap-1 cursor-pointer"
-              title="Fill in the title, price and description from the product"
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              Auto-fill Details
-            </button>
+            <span className="text-[11px] font-semibold text-slate-500 flex items-center gap-1">
+              <Sparkles className="w-3.5 h-3.5 text-orange-500" />
+              Dynamic Product Info
+            </span>
           </div>
 
           <div className="space-y-3">
             <label className="block text-xs font-bold text-slate-700">
-              PRoSelect the duct:
+              Select Product:
             </label>
             <select
-              value={flashSale.productId || ''}
-              onChange={(e) => {
-                const pid = e.target.value;
-                const prod = products.find(p => p.id === pid);
-                setFlashSale(prev => ({
-                  ...prev,
-                  productId: pid,
-                  originalPrice: prod?.regularPrice || prod?.price || prev.originalPrice,
-                  flashPrice: prod?.price || prev.flashPrice,
-                  title: prod?.title || prev.title
-                }));
-              }}
-              className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all cursor-pointer"
+              value={flashSale.productId || selectedProduct?.id || ''}
+              onChange={(e) => handleSelectProduct(e.target.value)}
+              className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 font-semibold focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all cursor-pointer"
             >
               {products.length === 0 ? (
                 <option value="">No products found</option>
               ) : (
                 products.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.title} (price: Tk.{p.price.toLocaleString()})
+                    {p.title} (Regular: Tk.{(p.regularPrice || p.price).toLocaleString()} | Sale: Tk.{p.price.toLocaleString()})
                   </option>
                 ))
               )}
             </select>
           </div>
+
+          {/* Dynamic Selected Product Preview Box */}
+          {selectedProduct && (
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 flex flex-col sm:flex-row items-center sm:items-start gap-4">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl bg-white border border-slate-200 shrink-0 overflow-hidden flex items-center justify-center p-1 shadow-2xs">
+                <img
+                  src={selectedProduct.coverImage || selectedProduct.images?.[0]}
+                  alt={selectedProduct.title}
+                  className="w-full h-full object-contain"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = '/favicon/favicon-96x96.png';
+                  }}
+                />
+              </div>
+              <div className="flex-1 min-w-0 space-y-1.5 text-center sm:text-left">
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-orange-100 text-orange-800">
+                    {selectedProduct.category || 'Skincare'}
+                  </span>
+                  {selectedProduct.series && (
+                    <span className="text-[10px] font-semibold text-slate-500">
+                      {selectedProduct.series}
+                    </span>
+                  )}
+                  <span className="text-[10px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">
+                    In Stock ({selectedProduct.stockQuantity || selectedProduct.stock || 100})
+                  </span>
+                </div>
+                <h3 className="text-sm font-bold text-slate-900 leading-snug">
+                  {selectedProduct.title}
+                </h3>
+                <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                  {selectedProduct.description ? selectedProduct.description.split('\n')[0].replace(/^Product Description\s*[:：]?\s*/i, '').trim() : 'Active formula for deep hydration & radiance.'}
+                </p>
+                <div className="flex items-center justify-center sm:justify-start gap-3 pt-1 text-xs">
+                  <span className="font-bold text-emerald-600">Base Price: Tk.{selectedProduct.price?.toLocaleString()}</span>
+                  {selectedProduct.regularPrice && selectedProduct.regularPrice > selectedProduct.price && (
+                    <span className="text-slate-400 line-through">Regular: Tk.{selectedProduct.regularPrice?.toLocaleString()}</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Card 2: Price & Countdown Timer */}
         <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-2xs space-y-5">
           <div className="flex items-center gap-2 border-b border-slate-100 pb-4">
             <Clock className="w-5 h-5 text-orange-500" />
-            <h2 className="text-sm font-bold text-slate-900">Pricing and countdown timer</h2>
+            <h2 className="text-sm font-bold text-slate-900">Flash Sale Pricing & Countdown Timer</h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="block text-xs font-bold text-slate-700">
-                Flash sale offer price (Tk.) *
+                Flash Sale Offer Price (Tk.) *
               </label>
               <div className="relative">
                 <span className="absolute left-3.5 top-3 text-slate-400 text-xs font-bold">Tk.</span>
@@ -281,14 +309,14 @@ export default function FlashSaleManager({ products, onSettingsUpdated }: FlashS
                   required
                   value={flashSale.flashPrice || 0}
                   onChange={(e) => setFlashSale(prev => ({ ...prev, flashPrice: Number(e.target.value) }))}
-                  className="w-full pl-8 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 font-bold focus:border-orange-500 focus:outline-none"
+                  className="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 font-bold focus:border-orange-500 focus:outline-none"
                 />
               </div>
             </div>
 
             <div className="space-y-1.5">
               <label className="block text-xs font-bold text-slate-700">
-                original / Regular price (Tk.)
+                Regular / Strike-through Price (Tk.)
               </label>
               <div className="relative">
                 <span className="absolute left-3.5 top-3 text-slate-400 text-xs font-bold">Tk.</span>
@@ -297,7 +325,7 @@ export default function FlashSaleManager({ products, onSettingsUpdated }: FlashS
                   min="0"
                   value={flashSale.originalPrice || 0}
                   onChange={(e) => setFlashSale(prev => ({ ...prev, originalPrice: Number(e.target.value) }))}
-                  className="w-full pl-8 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 font-mono focus:border-orange-500 focus:outline-none"
+                  className="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 font-mono focus:border-orange-500 focus:outline-none"
                 />
               </div>
             </div>
@@ -316,7 +344,7 @@ export default function FlashSaleManager({ products, onSettingsUpdated }: FlashS
           <div className="space-y-1.5 pt-2 border-t border-slate-100">
             <label className="block text-xs font-bold text-slate-700 flex items-center gap-1.5">
               <Calendar className="w-4 h-4 text-orange-500" />
-              Flash sale ends Date and time (Countdown Expiry):
+              Flash Sale Expiry Date & Time (Countdown Ends):
             </label>
             <input
               type="datetime-local"
@@ -325,100 +353,8 @@ export default function FlashSaleManager({ products, onSettingsUpdated }: FlashS
               className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 font-mono focus:border-orange-500 focus:outline-none cursor-pointer"
             />
             <p className="text-[11px] text-slate-400">
-              A live countdown timer will continue on the store's home page until this specified time।
+              The live countdown on the home page will run continuously until this date and time.
             </p>
-          </div>
-        </div>
-
-        {/* Card 3: Custom Text */}
-        <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-2xs space-y-4">
-          <div className="flex items-center gap-2 border-b border-slate-100 pb-4">
-            <Sparkles className="w-5 h-5 text-orange-500" />
-            <h2 className="text-sm font-bold text-slate-900">Title and presentation text</h2>
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="block text-xs font-bold text-slate-700">Header Badge Tag:</label>
-            <input
-              type="text"
-              value={flashSale.badgeTag || ''}
-              onChange={(e) => setFlashSale(prev => ({ ...prev, badgeTag: e.target.value }))}
-              placeholder="e.g. BRIGHTENING AND WHITENING SERIES"
-              className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm focus:border-orange-500 focus:outline-none"
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="block text-xs font-bold text-slate-700">Section Title:</label>
-            <input
-              type="text"
-              value={flashSale.title || ''}
-              onChange={(e) => setFlashSale(prev => ({ ...prev, title: e.target.value }))}
-              placeholder="e.g. FANTINE Whitening and Brightening Series"
-              className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm focus:border-orange-500 focus:outline-none"
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="block text-xs font-bold text-slate-700">Description:</label>
-            <textarea
-              rows={3}
-              value={flashSale.subtitle || ''}
-              onChange={(e) => setFlashSale(prev => ({ ...prev, subtitle: e.target.value }))}
-              placeholder="e.g. Instantly brightens and revitalizes the skin with just one application..."
-              className="w-full p-3.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm focus:border-orange-500 focus:outline-none resize-none"
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="block text-xs font-bold text-slate-700">Button Label:</label>
-            <input
-              type="text"
-              value={flashSale.buttonText || 'SHOP NOW'}
-              onChange={(e) => setFlashSale(prev => ({ ...prev, buttonText: e.target.value }))}
-              placeholder="SHOP NOW"
-              className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm focus:border-orange-500 focus:outline-none uppercase"
-            />
-          </div>
-
-          {/* Clinical Video Showcase Settings */}
-          <div className="pt-4 border-t border-slate-200/80 space-y-3">
-            <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-              <span>🎥 Clinical video demonstration settings</span>
-            </h4>
-
-            <div className="space-y-1.5">
-              <label className="block text-xs font-bold text-slate-700">Video Title:</label>
-              <input
-                type="text"
-                value={flashSale.videoTitle || ''}
-                onChange={(e) => setFlashSale(prev => ({ ...prev, videoTitle: e.target.value }))}
-                placeholder="Clinical Hanbang Formulation & Daily Application Ritual"
-                className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm focus:border-orange-500 focus:outline-none"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="block text-xs font-bold text-slate-700">Video Subtitle:</label>
-              <input
-                type="text"
-                value={flashSale.videoSubtitle || ''}
-                onChange={(e) => setFlashSale(prev => ({ ...prev, videoSubtitle: e.target.value }))}
-                placeholder="Watch how our Korean active formula penetrates deeply..."
-                className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm focus:border-orange-500 focus:outline-none"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="block text-xs font-bold text-slate-700">Video link or URLDirect MP4 URL:</label>
-              <input
-                type="text"
-                value={flashSale.videoUrl || ''}
-                onChange={(e) => setFlashSale(prev => ({ ...prev, videoUrl: e.target.value }))}
-                placeholder="https://assets.mixkit.co/videos/.../video.mp4"
-                className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm focus:border-orange-500 focus:outline-none font-mono text-xs"
-              />
-            </div>
           </div>
         </div>
 
@@ -436,7 +372,7 @@ export default function FlashSaleManager({ products, onSettingsUpdated }: FlashS
           ) : (
             <>
               <Save className="w-5 h-5" />
-              <span>Save</span>
+              <span>Save Flash Sale Settings</span>
             </>
           )}
         </button>

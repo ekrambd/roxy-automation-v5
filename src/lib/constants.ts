@@ -800,19 +800,19 @@ export const DEFAULT_ABOUT_SETTINGS: import('../types').AboutPageSettings = {
 export const DEFAULT_FLASH_SALE_SETTINGS: FlashSaleSettings = {
   enabled: true,
   productId: '',
-  badgeTag: 'BRIGHTENING AND WHITENING SERIES',
-  title: 'FANTINE Whitening and Brightening Series',
-  subtitle: 'Instantly brightens and revitalizes the skin with just one application. Infused with six powerful botanical whitening extracts for a rosy and radiant complexion.',
-  customImage: 'https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=1000&auto=format&fit=crop&q=90',
-  flashPrice: 1250,
-  originalPrice: 1850,
+  badgeTag: '',
+  title: '',
+  subtitle: '',
+  customImage: '',
+  flashPrice: 0,
+  originalPrice: 0,
   endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
   buttonText: 'SHOP NOW',
-  showVideoSection: true,
-  videoTitle: 'Clinical Hanbang Formulation & Daily Application Ritual',
-  videoSubtitle: 'Watch how our Korean active formula penetrates deeply to soothe inflammation, rebuild the skin barrier, and restore glass-skin radiance.',
+  showVideoSection: false,
+  videoTitle: '',
+  videoSubtitle: '',
   videoType: 'file',
-  videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-dropper-dropping-oil-into-a-glass-jar-42790-large.mp4'
+  videoUrl: ''
 };
 
 export const DEFAULT_HIGHLIGHT_SPOTLIGHT_SETTINGS: HighlightSpotlightSettings = {

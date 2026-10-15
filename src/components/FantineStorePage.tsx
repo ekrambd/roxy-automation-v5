@@ -2466,18 +2466,29 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
               ? products.find(p => p.id === flashSaleConfig.productId) 
               : products[0];
             
-            const title = flashSaleConfig?.title || targetProd?.title || 'FANTINE Whitening and Brightening Series';
-            const subtitle = flashSaleConfig?.subtitle || targetProd?.description || 'Instantly brightens and revitalizes the skin with just one application. Infused with six powerful botanical whitening extracts for a rosy and radiant complexion.';
-            const badgeTag = flashSaleConfig?.badgeTag || 'LIMITED FLASH SALE • KOREAN HANBANG CARE';
-            const image = targetProd?.coverImage || (targetProd?.images && targetProd.images[0]) || flashSaleConfig?.customImage || DEFAULT_FANTINE_FALLBACK_IMAGE;
-            const flashPrice = flashSaleConfig?.flashPrice ?? (targetProd?.price || 1250);
-            const origPrice = flashSaleConfig?.originalPrice ?? (targetProd?.regularPrice || targetProd?.price || 1850);
+            if (!targetProd) return null;
+
+            const title = targetProd.title;
+            const rawDesc = targetProd.description || targetProd.benefitsHighlights || '';
+            const subtitle = rawDesc
+              .split('\n')[0]
+              .replace(/^Product Description\s*[:：]?\s*/i, '')
+              .replace(/^পণ্যের বিবরণ\s*[:：]?\s*/i, '')
+              .trim() || rawDesc.slice(0, 160);
+
+            const badgeTag = targetProd.series 
+              ? `${targetProd.series.toUpperCase()} • FLASH SALE` 
+              : (targetProd.category ? `${targetProd.category.toUpperCase()} • FLASH SALE` : 'LIMITED FLASH SALE • KOREAN HANBANG CARE');
+
+            const image = targetProd.coverImage || (targetProd.images && targetProd.images[0]) || DEFAULT_FANTINE_FALLBACK_IMAGE;
+            const flashPrice = (flashSaleConfig?.flashPrice && flashSaleConfig.flashPrice > 0) 
+              ? flashSaleConfig.flashPrice 
+              : targetProd.price;
+            const origPrice = (flashSaleConfig?.originalPrice && flashSaleConfig.originalPrice > 0)
+              ? flashSaleConfig.originalPrice 
+              : (targetProd.regularPrice || targetProd.price);
             const discount = origPrice > flashPrice && origPrice > 0 ? Math.round(((origPrice - flashPrice) / origPrice) * 100) : 0;
-            const buttonText = flashSaleConfig?.buttonText || 'SHOP FLASH DEAL';
-            
-            const videoUrl = flashSaleConfig?.videoUrl || 'https://assets.mixkit.co/videos/preview/mixkit-dropper-dropping-oil-into-a-glass-jar-42790-large.mp4';
-            const videoTitle = flashSaleConfig?.videoTitle || 'Clinical Hanbang Formulation & Daily Application Ritual';
-            const videoSubtitle = flashSaleConfig?.videoSubtitle || 'Watch how our Korean active formula penetrates deeply into epidermal layers to soothe irritation, strengthen the moisture barrier, and revive natural glass-skin glow.';
+            const buttonText = 'SHOP FLASH DEAL';
 
             return (
               <div className="relative">
