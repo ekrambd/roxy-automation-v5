@@ -58,7 +58,7 @@ export default function DashboardOverview({
     for (let i = 6; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
-      const dateStr = d.toLocaleDateString('bn-BD', { day: 'numeric', month: 'short' });
+      const dateStr = d.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
       
       const dayStart = new Date(d.setHours(0,0,0,0)).getTime();
       const dayEnd = new Date(d.setHours(23,59,59,999)).getTime();
@@ -106,35 +106,35 @@ export default function DashboardOverview({
         return (
           <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
             <Clock className="h-3 w-3 mr-1" />
-            pending
+            Pending
           </span>
         );
       case 'Confirmed':
         return (
           <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
             <CheckCircle2 className="h-3 w-3 mr-1" />
-            confirmed
+            Confirmed
           </span>
         );
       case 'Shipped':
         return (
           <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
             <Truck className="h-3 w-3 mr-1" />
-            by courier Shipped
+            Shipped
           </span>
         );
       case 'Delivered':
         return (
           <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
             <CheckCircle2 className="h-3 w-3 mr-1" />
-            delivered
+            Delivered
           </span>
         );
       case 'Cancelled':
         return (
           <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">
             <XCircle className="h-3 w-3 mr-1" />
-            canceled
+            Cancelled
           </span>
         );
       default:
@@ -145,7 +145,6 @@ export default function DashboardOverview({
   return (
     <div className="space-y-8 font-sans">
 
-
       {/* Top Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {/* Total Sales */}
@@ -155,9 +154,9 @@ export default function DashboardOverview({
         >
           <div className="absolute -right-4 -top-4 bg-white/10 w-24 h-24 rounded-full blur-2xl"></div>
           <div className="space-y-1 relative z-10">
-            <span className="text-emerald-50 font-semibold text-xs block">Revenue</span>
+            <span className="text-emerald-50 font-semibold text-xs block">Total Revenue</span>
             <h3 className="text-2xl font-extrabold tracking-tight drop-shadow-sm">Tk.{totalRevenue.toLocaleString()}</h3>
-            <span className="text-[10px] text-emerald-100 font-medium block">With cash on delivery</span>
+            <span className="text-[10px] text-emerald-100 font-medium block">All active & delivered orders</span>
           </div>
           <div className="h-12 w-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center relative z-10 border border-white/10">
             <DollarSign className="h-6 w-6 text-white" />
@@ -172,9 +171,9 @@ export default function DashboardOverview({
         >
           <div className="absolute -right-4 -top-4 bg-white/10 w-24 h-24 rounded-full blur-2xl"></div>
           <div className="space-y-1 relative z-10">
-            <span className="text-violet-50 font-semibold text-xs block">total order</span>
-            <h3 className="text-2xl font-extrabold tracking-tight drop-shadow-sm">{orders.length} t</h3>
-            <span className="text-[10px] text-violet-100 font-medium block">Pending Orders: {pendingOrdersCount}</span>
+            <span className="text-violet-50 font-semibold text-xs block">Total Orders</span>
+            <h3 className="text-2xl font-extrabold tracking-tight drop-shadow-sm">{orders.length}</h3>
+            <span className="text-[10px] text-violet-100 font-medium block">Pending: {pendingOrdersCount}</span>
           </div>
           <div className="h-12 w-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center relative z-10 border border-white/10 group-hover:rotate-6 transition-transform">
             <ShoppingBag className="h-6 w-6 text-white" />
@@ -189,10 +188,10 @@ export default function DashboardOverview({
         >
           <div className="absolute -right-4 -top-4 bg-white/10 w-24 h-24 rounded-full blur-2xl"></div>
           <div className="space-y-1 relative z-10">
-            <span className={`font-semibold text-xs block ${lowStockProductsCount > 0 ? 'text-rose-50' : 'text-indigo-50'}`}>Inventory & Stock</span>
-            <h3 className="text-2xl font-extrabold tracking-tight drop-shadow-sm">{products.length} t</h3>
+            <span className={`font-semibold text-xs block ${lowStockProductsCount > 0 ? 'text-rose-50' : 'text-indigo-50'}`}>Total Products</span>
+            <h3 className="text-2xl font-extrabold tracking-tight drop-shadow-sm">{products.length}</h3>
             <span className={`text-[10px] font-medium block ${lowStockProductsCount > 0 ? 'text-white font-bold bg-white/20 px-1.5 py-0.5 rounded inline-block mt-1' : 'text-indigo-100'}`}>
-              Stock is limited/Stockout: {lowStockProductsCount} T
+              {lowStockProductsCount > 0 ? `Stockout / Low Stock: ${lowStockProductsCount}` : 'All items in stock'}
             </span>
           </div>
           <div className="h-12 w-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center relative z-10 border border-white/10 group-hover:rotate-6 transition-transform">
@@ -208,9 +207,9 @@ export default function DashboardOverview({
         >
           <div className="absolute -right-4 -top-4 bg-white/10 w-24 h-24 rounded-full blur-2xl"></div>
           <div className="space-y-1 relative z-10">
-            <span className="text-blue-50 font-semibold text-xs block">total customers</span>
-            <h3 className="text-2xl font-extrabold tracking-tight drop-shadow-sm">{customers.length} John</h3>
-            <span className="text-[10px] text-blue-100 font-medium block">Shipped/Delivered: {shippedOrdersCount}</span>
+            <span className="text-blue-50 font-semibold text-xs block">Total Customers</span>
+            <h3 className="text-2xl font-extrabold tracking-tight drop-shadow-sm">{customers.length}</h3>
+            <span className="text-[10px] text-blue-100 font-medium block">Delivered Orders: {deliveredOrdersCount}</span>
           </div>
           <div className="h-12 w-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center relative z-10 border border-white/10 group-hover:rotate-6 transition-transform">
             <Users className="h-6 w-6 text-white" />
@@ -228,8 +227,8 @@ export default function DashboardOverview({
         >
           <div className="absolute -right-4 -top-4 bg-white/10 w-24 h-24 rounded-full blur-2xl"></div>
           <div className="space-y-1 relative z-10">
-            <span className="text-amber-50 font-semibold text-xs block">Pending</span>
-            <h3 className="text-2xl font-extrabold tracking-tight drop-shadow-sm">{pendingOrdersCount} t</h3>
+            <span className="text-amber-50 font-semibold text-xs block">Pending Orders</span>
+            <h3 className="text-2xl font-extrabold tracking-tight drop-shadow-sm">{pendingOrdersCount}</h3>
             <span className="text-[10px] text-amber-100 font-medium block">Awaiting processing</span>
           </div>
           <div className="h-12 w-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center relative z-10 border border-white/10 group-hover:rotate-6 transition-transform">
@@ -245,9 +244,9 @@ export default function DashboardOverview({
         >
           <div className="absolute -right-4 -top-4 bg-white/10 w-24 h-24 rounded-full blur-2xl"></div>
           <div className="space-y-1 relative z-10">
-            <span className="text-green-50 font-semibold text-xs block">Delivered</span>
-            <h3 className="text-2xl font-extrabold tracking-tight drop-shadow-sm">{deliveredOrdersCount} t</h3>
-            <span className="text-[10px] text-green-100 font-medium block">Successful delivery completed</span>
+            <span className="text-green-50 font-semibold text-xs block">Delivered Orders</span>
+            <h3 className="text-2xl font-extrabold tracking-tight drop-shadow-sm">{deliveredOrdersCount}</h3>
+            <span className="text-[10px] text-green-100 font-medium block">Successfully completed</span>
           </div>
           <div className="h-12 w-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center relative z-10 border border-white/10 group-hover:rotate-6 transition-transform">
             <CheckCircle2 className="h-6 w-6 text-white" />
@@ -262,9 +261,9 @@ export default function DashboardOverview({
         >
           <div className="absolute -right-4 -top-4 bg-white/10 w-24 h-24 rounded-full blur-2xl"></div>
           <div className="space-y-1 relative z-10">
-            <span className="text-rose-50 font-semibold text-xs block">Cancelled</span>
-            <h3 className="text-2xl font-extrabold tracking-tight drop-shadow-sm">{cancelledOrdersCount} t</h3>
-            <span className="text-[10px] text-rose-100 font-medium block">Canceled by customer/admin</span>
+            <span className="text-rose-50 font-semibold text-xs block">Cancelled Orders</span>
+            <h3 className="text-2xl font-extrabold tracking-tight drop-shadow-sm">{cancelledOrdersCount}</h3>
+            <span className="text-[10px] text-rose-100 font-medium block">Customer or store cancelled</span>
           </div>
           <div className="h-12 w-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center relative z-10 border border-white/10 group-hover:rotate-6 transition-transform">
             <XCircle className="h-6 w-6 text-white" />
@@ -279,9 +278,9 @@ export default function DashboardOverview({
         >
           <div className="absolute -right-4 -top-4 bg-white/10 w-24 h-24 rounded-full blur-2xl"></div>
           <div className="space-y-1 relative z-10">
-            <span className="text-yellow-50 font-semibold text-xs block">Returned</span>
-            <h3 className="text-2xl font-extrabold tracking-tight drop-shadow-sm">{returnedOrdersCount} t</h3>
-            <span className="text-[10px] text-yellow-100 font-medium block">Courier returned parcel</span>
+            <span className="text-yellow-50 font-semibold text-xs block">Returned Orders</span>
+            <h3 className="text-2xl font-extrabold tracking-tight drop-shadow-sm">{returnedOrdersCount}</h3>
+            <span className="text-[10px] text-yellow-100 font-medium block">Courier parcel returned</span>
           </div>
           <div className="h-12 w-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center relative z-10 border border-white/10 group-hover:rotate-6 transition-transform">
             <RefreshCw className="h-6 w-6 text-white" />
@@ -293,7 +292,7 @@ export default function DashboardOverview({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Orders Trend */}
         <div className="w-full min-w-0 bg-white rounded-2xl border border-slate-100 shadow-xs p-5">
-          <h3 className="text-sm font-bold text-slate-800 mb-4">last 7 days</h3>
+          <h3 className="text-sm font-bold text-slate-800 mb-4">Orders Trend (Last 7 Days)</h3>
           <div className="h-64 w-full min-w-0">
             <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={220}>
               <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -309,7 +308,7 @@ export default function DashboardOverview({
 
         {/* Revenue Trend */}
         <div className="w-full min-w-0 bg-white rounded-2xl border border-slate-100 shadow-xs p-5">
-          <h3 className="text-sm font-bold text-slate-800 mb-4">last 7 days</h3>
+          <h3 className="text-sm font-bold text-slate-800 mb-4">Revenue Trend (Last 7 Days)</h3>
           <div className="h-64 w-full min-w-0">
             <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={220}>
               <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
@@ -335,7 +334,7 @@ export default function DashboardOverview({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
           <div>
             <h3 className="text-sm font-bold text-slate-900">Recent Orders</h3>
-            <p className="text-[11px] text-slate-400">List of customers' latest orders</p>
+            <p className="text-[11px] text-slate-500">Latest customer orders placed on the store</p>
           </div>
           
           <button 
@@ -355,7 +354,7 @@ export default function DashboardOverview({
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search by name, phone or order ID..."
+              placeholder="Search by order ID, name or phone..."
               className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
             />
           </div>
@@ -364,12 +363,12 @@ export default function DashboardOverview({
             onChange={(e) => setStatusFilter(e.target.value)}
             className="px-3 py-2 text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 cursor-pointer"
           >
-            <option value="all">All statuses</option>
-            <option value="Pending">pending</option>
-            <option value="Confirmed">confirmed</option>
+            <option value="all">All Statuses</option>
+            <option value="Pending">Pending</option>
+            <option value="Confirmed">Confirmed</option>
             <option value="Shipped">Shipped</option>
-            <option value="Delivered">delivered</option>
-            <option value="Cancelled">canceled</option>
+            <option value="Delivered">Delivered</option>
+            <option value="Cancelled">Cancelled</option>
           </select>
         </div>
 
@@ -377,34 +376,34 @@ export default function DashboardOverview({
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="bg-slate-50 text-slate-500 border-y border-slate-100 text-[11px]">
-                <th className="py-2.5 px-3 font-semibold">ID and date</th>
-                <th className="py-2.5 px-3 font-semibold">Subscribers and mobiles</th>
-                <th className="py-2.5 px-3 font-semibold">product</th>
-                <th className="py-2.5 px-3 font-semibold">price</th>
-                <th className="py-2.5 px-3 font-semibold">Status</th>
+              <tr className="bg-slate-50 text-slate-600 border-y border-slate-100 text-[11px]">
+                <th className="py-2.5 px-3 font-bold">Order ID & Date</th>
+                <th className="py-2.5 px-3 font-bold">Customer & Mobile</th>
+                <th className="py-2.5 px-3 font-bold">Product</th>
+                <th className="py-2.5 px-3 font-bold">Price</th>
+                <th className="py-2.5 px-3 font-bold">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredOrders.slice(0, 8).map((ord) => (
                 <tr key={ord.id} className="hover:bg-slate-50/70 transition-colors">
                   <td className="py-3 px-3">
-                    <span className="font-bold text-slate-800 font-mono block">{ord.id}</span>
-                    <span className="text-[10px] text-slate-400 block">
-                      {new Date(ord.createdAt).toLocaleDateString('bn-BD', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    <span className="font-bold text-slate-900 font-mono block">{ord.id}</span>
+                    <span className="text-[10px] text-slate-500 block">
+                      {new Date(ord.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </td>
                   <td className="py-3 px-3">
-                    <span className="font-semibold text-slate-900 block">{ord.customerName}</span>
+                    <span className="font-bold text-slate-900 block">{ord.customerName}</span>
                     <a href={`tel:${ord.phone}`} className="text-[10px] font-mono text-teal-600 hover:underline block">{ord.phone}</a>
                   </td>
                   <td className="py-3 px-3 max-w-[200px] truncate">
-                    <span className="text-slate-700 block truncate" title={ord.productTitle}>{ord.productTitle}</span>
-                    <span className="text-[10px] text-slate-400 block">Quantity: {ord.quantity || 1}</span>
+                    <span className="text-slate-800 font-medium block truncate" title={ord.productTitle}>{ord.productTitle}</span>
+                    <span className="text-[10px] text-slate-500 block">Quantity: {ord.quantity || 1}</span>
                   </td>
                   <td className="py-3 px-3">
                     <span className="font-bold text-emerald-600">Tk.{ord.totalPrice}</span>
-                    <span className="text-[10px] text-slate-400 block">{ord.paymentMethod || 'COD'}</span>
+                    <span className="text-[10px] text-slate-500 block">{ord.paymentMethod || 'COD'}</span>
                   </td>
                   <td className="py-3 px-3">
                     {getStatusBadge(ord.status)}
@@ -415,7 +414,7 @@ export default function DashboardOverview({
               {filteredOrders.length === 0 && (
                 <tr>
                   <td colSpan={5} className="py-8 text-center text-slate-400 font-medium">
-                    No orders found। (0 T order)
+                    No orders found.
                   </td>
                 </tr>
               )}

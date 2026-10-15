@@ -13,7 +13,7 @@
 
   body {
     font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    font-weight: 400;
+    font-weight: 500;
     line-height: 1.6;
     background-color: #faf9f6;
     color: #1a1a1a;
@@ -24,9 +24,57 @@
 
   h1, h2, h3, h4, h5, h6, .font-luxury {
     font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
-    font-weight: 600;
+    font-weight: 700;
     letter-spacing: -0.01em;
   }
+}
+
+/* Admin Scope Overrides: Solid, clean, legible sans-serif for dashboard & forms */
+.admin-scope {
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.admin-scope h1,
+.admin-scope h2,
+.admin-scope h3,
+.admin-scope h4,
+.admin-scope h5,
+.admin-scope h6 {
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.015em;
+  color: #0f172a;
+}
+
+.admin-scope p,
+.admin-scope span,
+.admin-scope label,
+.admin-scope div,
+.admin-scope button,
+.admin-scope input,
+.admin-scope select,
+.admin-scope textarea {
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+.admin-scope input,
+.admin-scope select,
+.admin-scope textarea {
+  font-weight: 500;
+  color: #0f172a;
+}
+
+.admin-scope table th {
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-weight: 700 !important;
+  color: #334155 !important;
+}
+
+.admin-scope table td {
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-weight: 500;
 }
 
 /* Custom Utilities */

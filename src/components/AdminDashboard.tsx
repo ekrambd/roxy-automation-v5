@@ -313,7 +313,7 @@ export default function AdminDashboard({ adminEmail, onLogout }: AdminDashboardP
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 flex font-sans text-slate-800">
+    <div className="admin-scope min-h-screen bg-slate-50 flex font-sans text-slate-800">
 
       {/* ===== New Order Toast Notification ===== */}
       <AnimatePresence>
