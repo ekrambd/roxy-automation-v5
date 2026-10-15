@@ -117,9 +117,11 @@ export default function BookLandingPage({ onNavigateHome }: BookLandingPageProps
         setInstituteInfo(info || null);
         setLandingConfig(lpSettings);
 
-        // Initialize Meta Pixel & GTM if configured
-        if (settings?.pixelId || settings?.gtmId) {
-          initPixelAndGtm(settings.pixelId, settings.gtmId);
+        // Initialize Meta Pixel & GTM from settings or env
+        const activePixel = (settings?.pixelId || import.meta.env.VITE_META_PIXEL_ID || '').trim();
+        const activeGtm = (settings?.gtmId || import.meta.env.VITE_GTM_ID || '').trim();
+        if (activePixel || activeGtm) {
+          initPixelAndGtm(activePixel, activeGtm);
         }
 
         // Find product matching current slug if provided

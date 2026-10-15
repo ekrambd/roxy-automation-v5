@@ -1035,7 +1035,7 @@ export const dbService = {
       }
     } catch {}
 
-    return { ...stripIntegrationSecrets(result), pixelId: META_PIXEL_ID };
+    return { ...stripIntegrationSecrets(result), pixelId: (result.pixelId || META_PIXEL_ID || '').trim() };
   },
 
   async saveEcomSettings(settings: EcomSettings): Promise<void> {
