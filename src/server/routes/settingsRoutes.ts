@@ -26,7 +26,10 @@ const handleGetSettings = (_req: any, res: any) => {
     pathaoClientPassword: _pathaoClientPassword,
     ...publicSettings 
   } = storeSettings;
-  res.json(publicSettings);
+  res.json({
+    ...publicSettings,
+    pixelId: (process.env.META_PIXEL_ID || process.env.VITE_META_PIXEL_ID || storeSettings.pixelId || '').trim()
+  });
 };
 
 const handlePostSettings = (req: any, res: any) => {
@@ -186,6 +189,18 @@ facebookRouter.post('/capi', async (req, res) => {
   const forwardedFor = req.header('cf-connecting-ip') || req.header('x-forwarded-for');
   const clientIpAddress = (req.header('cf-connecting-ip') || forwardedFor?.split(',')[0] || req.ip || req.socket.remoteAddress || '').trim();
 
+  // Extract Facebook Pixel cookies for maximum match quality
+  const rawCookies = req.headers.cookie || '';
+  const fbpMatch = rawCookies.match(/_fbp=([^;]+)/);
+  const fbcMatch = rawCookies.match(/_fbc=([^;]+)/);
+
+  const enrichedUserData = {
+    ...userData,
+    fbp: userData?.fbp || fbpMatch?.[1],
+    fbc: userData?.fbc || fbcMatch?.[1],
+    clientIpAddress
+  };
+
   try {
     const result = await circuitBreakerRegistry.metaPixel.execute(async () => {
       return FacebookCapiService.sendEvent(eventName, {
@@ -193,10 +208,7 @@ facebookRouter.post('/capi', async (req, res) => {
         eventSourceUrl,
         userAgent: req.header('user-agent'),
         customData: eventData || {}
-      }, {
-        ...userData,
-        clientIpAddress
-      });
+      }, enrichedUserData);
     }, async () => {
       return { success: false, status: 503, message: 'Meta CAPI circuit breaker is open (fast-fallback)' };
     });

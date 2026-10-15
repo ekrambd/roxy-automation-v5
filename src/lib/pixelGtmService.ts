@@ -128,4 +128,39 @@ export const trackEvent = (eventName: string, data: Record<string, any> = {}, ev
   } catch (e) {
     console.warn('GTM dataLayer push failed:', e);
   }
+
+  // 3. Server-Side Meta Conversions API (CAPI) Dispatch with Event Deduplication
+  try {
+    const finalEventId = eventId || createEventId(eventName.toLowerCase());
+    const rawCookies = typeof document !== 'undefined' ? document.cookie : '';
+    const fbpMatch = rawCookies.match(/_fbp=([^;]+)/);
+    const fbcMatch = rawCookies.match(/_fbc=([^;]+)/);
+
+    const capiEvents = ['PageView', 'ViewContent', 'AddToCart', 'InitiateCheckout', 'Purchase', 'Lead', 'Contact', 'Search'];
+    if (capiEvents.includes(eventName)) {
+      fetch('/api/facebook/capi', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          eventName,
+          eventId: finalEventId,
+          eventSourceUrl: window.location.href,
+          eventData: data,
+          userData: {
+            phone: data.phone || data.customerPhone,
+            email: data.email || data.customerEmail,
+            name: data.customerName || data.name,
+            district: data.district,
+            fbp: fbpMatch?.[1],
+            fbc: fbcMatch?.[1]
+          }
+        }),
+        keepalive: true
+      }).catch(() => {
+        // Non-blocking failover
+      });
+    }
+  } catch {
+    // Non-blocking failover
+  }
 };

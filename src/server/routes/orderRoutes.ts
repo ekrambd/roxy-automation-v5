@@ -8,6 +8,7 @@ import { shardService } from '../services/shardService';
 import { redundancyService } from '../services/redundancyService';
 import { prisma } from '../db';
 import { requireAdmin } from '../middleware/adminAuth';
+import { FacebookCapiService } from '../services/facebookCapiService';
 
 export const orderRouter = Router();
 
@@ -191,6 +192,43 @@ orderRouter.post('/checkout', checkoutRateLimiter, async (req, res) => {
     globalCache.invalidateTag('orders');
     globalCache.invalidateTag('products');
     redundancyService.saveSnapshot('recent_orders_backup', storeOrders.slice(0, 100));
+
+    // Dispatch Server-Side Meta CAPI Purchase event asynchronously
+    try {
+      const forwardedFor = req.header('cf-connecting-ip') || req.header('x-forwarded-for');
+      const clientIpAddress = (req.header('cf-connecting-ip') || forwardedFor?.split(',')[0] || req.ip || req.socket.remoteAddress || '').trim();
+      const rawCookies = req.headers.cookie || '';
+      const fbpMatch = rawCookies.match(/_fbp=([^;]+)/);
+      const fbcMatch = rawCookies.match(/_fbc=([^;]+)/);
+
+      FacebookCapiService.sendEvent('Purchase', {
+        eventId: confirmedOrder.id,
+        eventSourceUrl: req.header('referer') || 'https://fantinebd.com/checkout',
+        userAgent: req.header('user-agent'),
+        customData: {
+          value: confirmedOrder.totalPrice,
+          currency: 'BDT',
+          order_id: confirmedOrder.id,
+          content_type: 'product',
+          num_items: confirmedOrder.quantity,
+          contents: confirmedOrder.items?.map(it => ({
+            id: it.product?.id || it.productId || 'item',
+            title: it.product?.title || it.productTitle,
+            quantity: it.quantity,
+            item_price: it.price || it.product?.price
+          }))
+        }
+      }, {
+        phone: confirmedOrder.phone,
+        name: confirmedOrder.customerName,
+        district: confirmedOrder.district,
+        clientIpAddress,
+        fbp: fbpMatch?.[1],
+        fbc: fbcMatch?.[1]
+      }).catch(err => console.warn('[Meta CAPI] Checkout dispatch notice:', err?.message || err));
+    } catch (capiErr) {
+      console.warn('[Meta CAPI] Background dispatch error:', capiErr);
+    }
 
     return res.status(201).json({
       success: true,
