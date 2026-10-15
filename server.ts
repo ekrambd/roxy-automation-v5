@@ -141,8 +141,9 @@ async function startServer() {
   } else {
     const distPath = path.join(process.cwd(), 'dist');
 
-    // Static Assets Cache (Immutable 1-year cache for fingerprinted JS/CSS/Images)
+    // Static Assets Cache (Immutable 1-year cache for fingerprinted JS/CSS/Images, disable auto index.html to allow dynamic SSR injection)
     app.use(express.static(distPath, {
+      index: false,
       maxAge: '1y',
       immutable: true,
       setHeaders: (res, filePath) => {
@@ -153,7 +154,7 @@ async function startServer() {
     }));
 
     // Fallback static files directly from public directory
-    app.use(express.static(path.join(process.cwd(), 'public')));
+    app.use(express.static(path.join(process.cwd(), 'public'), { index: false }));
 
     const getIndexHtml = () => {
       let filePath = path.join(distPath, 'index.html');
