@@ -305,6 +305,110 @@ ${p.howToUseIt ? `- **ব্যবহারবিধি:** ${p.howToUseIt}` : '-
 
 আমি আপনাকে কীভাবে সাহায্য করতে পারি?`;
   }
+
+  /**
+   * Generates catchy, luxury e-commerce headline and marketing subtitle for Highlight Spotlight using Gemini
+   */
+  async generateSpotlightCopy(params: {
+    product?: { title: string; category?: string; series?: string; description?: string; benefitsHighlights?: string; price?: number };
+    categoryName?: string;
+  }): Promise<{ title: string; subtitle: string; badgeTag: string; buttonText: string }> {
+    const apiKey = this.getApiKey();
+
+    if (!apiKey) {
+      if (params.product) {
+        const p = params.product;
+        const cleanDesc = p.description ? p.description.split('\n')[0].replace(/^Product Description\s*[:：]?\s*/i, '').trim() : '';
+        return {
+          title: p.title,
+          subtitle: cleanDesc || p.benefitsHighlights || 'High-performance clinical Korean formulation crafted for restorative dermal care and natural radiance.',
+          badgeTag: p.series ? `${p.series.toUpperCase()} • SPOTLIGHT` : `${(p.category || 'FEATURED').toUpperCase()} • SPOTLIGHT`,
+          buttonText: 'BUY NOW'
+        };
+      } else {
+        const cat = params.categoryName || 'Skincare';
+        return {
+          title: `Discover Our Premium ${cat} Collection`,
+          subtitle: `Explore clinical-grade Korean formulations designed to deeply nourish, repair, and illuminate your skin.`,
+          badgeTag: `${cat.toUpperCase()} • COLLECTION SPOTLIGHT`,
+          buttonText: 'VIEW COLLECTION'
+        };
+      }
+    }
+
+    try {
+      const prompt = params.product 
+        ? `You are an elite luxury Korean skincare copywriter for brand FANTINE (Brandini Co., Ltd. Seoul).
+Create an irresistible, sophisticated homepage spotlight copy for this product:
+Product Title: ${params.product.title}
+Category: ${params.product.category || 'Skincare'}
+Series: ${params.product.series || ''}
+Description: ${params.product.description || ''}
+Benefits: ${params.product.benefitsHighlights || ''}
+
+Return ONLY valid JSON in this exact structure:
+{
+  "title": "Punchy luxury headline (max 8 words, e.g. Clinical Pure Vitamin C Antioxidant Powerhouse)",
+  "subtitle": "Compelling 1-2 sentence marketing pitch emphasizing clinical results and radiance (max 35 words)",
+  "badgeTag": "Short uppercase badge tag (e.g. CELLULAR REPAIR • CLINICAL FORMULA)",
+  "buttonText": "BUY NOW"
+}`
+        : `You are an elite luxury Korean skincare copywriter for brand FANTINE (Brandini Co., Ltd. Seoul).
+Create an irresistible homepage spotlight copy for our skincare category: ${params.categoryName || 'Skincare'}.
+
+Return ONLY valid JSON in this exact structure:
+{
+  "title": "Inspiring luxury category headline (max 8 words)",
+  "subtitle": "Compelling 1-2 sentence pitch describing why this collection elevates daily skincare (max 35 words)",
+  "badgeTag": "${(params.categoryName || 'LUXURY').toUpperCase()} • COLLECTION",
+  "buttonText": "EXPLORE COLLECTION"
+}`;
+
+      const models = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-flash-latest'];
+      for (const model of models) {
+        try {
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ role: 'user', parts: [{ text: prompt }] }],
+              generationConfig: {
+                temperature: 0.7,
+                responseMimeType: 'application/json'
+              }
+            })
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (text) {
+              const parsed = JSON.parse(text);
+              return {
+                title: parsed.title || params.product?.title || 'FANTINE Skincare Spotlight',
+                subtitle: parsed.subtitle || params.product?.description || 'Clinical Korean formulation for daily skin transformation.',
+                badgeTag: parsed.badgeTag || 'FEATURED SPOTLIGHT',
+                buttonText: parsed.buttonText || 'BUY NOW'
+              };
+            }
+          }
+        } catch (mErr) {
+          console.warn(`[Gemini API] Spotlight copy failed for ${model}:`, mErr);
+        }
+      }
+    } catch (err) {
+      console.error('[Gemini API] Error generating spotlight copy:', err);
+    }
+
+    const p = params.product;
+    return {
+      title: p?.title || `Discover Our Premium ${params.categoryName || 'Skincare'} Series`,
+      subtitle: p?.description ? p.description.split('\n')[0].replace(/^Product Description\s*[:：]?\s*/i, '').trim() : 'Active formula for deep hydration & youthful radiance.',
+      badgeTag: p?.category ? `${p.category.toUpperCase()} • SPOTLIGHT` : 'FEATURED SPOTLIGHT',
+      buttonText: 'BUY NOW'
+    };
+  }
 }
 
 export const geminiSkincareService = new GeminiSkincareService();

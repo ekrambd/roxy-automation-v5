@@ -2632,20 +2632,27 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
               ? hlConfig.categoryName
               : (ecomSettings?.categories?.[0] || 'Creams');
 
-            const title = hlConfig?.title 
-              || (isProductTarget ? (targetProd?.title || 'Ultimate Calming Solution Face Cleanser') : `Explore Our ${targetCat} Collection`);
+            const rawDesc = targetProd?.description || targetProd?.benefitsHighlights || '';
+            const productExcerpt = rawDesc
+              .split('\n')[0]
+              .replace(/^Product Description\s*[:：]?\s*/i, '')
+              .replace(/^পণ্যের বিবরণ\s*[:：]?\s*/i, '')
+              .trim() || rawDesc.slice(0, 160);
+
+            const title = hlConfig?.title?.trim() 
+              || (isProductTarget ? (targetProd?.title || 'FANTINE Skincare Spotlight') : `Explore Our ${targetCat} Collection`);
             
             const subtitle = (hlConfig?.subtitle && !hlConfig.subtitle.includes('stay in touch')) 
               ? hlConfig.subtitle
-              : (isProductTarget ? (targetProd?.benefitsHighlights || targetProd?.description || 'Gentle daily botanical foam cleanser formulated to deeply purify pores without stripping moisture.') : `Discover premium formulations and clinical results in our ${targetCat} line.`);
+              : (isProductTarget ? productExcerpt : `Discover premium formulations and clinical results in our ${targetCat} line.`);
             
             const badgeTag = (hlConfig?.badgeTag && !hlConfig.badgeTag.includes('BRANDINI SEOUL TOWER')) 
               ? hlConfig.badgeTag 
-              : (isProductTarget && targetProd?.category ? `${targetProd.category.toUpperCase()}` : null);
+              : (isProductTarget && targetProd?.category ? `${(targetProd.series || targetProd.category).toUpperCase()} • SPOTLIGHT` : `${targetCat.toUpperCase()} • COLLECTION`);
             
             const image = isProductTarget 
-              ? (targetProd?.coverImage || (targetProd?.images && targetProd.images[0]) || hlConfig?.customImage || aboutSettings.hqImage || "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1000&auto=format&fit=crop&q=85")
-              : (products.find(p => p.category?.toLowerCase() === targetCat.toLowerCase())?.coverImage || hlConfig?.customImage || aboutSettings.hqImage || "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1000&auto=format&fit=crop&q=85");
+              ? (targetProd?.coverImage || (targetProd?.images && targetProd.images[0]) || hlConfig?.customImage || DEFAULT_FANTINE_FALLBACK_IMAGE)
+              : (products.find(p => p.category?.toLowerCase() === targetCat.toLowerCase())?.coverImage || hlConfig?.customImage || DEFAULT_FANTINE_FALLBACK_IMAGE);
 
             const currentPrice = targetProd?.price || 500;
             const regularPrice = targetProd?.regularPrice && targetProd.regularPrice > currentPrice 

@@ -71,3 +71,22 @@ aiRouter.post('/analyze-routine', async (req: Request, res: Response) => {
     });
   }
 });
+
+// POST /api/ai/generate-spotlight - Generate luxury spotlight copy for product or category
+aiRouter.post('/generate-spotlight', async (req: Request, res: Response) => {
+  try {
+    const { product, categoryName } = req.body;
+    const result = await geminiSkincareService.generateSpotlightCopy({ product, categoryName });
+    res.json({
+      success: true,
+      data: result
+    });
+  } catch (error: any) {
+    console.error('AI Spotlight Generation error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to generate spotlight copy'
+    });
+  }
+});
+
