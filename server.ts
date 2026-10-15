@@ -67,6 +67,37 @@ function injectServerMeta(html: string, reqPath: string, host: string, proto: st
 // Vercel injects production variables. Local development reads the ignored file.
 dotenv.config({ path: '.env.local' });
 
+function injectTrackingScripts(html: string): string {
+  const pixelId = (process.env.META_PIXEL_ID || process.env.VITE_META_PIXEL_ID || '').trim();
+  if (!pixelId) return html;
+
+  const trackingSnippet = `
+    <!-- Meta Pixel Code -->
+    <script id="fb-pixel-script">
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window, document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', '${pixelId}');
+      fbq('track', 'PageView');
+      window.__META_PIXEL_ID__ = '${pixelId}';
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+      src="https://www.facebook.com/tr?id=${pixelId}&ev=PageView&noscript=1"
+    /></noscript>
+    <!-- End Meta Pixel Code -->
+  `;
+
+  if (html.includes('</head>')) {
+    return html.replace('</head>', `${trackingSnippet}\n</head>`);
+  }
+  return html + trackingSnippet;
+}
+
 const PORT = Number(process.env.PORT) || 3004;
 
 // Native HTTP Gzip/Deflate Compression Middleware (Zero dependency)
@@ -137,13 +168,13 @@ async function startServer() {
       return { html: null, etag: null };
     };
 
-    // SPA Page Route Handler with Micro-caching & Dynamic Server-side Meta Injection
+    // SPA Page Route Handler with Dynamic Server-side Meta & Tracking Script Injection
     app.get('*', (req, res) => {
       if (req.path.startsWith('/api') || req.path.startsWith('/cdn') || req.path.startsWith('/uploads')) {
         return res.status(404).json({ error: 'Endpoint not found' });
       }
 
-      const { html, etag } = getIndexHtml();
+      const { html } = getIndexHtml();
       if (!html) {
         return res.sendFile(path.join(process.cwd(), 'index.html'));
       }
@@ -152,27 +183,15 @@ async function startServer() {
       const proto = (req.headers['x-forwarded-proto'] as string) || req.protocol || 'https';
       const isDynamicRoute = req.path.startsWith('/product') || req.path.startsWith('/shop') || req.path.startsWith('/about') || req.path.startsWith('/contact') || req.path.startsWith('/quiz');
 
+      let pageHtml = html;
       if (isDynamicRoute) {
-        const enrichedHtml = injectServerMeta(html, req.path, host, proto);
-        res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-        return res.send(enrichedHtml);
+        pageHtml = injectServerMeta(html, req.path, host, proto);
       }
-
-      // Check 304 Not Modified for static index
-      const clientEtag = req.headers['if-none-match'];
-      if (clientEtag && clientEtag === etag) {
-        res.setHeader('ETag', etag);
-        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-        res.setHeader('X-Page-Cache', 'HIT-304');
-        return res.status(304).end();
-      }
+      pageHtml = injectTrackingScripts(pageHtml);
 
       res.setHeader('Content-Type', 'text/html; charset=utf-8');
-      if (etag) res.setHeader('ETag', etag);
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-      res.setHeader('X-Page-Cache', 'HIT-MEMORY');
-      res.send(html);
+      return res.send(pageHtml);
     });
   }
 

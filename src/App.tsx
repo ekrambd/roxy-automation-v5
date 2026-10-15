@@ -1,4 +1,4 @@
-import { useState, useEffect, Suspense, lazy } from 'react';
+import { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useAppStore } from './store/useAppStore';
 import { initPixelAndGtm, trackEvent } from './lib/pixelGtmService';
@@ -71,19 +71,41 @@ function GlobalBrandingFix() {
 function AppRoutes() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { adminEmail, setAdminEmail, logoutAdmin, ecomSettings } = useAppStore();
-  
+  const { adminEmail, setAdminEmail, logoutAdmin } = useAppStore();
+  const [pixelId, setPixelId] = useState<string>(() => {
+    return (typeof window !== 'undefined' && (window as any).__META_PIXEL_ID__) || (import.meta as any).env.VITE_META_PIXEL_ID || '';
+  });
+  const [gtmId, setGtmId] = useState<string>(() => {
+    return (typeof window !== 'undefined' && (window as any).__GTM_ID__) || (import.meta as any).env.VITE_GTM_ID || '';
+  });
+  const isFirstMount = useRef(true);
+
   useEffect(() => {
-    // Globally initialize the Meta Pixel as soon as settings load from env or API
-    const pixelId = (ecomSettings?.pixelId || import.meta.env.VITE_META_PIXEL_ID || '').trim();
-    const gtmId = (ecomSettings?.gtmId || import.meta.env.VITE_GTM_ID || '').trim();
+    // Dynamically fetch from /api/settings if not yet available
+    if (!pixelId) {
+      fetch('/api/settings')
+        .then((res) => res.json())
+        .then((data) => {
+          if (data?.pixelId) setPixelId(data.pixelId);
+          if (data?.gtmId) setGtmId(data.gtmId);
+        })
+        .catch(() => {});
+    }
+  }, [pixelId]);
+
+  useEffect(() => {
     if (pixelId || gtmId) {
       initPixelAndGtm(pixelId, gtmId);
     }
-  }, [ecomSettings?.pixelId, ecomSettings?.gtmId]);
+  }, [pixelId, gtmId]);
 
   useEffect(() => {
-    // Track PageView on route change (SPA support)
+    // Avoid double firing on first SSR mount if already tracked by base HTML script
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+      return;
+    }
+    // Track PageView on SPA route change
     trackEvent('PageView', {
       page_path: location.pathname,
       page_location: window.location.href,

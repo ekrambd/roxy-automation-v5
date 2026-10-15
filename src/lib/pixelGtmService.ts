@@ -85,10 +85,11 @@ export const trackEvent = (eventName: string, data: Record<string, any> = {}, ev
     window._fbq = fbq;
   }
 
-  // 1. Meta Pixel track
+  const finalEventId = eventId || createEventId(eventName.toLowerCase());
+
+  // 1. Meta Pixel track with deduplication eventID
   try {
-    if (eventId) window.fbq('track', eventName, data, { eventID: eventId });
-    else window.fbq('track', eventName, data);
+    window.fbq('track', eventName, data, { eventID: finalEventId });
   } catch (e) {
     console.warn('Pixel event track failed:', e);
   }
@@ -131,7 +132,6 @@ export const trackEvent = (eventName: string, data: Record<string, any> = {}, ev
 
   // 3. Server-Side Meta Conversions API (CAPI) Dispatch with Event Deduplication
   try {
-    const finalEventId = eventId || createEventId(eventName.toLowerCase());
     const rawCookies = typeof document !== 'undefined' ? document.cookie : '';
     const fbpMatch = rawCookies.match(/_fbp=([^;]+)/);
     const fbcMatch = rawCookies.match(/_fbc=([^;]+)/);
