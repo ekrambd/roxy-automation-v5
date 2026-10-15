@@ -717,7 +717,42 @@ export const setStoreProducts = (newProducts: Product[]) => {
   return storeProducts;
 };
 
-export let storeOrders: BookOrder[] = [];
+const ORDERS_STORAGE_FILE = path.join(process.cwd(), 'prisma', 'orders.json');
+
+export function loadOrdersFromDisk(): BookOrder[] {
+  try {
+    if (fs.existsSync(ORDERS_STORAGE_FILE)) {
+      const raw = fs.readFileSync(ORDERS_STORAGE_FILE, 'utf-8');
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        return parsed;
+      }
+    }
+  } catch (err) {
+    console.error('[store] Error reading orders from disk:', err);
+  }
+  return [];
+}
+
+export function saveOrdersToDisk(orders: BookOrder[]): void {
+  try {
+    const dir = path.dirname(ORDERS_STORAGE_FILE);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(ORDERS_STORAGE_FILE, JSON.stringify(orders, null, 2), 'utf-8');
+  } catch (err) {
+    console.error('[store] Failed saving orders to disk:', err);
+  }
+}
+
+export let storeOrders: BookOrder[] = loadOrdersFromDisk();
+
+export const updateStoreOrders = (newOrders: BookOrder[]) => {
+  storeOrders = newOrders;
+  saveOrdersToDisk(storeOrders);
+  return storeOrders;
+};
 
 const SETTINGS_STORAGE_FILE = path.join(process.cwd(), 'prisma', 'settings.json');
 
@@ -780,7 +815,30 @@ export let storeSettings: EcomSettings = loadSettingsFromDisk();
 saveSettingsToDisk(storeSettings);
 
 export const updateStoreSettings = (newSettings: Partial<EcomSettings>) => {
-  storeSettings = { ...storeSettings, ...newSettings };
+  storeSettings = {
+    ...storeSettings,
+    ...newSettings,
+    socialLinks: {
+      ...(storeSettings.socialLinks || {}),
+      ...(newSettings.socialLinks || {})
+    },
+    aboutSettings: {
+      ...(storeSettings.aboutSettings || {}),
+      ...(newSettings.aboutSettings || {})
+    },
+    flashSale: {
+      ...(storeSettings.flashSale || {}),
+      ...(newSettings.flashSale || {})
+    },
+    highlightSpotlight: {
+      ...(storeSettings.highlightSpotlight || {}),
+      ...(newSettings.highlightSpotlight || {})
+    },
+    instituteInfo: {
+      ...(storeSettings.instituteInfo || {}),
+      ...(newSettings.instituteInfo || {})
+    }
+  };
   saveSettingsToDisk(storeSettings);
   return storeSettings;
 };

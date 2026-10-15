@@ -1,12 +1,13 @@
 import { Router } from 'express';
 import { checkoutRateLimiter } from '../middleware/rateLimiter';
-import { storeOrders, storeProducts } from '../data/store';
+import { storeOrders, storeProducts, saveOrdersToDisk } from '../data/store';
 import { BookOrder } from '../../types';
 import { cacheResponse } from '../middleware/cacheMiddleware';
 import { globalCache } from '../services/cacheEngine';
 import { shardService } from '../services/shardService';
 import { redundancyService } from '../services/redundancyService';
 import { prisma } from '../db';
+import { requireAdmin } from '../middleware/adminAuth';
 
 export const orderRouter = Router();
 
@@ -185,6 +186,7 @@ orderRouter.post('/checkout', checkoutRateLimiter, async (req, res) => {
 
     // Save order
     storeOrders.unshift(confirmedOrder);
+    saveOrdersToDisk(storeOrders);
     shardService.incrementCounter('orders_total', 1);
     globalCache.invalidateTag('orders');
     globalCache.invalidateTag('products');
@@ -218,6 +220,7 @@ orderRouter.post('/', checkoutRateLimiter, (req, res) => {
   };
 
   storeOrders.unshift(newOrder);
+  saveOrdersToDisk(storeOrders);
 
   // Increment distributed sharded order counter
   shardService.incrementCounter('orders_total', 1);
@@ -237,11 +240,29 @@ orderRouter.put('/:id', (req, res) => {
   const index = storeOrders.findIndex(o => o.id === id);
   if (index !== -1) {
     storeOrders[index] = { ...storeOrders[index], ...req.body };
+    saveOrdersToDisk(storeOrders);
 
     // Invalidate order caches
     globalCache.invalidateTag('orders');
 
     res.json(storeOrders[index]);
+  } else {
+    res.status(404).json({ error: "Order not found" });
+  }
+});
+
+// DELETE Order
+orderRouter.delete('/:id', requireAdmin, (req, res) => {
+  const { id } = req.params;
+  const index = storeOrders.findIndex(o => o.id === id);
+  if (index !== -1) {
+    storeOrders.splice(index, 1);
+    saveOrdersToDisk(storeOrders);
+
+    // Invalidate order caches
+    globalCache.invalidateTag('orders');
+
+    res.json({ success: true, id });
   } else {
     res.status(404).json({ error: "Order not found" });
   }

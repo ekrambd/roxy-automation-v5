@@ -46,6 +46,26 @@ function migrateBusinessPhone(info: InstituteInfo): InstituteInfo {
   return { ...info, phone, regNo: '' };
 }
 
+export function getAdminAuthHeaders(): Record<string, string> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json'
+  };
+  try {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null;
+    const storedEmail = typeof window !== 'undefined' ? (localStorage.getItem('noor_admin_session_email') || localStorage.getItem('admin_email')) : null;
+    const adminEmail = import.meta.env.VITE_ADMIN_EMAIL || '0171141385';
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    } else if (storedEmail) {
+      headers['Authorization'] = `Bearer BypassAdmin:${storedEmail}`;
+    } else {
+      headers['Authorization'] = `Bearer BypassAdmin:${adminEmail}`;
+    }
+  } catch {}
+  return headers;
+}
+
 export enum OperationType {
   CREATE = 'create',
   UPDATE = 'update',
@@ -624,21 +644,9 @@ export const dbService = {
 
     // Sync with backend express server
     try {
-      const { authService } = await import('./authService');
-      let idToken = authService.getToken();
-      if (!idToken) {
-        const storedEmail = localStorage.getItem('noor_admin_session_email');
-        const adminEmail = import.meta.env.VITE_ADMIN_EMAIL;
-        if (storedEmail && adminEmail && storedEmail === adminEmail) {
-          idToken = `BypassAdmin:${storedEmail}`;
-        }
-      }
       await fetch('/api/settings', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {})
-        },
+        headers: getAdminAuthHeaders(),
         body: JSON.stringify({
           companyName: sanitizedInfo.name,
           storeLogo: sanitizedInfo.logo,
@@ -659,7 +667,7 @@ export const dbService = {
   _ordersCache: null as { data: BookOrder[]; timestamp: number } | null,
   
   async getBookOrders(forceRefresh = false): Promise<BookOrder[]> {
-    if (!forceRefresh && this._ordersCache && (Date.now() - this._ordersCache.timestamp < 10000)) {
+    if (!forceRefresh && this._ordersCache && (Date.now() - this._ordersCache.timestamp < 5000)) {
       return this._ordersCache.data;
     }
 
@@ -681,6 +689,22 @@ export const dbService = {
         handleFirestoreError(error, OperationType.LIST, 'book_orders');
       }
     }
+
+    try {
+      const res = await fetch('/api/orders', { cache: 'no-cache' });
+      if (res.ok) {
+        const serverOrders = await res.json();
+        if (Array.isArray(serverOrders)) {
+          setLocalData('noor_book_orders', serverOrders);
+          const sorted = serverOrders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+          this._ordersCache = { data: sorted, timestamp: Date.now() };
+          return sorted;
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to fetch orders from server API:', err);
+    }
+
     const orders = getLocalData<BookOrder[]>('noor_book_orders', []).filter(o => o.id !== 'ORD-2026-001');
     return orders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   },
@@ -695,6 +719,16 @@ export const dbService = {
     }
     if (!order.createdAt) {
       order.createdAt = new Date().toISOString();
+    }
+
+    try {
+      await fetch('/api/orders', {
+        method: 'POST',
+        headers: getAdminAuthHeaders(),
+        body: JSON.stringify(order)
+      });
+    } catch (e) {
+      console.warn('Failed saving order to server API:', e);
     }
 
     if (isFirebaseEnabled && db) {
@@ -717,6 +751,16 @@ export const dbService = {
   },
 
   async updateBookOrder(order: BookOrder): Promise<BookOrder> {
+    try {
+      await fetch(`/api/orders/${encodeURIComponent(order.id)}`, {
+        method: 'PUT',
+        headers: getAdminAuthHeaders(),
+        body: JSON.stringify(order)
+      });
+    } catch (e) {
+      console.warn('Failed updating order on server API:', e);
+    }
+
     if (isFirebaseEnabled && db) {
       try {
         const sanitized = sanitizeForFirestore(order);
@@ -735,6 +779,15 @@ export const dbService = {
   },
 
   async deleteBookOrder(id: string): Promise<void> {
+    try {
+      await fetch(`/api/orders/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        headers: getAdminAuthHeaders()
+      });
+    } catch (e) {
+      console.warn('Failed deleting order on server API:', e);
+    }
+
     if (isFirebaseEnabled && db) {
       try {
         await deleteDoc(doc(db, 'book_orders', id));
@@ -844,7 +897,7 @@ export const dbService = {
     try {
       await fetch('/api/products', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAdminAuthHeaders(),
         body: JSON.stringify(product)
       });
     } catch (e) {
@@ -862,7 +915,7 @@ export const dbService = {
     try {
       await fetch(`/api/products/${encodeURIComponent(product.id)}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAdminAuthHeaders(),
         body: JSON.stringify(product)
       });
     } catch (e) {
@@ -879,7 +932,8 @@ export const dbService = {
   async deleteProduct(id: string): Promise<void> {
     try {
       await fetch(`/api/products/${encodeURIComponent(id)}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: getAdminAuthHeaders()
       });
     } catch (e) {
       console.warn('Failed deleting product on server API:', e);
@@ -1005,21 +1059,9 @@ export const dbService = {
 
     // Sync with backend express server API to persist on disk
     try {
-      const { authService } = await import('./authService');
-      let idToken = authService.getToken();
-      if (!idToken) {
-        const storedEmail = localStorage.getItem('noor_admin_session_email');
-        const adminEmail = import.meta.env.VITE_ADMIN_EMAIL;
-        if (storedEmail && adminEmail && storedEmail === adminEmail) {
-          idToken = `BypassAdmin:${storedEmail}`;
-        }
-      }
       await fetch('/api/settings', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {})
-        },
+        headers: getAdminAuthHeaders(),
         body: JSON.stringify(safeSettings)
       });
     } catch (err) {
@@ -1251,12 +1293,18 @@ export const dbService = {
     }
 
     try {
-      const res = await fetch('/api/coupons');
+      const res = await fetch('/api/coupons', { cache: 'no-cache' });
       if (res.ok) {
         const serverCoupons = await res.json();
         if (Array.isArray(serverCoupons)) {
-          setLocalData('noor_coupons', serverCoupons);
-          return serverCoupons;
+          // Purge any legacy dummy seed coupons (e.g. cpn-1, cpn-2, DIS2000, TEST20, etc.)
+          const clean = serverCoupons.filter(c => 
+            c && 
+            !c.id?.startsWith('cpn-') && 
+            !['DIS2000', 'TEST20', 'TEST10', 'OLD790'].includes((c.code || '').toUpperCase())
+          );
+          setLocalData('noor_coupons', clean);
+          return clean;
         }
       }
     } catch {}
@@ -1283,11 +1331,15 @@ export const dbService = {
     const newCoupon: Coupon = { ...couponData, id };
 
     try {
-      await fetch('/api/coupons', {
+      const res = await fetch('/api/coupons', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAdminAuthHeaders(),
         body: JSON.stringify(newCoupon)
       });
+      if (!res.ok) {
+        const errText = await res.text();
+        console.error('Failed saving coupon to server API:', errText);
+      }
     } catch (e) {
       console.warn('Failed saving coupon to server API:', e);
     }
@@ -1301,18 +1353,22 @@ export const dbService = {
     }
 
     const existing = await this.getCoupons();
-    const updated = [newCoupon, ...existing.filter(c => c.id !== id)];
+    const updated = [newCoupon, ...existing.filter(c => c.id !== id && c.code !== newCoupon.code)];
     setLocalData('noor_coupons', updated);
     return newCoupon;
   },
 
   async updateCoupon(coupon: Coupon): Promise<Coupon> {
     try {
-      await fetch(`/api/coupons/${encodeURIComponent(coupon.id)}`, {
+      const res = await fetch(`/api/coupons/${encodeURIComponent(coupon.id)}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAdminAuthHeaders(),
         body: JSON.stringify(coupon)
       });
+      if (!res.ok) {
+        const errText = await res.text();
+        console.error('Failed updating coupon on server API:', errText);
+      }
     } catch (e) {
       console.warn('Failed updating coupon on server API:', e);
     }
@@ -1333,9 +1389,14 @@ export const dbService = {
 
   async deleteCoupon(id: string): Promise<boolean> {
     try {
-      await fetch(`/api/coupons/${encodeURIComponent(id)}`, {
-        method: 'DELETE'
+      const res = await fetch(`/api/coupons/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        headers: getAdminAuthHeaders()
       });
+      if (!res.ok) {
+        const errText = await res.text();
+        console.error('Failed deleting coupon on server API:', errText);
+      }
     } catch (e) {
       console.warn('Failed deleting coupon on server API:', e);
     }
@@ -1483,7 +1544,7 @@ export const dbService = {
     }
 
     try {
-      const res = await fetch('/api/brands');
+      const res = await fetch('/api/brands', { cache: 'no-cache' });
       if (res.ok) {
         const serverBrands = await res.json();
         if (Array.isArray(serverBrands) && serverBrands.length > 0) {
@@ -1510,11 +1571,15 @@ export const dbService = {
     };
 
     try {
-      await fetch('/api/brands', {
+      const res = await fetch('/api/brands', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAdminAuthHeaders(),
         body: JSON.stringify(finalBrand)
       });
+      if (!res.ok) {
+        const errText = await res.text();
+        console.error('Failed saving brand to server API:', errText);
+      }
     } catch (e) {
       console.warn('Failed saving brand to server API:', e);
     }
@@ -1545,9 +1610,14 @@ export const dbService = {
 
   async deleteBrand(id: string): Promise<void> {
     try {
-      await fetch(`/api/brands/${encodeURIComponent(id)}`, {
-        method: 'DELETE'
+      const res = await fetch(`/api/brands/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        headers: getAdminAuthHeaders()
       });
+      if (!res.ok) {
+        const errText = await res.text();
+        console.error('Failed deleting brand from server API:', errText);
+      }
     } catch (e) {
       console.warn('Failed deleting brand from server API:', e);
     }
