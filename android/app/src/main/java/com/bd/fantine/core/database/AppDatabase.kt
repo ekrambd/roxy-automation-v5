@@ -1,29 +1,60 @@
 package com.bd.fantine.core.database
 
 import android.content.Context
-import androidx.room.Database
-import androidx.room.Room
-import androidx.room.RoomDatabase
+import android.database.sqlite.SQLiteDatabase
+import android.database.sqlite.SQLiteOpenHelper
 import com.bd.fantine.core.database.dao.OrderDao
-import com.bd.fantine.core.database.entity.OrderEntity
+import com.bd.fantine.core.database.dao.OrderDaoImpl
 
-@Database(entities = [OrderEntity::class], version = 1, exportSchema = false)
-abstract class AppDatabase : RoomDatabase() {
+class AppDatabase private constructor(context: Context) : SQLiteOpenHelper(
+    context.applicationContext,
+    DATABASE_NAME,
+    null,
+    DATABASE_VERSION
+) {
 
-    abstract fun orderDao(): OrderDao
+    private val orderDaoInstance: OrderDao by lazy {
+        OrderDaoImpl { writableDatabase }
+    }
+
+    fun orderDao(): OrderDao = orderDaoInstance
+
+    override fun onCreate(db: SQLiteDatabase) {
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS orders (
+                id TEXT PRIMARY KEY NOT NULL,
+                customerName TEXT NOT NULL,
+                phone TEXT NOT NULL,
+                address TEXT NOT NULL,
+                district TEXT NOT NULL,
+                totalAmount REAL NOT NULL,
+                deliveryCharge REAL NOT NULL,
+                paymentMethod TEXT NOT NULL,
+                status TEXT NOT NULL,
+                createdAt TEXT NOT NULL,
+                itemsSummary TEXT NOT NULL,
+                notes TEXT NOT NULL
+            )
+            """.trimIndent()
+        )
+    }
+
+    override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+        db.execSQL("DROP TABLE IF EXISTS orders")
+        onCreate(db)
+    }
 
     companion object {
+        private const val DATABASE_NAME = "fantine_admin.db"
+        private const val DATABASE_VERSION = 1
+
         @Volatile
         private var instance: AppDatabase? = null
 
         fun getInstance(context: Context): AppDatabase {
             return instance ?: synchronized(this) {
-                instance ?: Room.databaseBuilder(
-                    context.applicationContext,
-                    AppDatabase::class.java,
-                    "fantine_admin.db"
-                ).fallbackToDestructiveMigration()
-                    .build().also { instance = it }
+                instance ?: AppDatabase(context).also { instance = it }
             }
         }
     }
