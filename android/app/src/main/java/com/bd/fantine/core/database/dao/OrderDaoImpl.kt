@@ -48,6 +48,8 @@ class OrderDaoImpl(private val dbHelper: () -> SQLiteDatabase) : OrderDao {
     }
 
     private fun cursorToEntity(c: Cursor): OrderEntity {
+        val courierIdx = c.getColumnIndex("courierProvider")
+        val trackIdx = c.getColumnIndex("trackingCode")
         return OrderEntity(
             id = c.getString(c.getColumnIndexOrThrow("id")),
             customerName = c.getString(c.getColumnIndexOrThrow("customerName")),
@@ -60,7 +62,9 @@ class OrderDaoImpl(private val dbHelper: () -> SQLiteDatabase) : OrderDao {
             status = c.getString(c.getColumnIndexOrThrow("status")),
             createdAt = c.getString(c.getColumnIndexOrThrow("createdAt")),
             itemsSummary = c.getString(c.getColumnIndexOrThrow("itemsSummary")),
-            notes = c.getString(c.getColumnIndexOrThrow("notes"))
+            notes = c.getString(c.getColumnIndexOrThrow("notes")),
+            courierProvider = if (courierIdx >= 0 && !c.isNull(courierIdx)) c.getString(courierIdx) else "",
+            trackingCode = if (trackIdx >= 0 && !c.isNull(trackIdx)) c.getString(trackIdx) else ""
         )
     }
 
@@ -120,6 +124,17 @@ class OrderDaoImpl(private val dbHelper: () -> SQLiteDatabase) : OrderDao {
         refreshFlow()
     }
 
+    override suspend fun updateCourierInfo(id: String, courierProvider: String, trackingCode: String, status: String) = withContext(Dispatchers.IO) {
+        val db = dbHelper()
+        val cv = ContentValues().apply {
+            put("courierProvider", courierProvider)
+            put("trackingCode", trackingCode)
+            put("status", status)
+        }
+        db.update("orders", cv, "id = ?", arrayOf(id))
+        refreshFlow()
+    }
+
     override suspend fun deleteById(id: String) = withContext(Dispatchers.IO) {
         val db = dbHelper()
         db.delete("orders", "id = ?", arrayOf(id))
@@ -129,6 +144,22 @@ class OrderDaoImpl(private val dbHelper: () -> SQLiteDatabase) : OrderDao {
     override suspend fun clearAll() = withContext(Dispatchers.IO) {
         val db = dbHelper()
         db.delete("orders", null, null)
+        refreshFlow()
+    }
+
+    override suspend fun replaceAll(orders: List<OrderEntity>) = withContext(Dispatchers.IO) {
+        val db = dbHelper()
+        db.beginTransaction()
+        try {
+            db.delete("orders", null, null)
+            for (order in orders) {
+                val cv = entityToContentValues(order)
+                db.insertWithOnConflict("orders", null, cv, SQLiteDatabase.CONFLICT_REPLACE)
+            }
+            db.setTransactionSuccessful()
+        } finally {
+            db.endTransaction()
+        }
         refreshFlow()
     }
 
@@ -146,6 +177,8 @@ class OrderDaoImpl(private val dbHelper: () -> SQLiteDatabase) : OrderDao {
             put("createdAt", e.createdAt)
             put("itemsSummary", e.itemsSummary)
             put("notes", e.notes)
+            put("courierProvider", e.courierProvider)
+            put("trackingCode", e.trackingCode)
         }
     }
 }

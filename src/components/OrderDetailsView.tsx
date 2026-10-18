@@ -223,19 +223,25 @@ export function OrderDetailsView({ order, onClose, onUpdateStatus, onEditOrder }
                     );
                   })
                 ) : (
-                  <tr className="hover:bg-slate-50/50">
-                    <td className="py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                          <Package className="w-5 h-5 text-slate-400" />
-                        </div>
-                        <p className="font-bold text-sm text-slate-800 line-clamp-2">{order.productTitle}</p>
-                      </div>
-                    </td>
-                    <td className="py-4 text-center font-mono text-sm text-slate-600">৳ {order.price}</td>
-                    <td className="py-4 text-center font-mono text-sm text-slate-600">{order.quantity}</td>
-                    <td className="py-4 text-right font-mono font-bold text-slate-800">৳ {(order.price || 0) * (order.quantity || 1)}</td>
-                  </tr>
+                  (() => {
+                    const fallbackQty = order.quantity || 1;
+                    const fallbackPrice = order.price ?? (order.totalPrice ? Math.max(0, (order.totalPrice - (order.deliveryCharge || 0)) / fallbackQty) : 0);
+                    return (
+                      <tr className="hover:bg-slate-50/50">
+                        <td className="py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                              <Package className="w-5 h-5 text-slate-400" />
+                            </div>
+                            <p className="font-bold text-sm text-slate-800 line-clamp-2">{order.productTitle || 'Product'}</p>
+                          </div>
+                        </td>
+                        <td className="py-4 text-center font-mono text-sm text-slate-600">৳ {fallbackPrice}</td>
+                        <td className="py-4 text-center font-mono text-sm text-slate-600">{fallbackQty}</td>
+                        <td className="py-4 text-right font-mono font-bold text-slate-800">৳ {fallbackPrice * fallbackQty}</td>
+                      </tr>
+                    );
+                  })()
                 )}
               </tbody>
             </table>

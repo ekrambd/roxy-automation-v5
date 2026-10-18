@@ -1793,7 +1793,7 @@ export default function OrderManager({
                           })()}
                           <div className="min-w-0">
                             <span className="font-semibold text-slate-800 block text-xs leading-snug">{order.productTitle}</span>
-                            <span className="text-[10px] text-slate-500 block mt-0.5">Quantity: {order.quantity}</span>
+                            <span className="text-[10px] text-slate-500 block mt-0.5">Quantity: {order.quantity || 1}</span>
                           </div>
                         </div>
                       </td>

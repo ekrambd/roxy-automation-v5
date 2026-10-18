@@ -19,7 +19,11 @@ interface OrderDao {
 
     suspend fun updateStatus(id: String, status: String)
 
+    suspend fun updateCourierInfo(id: String, courierProvider: String, trackingCode: String, status: String)
+
     suspend fun deleteById(id: String)
 
     suspend fun clearAll()
+
+    suspend fun replaceAll(orders: List<OrderEntity>)
 }

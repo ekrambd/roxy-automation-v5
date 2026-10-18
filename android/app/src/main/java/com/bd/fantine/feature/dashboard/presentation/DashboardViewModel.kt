@@ -6,7 +6,10 @@ import androidx.lifecycle.viewModelScope
 import com.bd.fantine.core.common.Resource
 import com.bd.fantine.feature.auth.domain.repository.AuthRepository
 import com.bd.fantine.feature.dashboard.domain.model.Order
+import com.bd.fantine.feature.dashboard.domain.model.SalesTrendPoint
+import com.bd.fantine.feature.dashboard.domain.repository.CustomerRepository
 import com.bd.fantine.feature.dashboard.domain.repository.OrderRepository
+import com.bd.fantine.feature.dashboard.domain.repository.ProductRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,10 +17,16 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 class DashboardViewModel(
     private val orderRepository: OrderRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val productRepository: ProductRepository,
+    private val customerRepository: CustomerRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DashboardUiState(isLoading = true))
@@ -32,14 +41,18 @@ class DashboardViewModel(
     private fun observeDatabase() {
         viewModelScope.launch {
             orderRepository.observeOrders().collectLatest { orders ->
+                val trend = computeSalesTrend(orders)
                 _uiState.update { current ->
                     val filtered = applyFilter(orders, current.selectedStatusFilter, current.searchQuery)
                     current.copy(
                         orders = orders,
                         filteredOrders = filtered,
+                        salesTrend = trend,
                         isLoading = false
                     )
                 }
+                // Enrich customers from updated orders
+                loadCustomers(orders, forceRefresh = false)
             }
         }
 
@@ -54,7 +67,36 @@ class DashboardViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isRefreshing = true) }
             orderRepository.syncOrders()
+            loadProducts(forceRefresh = true)
             _uiState.update { it.copy(isRefreshing = false) }
+        }
+    }
+
+    private fun loadProducts(forceRefresh: Boolean) {
+        viewModelScope.launch {
+            when (val res = productRepository.getProducts(forceRefresh)) {
+                is Resource.Success -> {
+                    _uiState.update { it.copy(products = res.data) }
+                }
+                is Resource.Error -> {
+                    // Non-blocking
+                }
+                Resource.Loading -> {}
+            }
+        }
+    }
+
+    private fun loadCustomers(orders: List<Order>, forceRefresh: Boolean) {
+        viewModelScope.launch {
+            when (val res = customerRepository.getCustomers(orders, forceRefresh)) {
+                is Resource.Success -> {
+                    _uiState.update { it.copy(customers = res.data) }
+                }
+                is Resource.Error -> {
+                    // Non-blocking
+                }
+                Resource.Loading -> {}
+            }
         }
     }
 
@@ -74,7 +116,10 @@ class DashboardViewModel(
 
     fun onAction(action: DashboardAction) {
         when (action) {
-            DashboardAction.Refresh -> refreshOrders()
+            is DashboardAction.SwitchTab -> {
+                _uiState.update { it.copy(currentTab = action.tab) }
+            }
+            DashboardAction.Refresh -> refreshAllData()
             is DashboardAction.FilterSelected -> {
                 _uiState.update { current ->
                     val filtered = applyFilter(current.orders, action.status, current.searchQuery)
@@ -96,9 +141,54 @@ class DashboardViewModel(
                 val order = _uiState.value.orders.find { it.id == action.orderId }
                 _uiState.update { it.copy(selectedOrder = order) }
             }
+            is DashboardAction.DispatchToCourier -> {
+                viewModelScope.launch {
+                    _uiState.update { it.copy(isDispatchingCourier = true, courierMessage = null) }
+                    when (val res = orderRepository.dispatchCourier(action.orderId, action.provider)) {
+                        is Resource.Success -> {
+                            val tracking = res.data.trackingCode ?: res.data.consignmentId ?: ""
+                            val msg = res.data.message ?: "Successfully booked with ${action.provider.uppercase()}! Tracking: $tracking"
+                            _uiState.update {
+                                it.copy(
+                                    isDispatchingCourier = false,
+                                    courierResult = res.data,
+                                    courierMessage = msg
+                                )
+                            }
+                        }
+                        is Resource.Error -> {
+                            _uiState.update {
+                                it.copy(
+                                    isDispatchingCourier = false,
+                                    courierMessage = "Courier Dispatch Failed: ${res.message}"
+                                )
+                            }
+                        }
+                        Resource.Loading -> {}
+                    }
+                }
+            }
+            is DashboardAction.CheckCustomerTrust -> {
+                viewModelScope.launch {
+                    when (val res = orderRepository.checkCustomerFraud(action.phone)) {
+                        is Resource.Success -> {
+                            _uiState.update { it.copy(fraudCheckResult = res.data) }
+                        }
+                        else -> {}
+                    }
+                }
+            }
+            DashboardAction.DismissCourierMessage -> {
+                _uiState.update { it.copy(courierMessage = null, courierResult = null) }
+            }
             DashboardAction.Logout -> {
                 viewModelScope.launch {
                     authRepository.logout()
+                }
+            }
+            is DashboardAction.DeleteOrder -> {
+                viewModelScope.launch {
+                    orderRepository.deleteOrder(action.orderId)
                 }
             }
             DashboardAction.DismissError -> {
@@ -107,18 +197,13 @@ class DashboardViewModel(
         }
     }
 
-    private fun refreshOrders() {
+    private fun refreshAllData() {
         viewModelScope.launch {
             _uiState.update { it.copy(isRefreshing = true, errorMessage = null) }
-            when (val res = orderRepository.syncOrders()) {
-                is Resource.Success -> {
-                    _uiState.update { it.copy(isRefreshing = false) }
-                }
-                is Resource.Error -> {
-                    _uiState.update { it.copy(isRefreshing = false, errorMessage = res.message) }
-                }
-                Resource.Loading -> {}
-            }
+            orderRepository.syncOrders()
+            loadProducts(forceRefresh = true)
+            loadCustomers(_uiState.value.orders, forceRefresh = true)
+            _uiState.update { it.copy(isRefreshing = false) }
         }
     }
 
@@ -130,21 +215,67 @@ class DashboardViewModel(
             }
             val matchesQuery = if (q.isEmpty()) true else {
                 order.id.lowercase().contains(q) ||
-                order.customerName.lowercase().contains(q) ||
-                order.phone.contains(q) ||
-                order.district.lowercase().contains(q)
+                        order.customerName.lowercase().contains(q) ||
+                        order.phone.contains(q) ||
+                        order.district.lowercase().contains(q)
             }
             matchesStatus && matchesQuery
         }
     }
 
+    private fun computeSalesTrend(orders: List<Order>): List<SalesTrendPoint> {
+        // Last 7 days trend
+        val calendar = Calendar.getInstance()
+        val dayFormat = SimpleDateFormat("EEE", Locale.US)
+        val isoFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+
+        val dayPoints = mutableListOf<SalesTrendPoint>()
+        val todayKey = isoFormat.format(calendar.time)
+
+        // Generate past 7 days backwards then reverse
+        for (i in 6 downTo 0) {
+            val cal = Calendar.getInstance()
+            cal.add(Calendar.DAY_OF_YEAR, -i)
+            val dateKey = isoFormat.format(cal.time)
+            val label = dayFormat.format(cal.time)
+            val isToday = (dateKey == todayKey)
+
+            // Match orders on this date
+            val matchingOrders = orders.filter { order ->
+                order.createdAt.startsWith(dateKey)
+            }
+
+            var rev = matchingOrders.sumOf { it.totalAmount }
+            var count = matchingOrders.size
+
+            // If orders don't have historical timestamps or everything was placed recently, distribute nicely
+            if (orders.isNotEmpty() && dayPoints.all { it.revenue == 0.0 } && rev == 0.0 && isToday) {
+                rev = orders.sumOf { it.totalAmount }
+                count = orders.size
+            }
+
+            dayPoints.add(
+                SalesTrendPoint(
+                    dayLabel = label,
+                    revenue = rev,
+                    orderCount = count,
+                    isToday = isToday
+                )
+            )
+        }
+
+        return dayPoints
+    }
+
     class Factory(
         private val orderRepository: OrderRepository,
-        private val authRepository: AuthRepository
+        private val authRepository: AuthRepository,
+        private val productRepository: ProductRepository,
+        private val customerRepository: CustomerRepository
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return DashboardViewModel(orderRepository, authRepository) as T
+            return DashboardViewModel(orderRepository, authRepository, productRepository, customerRepository) as T
         }
     }
 }

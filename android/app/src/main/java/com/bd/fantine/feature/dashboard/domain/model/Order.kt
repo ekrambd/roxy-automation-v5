@@ -12,7 +12,9 @@ data class Order(
     val status: String,
     val createdAt: String,
     val items: List<OrderItem>,
-    val notes: String
+    val notes: String,
+    val courierProvider: String? = null,
+    val trackingCode: String? = null
 )
 
 data class OrderItem(

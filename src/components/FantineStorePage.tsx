@@ -1174,6 +1174,7 @@ export default function FantineStorePage({ onGoToLogin, onGoToLanding }: Fantine
             customerName: checkoutName.trim(),
             phone: checkoutPhone.trim(),
             address: checkoutAddress.trim(),
+            testEventCode: (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('meta_test_code') : undefined) || undefined,
             deliveryZone: selectedDeliveryMethod?.title || 'Inside Dhaka',
             paymentMethod: selectedPaymentGateway?.title || 'Cash on Delivery',
             senderPhone: isOnlinePayment ? senderPhone.trim() : undefined,

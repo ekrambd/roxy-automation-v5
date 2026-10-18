@@ -181,7 +181,7 @@ courierRouter.post('/pathao/webhook', async (req, res) => {
 
 // Meta Facebook CAPI Protected by Circuit Breaker
 facebookRouter.post('/capi', async (req, res) => {
-  const { eventName, eventId, eventData, userData, eventSourceUrl } = req.body || {};
+  const { eventName, eventId, eventData, userData, eventSourceUrl, testEventCode } = req.body || {};
   if (!eventName || !eventId || !eventSourceUrl) {
     res.status(400).json({ success: false, message: 'eventName, eventId, and eventSourceUrl are required' });
     return;
@@ -193,6 +193,15 @@ facebookRouter.post('/capi', async (req, res) => {
   const rawCookies = req.headers.cookie || '';
   const fbpMatch = rawCookies.match(/_fbp=([^;]+)/);
   const fbcMatch = rawCookies.match(/_fbc=([^;]+)/);
+  const testCodeCookie = rawCookies.match(/meta_test_code=([^;]+)/);
+
+  const resolvedTestCode = (
+    testEventCode ||
+    req.query.test_event_code as string ||
+    req.query.test_code as string ||
+    testCodeCookie?.[1] ||
+    ''
+  ).trim();
 
   const enrichedUserData = {
     ...userData,
@@ -207,7 +216,8 @@ facebookRouter.post('/capi', async (req, res) => {
         eventId,
         eventSourceUrl,
         userAgent: req.header('user-agent'),
-        customData: eventData || {}
+        customData: eventData || {},
+        testEventCode: resolvedTestCode || undefined
       }, enrichedUserData);
     }, async () => {
       return { success: false, status: 503, message: 'Meta CAPI circuit breaker is open (fast-fallback)' };

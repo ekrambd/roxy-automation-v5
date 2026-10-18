@@ -442,6 +442,7 @@ export default function CheckoutPage({
             customerName: name.trim(),
             phone: phone.trim(),
             address: address.trim(),
+            testEventCode: (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('meta_test_code') : undefined) || undefined,
             deliveryZone: selectedDeliveryMethod?.title || 'Inside Dhaka',
             paymentMethod: selectedPaymentGateway?.title || 'Cash on Delivery',
             senderPhone: isOnlinePayment ? senderPhone.trim() : undefined,

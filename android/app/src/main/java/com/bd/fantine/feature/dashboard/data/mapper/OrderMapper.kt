@@ -29,6 +29,9 @@ object OrderMapper {
 
         val itemsJson = gson.toJson(itemsList)
 
+        val courier = dto.courierProvider ?: ""
+        val track = dto.trackingCode ?: dto.steadfastTrackingCode ?: dto.pathaoTrackingCode ?: dto.pathaoConsignmentId ?: ""
+
         return OrderEntity(
             id = dto.id,
             customerName = customer,
@@ -41,7 +44,9 @@ object OrderMapper {
             status = dto.status ?: "Pending",
             createdAt = dto.createdAt ?: dto.orderDate ?: System.currentTimeMillis().toString(),
             itemsSummary = itemsJson,
-            notes = dto.notes ?: ""
+            notes = dto.notes ?: "",
+            courierProvider = courier,
+            trackingCode = track
         )
     }
 
@@ -65,7 +70,9 @@ object OrderMapper {
             status = entity.status,
             createdAt = entity.createdAt,
             items = items,
-            notes = entity.notes
+            notes = entity.notes,
+            courierProvider = entity.courierProvider.ifEmpty { null },
+            trackingCode = entity.trackingCode.ifEmpty { null }
         )
     }
 }

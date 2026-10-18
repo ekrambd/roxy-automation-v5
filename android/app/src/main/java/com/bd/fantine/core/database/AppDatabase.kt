@@ -34,20 +34,29 @@ class AppDatabase private constructor(context: Context) : SQLiteOpenHelper(
                 status TEXT NOT NULL,
                 createdAt TEXT NOT NULL,
                 itemsSummary TEXT NOT NULL,
-                notes TEXT NOT NULL
+                notes TEXT NOT NULL,
+                courierProvider TEXT DEFAULT '',
+                trackingCode TEXT DEFAULT ''
             )
             """.trimIndent()
         )
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        db.execSQL("DROP TABLE IF EXISTS orders")
-        onCreate(db)
+        if (oldVersion < 2) {
+            try {
+                db.execSQL("ALTER TABLE orders ADD COLUMN courierProvider TEXT DEFAULT ''")
+                db.execSQL("ALTER TABLE orders ADD COLUMN trackingCode TEXT DEFAULT ''")
+            } catch (e: Exception) {
+                db.execSQL("DROP TABLE IF EXISTS orders")
+                onCreate(db)
+            }
+        }
     }
 
     companion object {
         private const val DATABASE_NAME = "fantine_admin.db"
-        private const val DATABASE_VERSION = 1
+        private const val DATABASE_VERSION = 2
 
         @Volatile
         private var instance: AppDatabase? = null

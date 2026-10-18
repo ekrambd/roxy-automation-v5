@@ -49,6 +49,19 @@ class AppContainer(private val context: Context) {
         )
     }
 
+    val productRepository: com.bd.fantine.feature.dashboard.domain.repository.ProductRepository by lazy {
+        com.bd.fantine.feature.dashboard.data.repository.ProductRepositoryImpl(
+            apiService = networkClient.apiService
+        )
+    }
+
+    val customerRepository: com.bd.fantine.feature.dashboard.domain.repository.CustomerRepository by lazy {
+        com.bd.fantine.feature.dashboard.data.repository.CustomerRepositoryImpl(
+            apiService = networkClient.apiService
+        )
+    }
+
+
     fun scheduleOrderNotificationWorker() {
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)

@@ -200,11 +200,20 @@ orderRouter.post('/checkout', checkoutRateLimiter, async (req, res) => {
       const rawCookies = req.headers.cookie || '';
       const fbpMatch = rawCookies.match(/_fbp=([^;]+)/);
       const fbcMatch = rawCookies.match(/_fbc=([^;]+)/);
+      const testCodeCookie = rawCookies.match(/meta_test_code=([^;]+)/);
+      const testEventCode = (
+        req.body?.testEventCode ||
+        req.query?.test_event_code as string ||
+        req.query?.test_code as string ||
+        testCodeCookie?.[1] ||
+        ''
+      ).trim();
 
       FacebookCapiService.sendEvent('Purchase', {
         eventId: confirmedOrder.id,
         eventSourceUrl: req.header('referer') || 'https://fantinebd.com/checkout',
         userAgent: req.header('user-agent'),
+        testEventCode: testEventCode || undefined,
         customData: {
           value: confirmedOrder.totalPrice,
           currency: 'BDT',

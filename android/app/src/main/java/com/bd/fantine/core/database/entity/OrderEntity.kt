@@ -12,5 +12,7 @@ data class OrderEntity(
     val status: String,
     val createdAt: String,
     val itemsSummary: String,
-    val notes: String
+    val notes: String,
+    val courierProvider: String = "",
+    val trackingCode: String = ""
 )

@@ -62,7 +62,7 @@ class OrderRepositoryImpl(
             if (response.isSuccessful && response.body() != null) {
                 val dts = response.body()!!
                 val entities = dts.map { OrderMapper.dtoToEntity(it) }
-                orderDao.insertOrders(entities)
+                orderDao.replaceAll(entities)
                 val domainList = entities.map { OrderMapper.entityToDomain(it) }
                 Resource.Success(domainList)
             } else {
@@ -123,6 +123,100 @@ class OrderRepositoryImpl(
             newOrders.size
         } catch (e: Exception) {
             0
+        }
+    }
+
+    override suspend fun dispatchCourier(
+        orderId: String,
+        provider: String
+    ): Resource<com.bd.fantine.core.network.dto.CourierDispatchResponse> {
+        val entity = orderDao.getOrderById(orderId)
+            ?: return Resource.Error("Order not found in local database")
+        val order = OrderMapper.entityToDomain(entity)
+
+        return try {
+            val orderMap = mutableMapOf<String, Any?>(
+                "id" to order.id,
+                "customerName" to order.customerName,
+                "phone" to order.phone,
+                "address" to order.address,
+                "district" to order.district,
+                "totalPrice" to order.totalAmount,
+                "status" to order.status,
+                "paymentMethod" to order.paymentMethod,
+                "productTitle" to if (order.items.isNotEmpty()) {
+                    order.items.joinToString(", ") { "${it.title} x${it.quantity}" }
+                } else "FANTINE Skincare Item"
+            )
+
+            val request = com.bd.fantine.core.network.dto.CourierDispatchRequest(
+                order = orderMap,
+                storeId = 461309L, // Active 'Fantine BD' store
+                itemWeight = 0.5,
+                itemQuantity = if (order.items.isNotEmpty()) order.items.sumOf { it.quantity } else 1,
+                specialInstruction = "Handle with care - Premium Korean Skincare"
+            )
+
+            val response = if (provider.equals("pathao", ignoreCase = true)) {
+                apiService.dispatchPathao(request)
+            } else {
+                apiService.dispatchSteadfast(request)
+            }
+
+            if (response.isSuccessful && response.body() != null) {
+                val body = response.body()!!
+                if (body.success) {
+                    val tracking = body.trackingCode ?: body.consignmentId ?: ""
+                    // Optimistic update in SQLite
+                    orderDao.updateCourierInfo(order.id, provider.lowercase(), tracking, "Shipped")
+                    // Notify backend of status change
+                    try {
+                        apiService.updateOrderStatus(
+                            order.id,
+                            mapOf("status" to "Shipped")
+                        )
+                    } catch (e: Exception) {
+                        // non-blocking
+                    }
+                    Resource.Success(body)
+                } else {
+                    Resource.Error(body.message ?: body.error ?: "Courier booking failed")
+                }
+            } else {
+                Resource.Error("Courier API error: ${response.code()} ${response.message()}")
+            }
+        } catch (e: Exception) {
+            Resource.Error(e.localizedMessage ?: "Failed to connect to courier server")
+        }
+    }
+
+    override suspend fun checkCustomerFraud(phone: String): Resource<com.bd.fantine.core.network.dto.FraudCheckResponse> {
+        return try {
+            val response = apiService.checkSteadfastFraud(phone)
+            if (response.isSuccessful && response.body() != null) {
+                Resource.Success(response.body()!!)
+            } else {
+                Resource.Error(response.message())
+            }
+        } catch (e: Exception) {
+            Resource.Error(e.localizedMessage ?: "Fraud check failed")
+        }
+    }
+
+    override suspend fun deleteOrder(id: String): Resource<Unit> {
+        return try {
+            // 1. Immediately delete from local SQLite database (reactive Flow updates UI instantly)
+            orderDao.deleteById(id)
+
+            // 2. Delete from server
+            val response = apiService.deleteOrder(id)
+            if (response.isSuccessful) {
+                Resource.Success(Unit)
+            } else {
+                Resource.Error("Server error: ${response.message()}")
+            }
+        } catch (e: Exception) {
+            Resource.Error(e.localizedMessage ?: "Failed to delete order from server")
         }
     }
 }

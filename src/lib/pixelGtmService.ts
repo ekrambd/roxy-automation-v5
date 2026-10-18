@@ -138,6 +138,22 @@ export const trackEvent = (eventName: string, data: Record<string, any> = {}, ev
 
     const capiEvents = ['PageView', 'ViewContent', 'AddToCart', 'InitiateCheckout', 'Purchase', 'Lead', 'Contact', 'Search'];
     if (capiEvents.includes(eventName)) {
+      // Dynamic Meta Test Event Code resolution (from URL or session)
+      let dynamicTestCode: string | undefined;
+      if (typeof window !== 'undefined') {
+        try {
+          const urlParams = new URLSearchParams(window.location.search);
+          const fromUrl = urlParams.get('test_event_code') || urlParams.get('test_code');
+          if (fromUrl) {
+            sessionStorage.setItem('meta_test_code', fromUrl);
+            document.cookie = `meta_test_code=${encodeURIComponent(fromUrl)}; path=/; max-age=86400; SameSite=Lax`;
+            dynamicTestCode = fromUrl;
+          } else {
+            dynamicTestCode = sessionStorage.getItem('meta_test_code') || undefined;
+          }
+        } catch {}
+      }
+
       fetch('/api/facebook/capi', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -145,6 +161,7 @@ export const trackEvent = (eventName: string, data: Record<string, any> = {}, ev
           eventName,
           eventId: finalEventId,
           eventSourceUrl: window.location.href,
+          testEventCode: dynamicTestCode,
           eventData: data,
           userData: {
             phone: data.phone || data.customerPhone,

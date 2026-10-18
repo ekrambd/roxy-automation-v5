@@ -20,7 +20,12 @@ data class OrderDto(
     @SerializedName("orderDate") val orderDate: String? = null,
     @SerializedName("items") val items: List<OrderItemDto>? = null,
     @SerializedName("notes") val notes: String? = null,
-    @SerializedName("productTitle") val productTitle: String? = null
+    @SerializedName("productTitle") val productTitle: String? = null,
+    @SerializedName("courierProvider") val courierProvider: String? = null,
+    @SerializedName("steadfastTrackingCode") val steadfastTrackingCode: String? = null,
+    @SerializedName("pathaoConsignmentId") val pathaoConsignmentId: String? = null,
+    @SerializedName("pathaoTrackingCode") val pathaoTrackingCode: String? = null,
+    @SerializedName("trackingCode") val trackingCode: String? = null
 )
 
 data class OrderItemDto(

@@ -59,7 +59,9 @@ fun AppNavHost(
             val dashboardViewModel: DashboardViewModel = viewModel(
                 factory = DashboardViewModel.Factory(
                     container.orderRepository,
-                    container.authRepository
+                    container.authRepository,
+                    container.productRepository,
+                    container.customerRepository
                 )
             )
 
@@ -85,7 +87,9 @@ fun AppNavHost(
             val dashboardViewModel: DashboardViewModel = viewModel(
                 factory = DashboardViewModel.Factory(
                     container.orderRepository,
-                    container.authRepository
+                    container.authRepository,
+                    container.productRepository,
+                    container.customerRepository
                 )
             )
 
