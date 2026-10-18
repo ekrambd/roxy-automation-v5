@@ -30,13 +30,17 @@ export class FacebookCapiService {
   static async sendEvent(eventName: string, eventData: any, userData: any) {
     const pixelId = (process.env.META_PIXEL_ID || process.env.VITE_META_PIXEL_ID || '').trim();
     const metaApiToken = (process.env.META_CAPI_TOKEN || process.env.META_ACCESS_TOKEN || '').trim();
-    const testEventCode = (
+    let testEventCode = (
       eventData?.testEventCode ||
       eventData?.test_event_code ||
       process.env.META_TEST_CODE ||
       process.env.META_TEST_EVENT_CODE ||
       ''
     ).trim();
+
+    if (testEventCode && !testEventCode.toUpperCase().startsWith('TEST')) {
+      testEventCode = `TEST${testEventCode}`;
+    }
 
     if (!pixelId || !metaApiToken) {
       return { success: false, status: 503, message: 'Meta CAPI is not configured on the server (missing META_PIXEL_ID or META_CAPI_TOKEN)' };

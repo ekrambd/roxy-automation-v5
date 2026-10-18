@@ -143,8 +143,11 @@ export const trackEvent = (eventName: string, data: Record<string, any> = {}, ev
       if (typeof window !== 'undefined') {
         try {
           const urlParams = new URLSearchParams(window.location.search);
-          const fromUrl = urlParams.get('test_event_code') || urlParams.get('test_code');
+          let fromUrl = (urlParams.get('test_event_code') || urlParams.get('test_code'))?.trim();
           if (fromUrl) {
+            if (!fromUrl.toUpperCase().startsWith('TEST')) {
+              fromUrl = `TEST${fromUrl}`;
+            }
             sessionStorage.setItem('meta_test_code', fromUrl);
             document.cookie = `meta_test_code=${encodeURIComponent(fromUrl)}; path=/; max-age=86400; SameSite=Lax`;
             dynamicTestCode = fromUrl;
