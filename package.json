@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "tsx server.ts",
     "dev:cluster": "tsx src/server/clusterServer.ts",
+    "postinstall": "prisma generate",
     "start:cluster": "node dist/clusterServer.cjs",
     "backup:create": "node --import tsx scripts/disasterRecovery.ts create",
     "backup:list": "node --import tsx scripts/disasterRecovery.ts list",
