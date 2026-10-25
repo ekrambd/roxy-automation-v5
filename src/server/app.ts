@@ -138,6 +138,35 @@ app.use('/uploads', express.static(publicUploadsDir, {
   immutable: true
 }));
 
+// Streaming fallback for missing uploads: proxy directly from live Hostinger VPS without saving to local disk
+app.get('/uploads/:filename', async (req, res) => {
+  const filename = req.params.filename;
+  const filePath = path.join(publicUploadsDir, filename);
+  if (fs.existsSync(filePath)) {
+    return res.sendFile(filePath);
+  }
+
+  const remoteDomain = process.env.REMOTE_ASSETS_ORIGIN || 'https://fantinebd.com';
+  try {
+    const remoteUrl = `${remoteDomain}/uploads/${filename}`;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    const remoteResp = await fetch(remoteUrl, { signal: controller.signal });
+    clearTimeout(timeout);
+
+    if (remoteResp.ok) {
+      const buffer = Buffer.from(await remoteResp.arrayBuffer());
+      const contentType = remoteResp.headers.get('content-type') || 'image/jpeg';
+      res.setHeader('Content-Type', contentType);
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      return res.send(buffer);
+    }
+  } catch (err) {
+    // fallback failed
+  }
+  return res.status(404).send('Upload not found');
+});
+
 // Service Worker endpoint
 app.get('/firebase-messaging-sw.js', (req, res) => {
   res.setHeader('Content-Type', 'application/javascript');

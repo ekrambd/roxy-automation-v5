@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Customer, BookOrder } from '../types';
 import { Users, Search, Phone, MapPin, ShoppingBag, Calendar, ExternalLink, MessageSquare } from 'lucide-react';
+import { formatWhatsAppLink } from '../lib/constants';
 
 interface CustomerManagerProps {
   customers: Customer[];
@@ -151,7 +152,7 @@ export default function CustomerManager({ customers }: CustomerManagerProps) {
                         details
                       </button>
                       <a
-                        href={`https://wa.me/88${c.phone.replace(/[^0-9]/g, '')}`}
+                        href={formatWhatsAppLink(c.phone)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="p-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-lg transition-colors"

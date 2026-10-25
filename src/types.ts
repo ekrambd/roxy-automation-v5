@@ -24,6 +24,8 @@ export interface Product {
   hasVariants?: boolean;
   variants?: ProductVariant[];
   image?: string;
+  images?: string[];
+  series?: string;
   category: string;
   subCategory?: string;
   brand?: string;
@@ -324,6 +326,7 @@ export interface EcomSettings {
   storeName?: string;
   storeLogo?: string;
   storeTagline?: string;
+  storeDomain?: string;
   topAnnouncementText?: string;
   companyName?: string;
   contactEmail?: string;
@@ -391,6 +394,7 @@ export interface EcomSettings {
   pathaoWebhookSecret?: string;
   defaultCourierProvider?: 'steadfast' | 'pathao';
   aboutSettings?: AboutPageSettings;
+  instituteInfo?: InstituteInfo;
 }
 
 export interface AboutPagePillar {
@@ -500,6 +504,7 @@ export interface BookOrder {
 
   name?: string;
   phone: string;
+  customerPhone?: string;
   address: string;
   deliveryZone?: string;
   district?: string;
@@ -517,8 +522,11 @@ export interface BookOrder {
   senderPhone?: string;
   orderType?: 'landing' | 'physical' | 'store' | 'storefront';
   source?: string;
-  deliveryArea?: string;
   status: 'Pending' | 'Confirmed' | 'Packaging' | 'Ready for Shipment' | 'Shipped' | 'Delivered' | 'Hold' | 'Under Review' | 'Not Responding' | 'Return' | 'Cancelled' | string;
+  paymentStatus?: 'Paid' | 'Unpaid' | string;
+  ipAddress?: string;
+  device?: string;
+  userAgent?: string;
   createdAt: string;
   orderDate?: string;
   pointsSpent?: number;
@@ -582,7 +590,7 @@ export interface Brand {
   updatedAt?: string;
 }
 
-export type ActiveTab = 'dashboard' | 'products' | 'orders' | 'customers' | 'coupons' | 'inventory' | 'category_management' | 'brand_management' | 'flash_sale' | 'highlight_spotlight' | 'about_settings' | 'landing_setup' | 'payment_settings' | 'delivery_settings' | 'pixel_settings' | 'courier_settings' | 'profile' | 'points' | 'contact_messages';
+export type ActiveTab = 'dashboard' | 'products' | 'orders' | 'customers' | 'coupons' | 'inventory' | 'category_management' | 'subcategory_management' | 'brand_management' | 'flash_sale' | 'highlight_spotlight' | 'about_settings' | 'landing_setup' | 'payment_settings' | 'delivery_settings' | 'pixel_settings' | 'courier_settings' | 'profile' | 'points' | 'contact_messages';
 
 export interface ContactMessage {
   id: string;

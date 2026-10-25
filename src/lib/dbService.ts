@@ -1,6 +1,19 @@
 const db = null;
 const isFirebaseEnabled = false;
 const auth = null;
+const doc: any = () => null;
+const setDoc: any = async () => {};
+const getDoc: any = async () => ({ exists: () => false, data: () => ({}) });
+const getDocs: any = async () => ({ docs: [], forEach: () => {} });
+const collection: any = () => null;
+const query: any = () => null;
+const where: any = () => null;
+const deleteDoc: any = async () => {};
+const orderBy: any = () => null;
+const limit: any = () => null;
+const startAfter: any = () => null;
+const deleteField: any = () => null;
+const onSnapshot: any = () => () => {};
 import { BookOrder, Product, EcomSettings, Customer, PaymentGatewayItem, DeliveryMethodItem, Coupon, LandingPageData, InstituteInfo, Review, Brand, ContactMessage } from '../types';
 import { ApiClient } from '../services/apiClient';
 
@@ -615,6 +628,31 @@ export const dbService = {
         setLocalData('noor_institute_info', info);
       }
     } catch {}
+
+    // Sanitize any legacy mock or stale cached values
+    const isMockStr = (str?: string) => !str || /nur\s*survey|nursurvey|livewell/i.test(str);
+    if (isMockStr(info.name)) {
+      info.name = DEFAULT_INSTITUTE_INFO.name;
+    }
+    if (isMockStr(info.email)) {
+      info.email = DEFAULT_INSTITUTE_INFO.email;
+    }
+    if (typeof localStorage !== 'undefined') {
+      try {
+        const rawInfo = localStorage.getItem('noor_institute_info');
+        if (rawInfo && isMockStr(rawInfo)) {
+          localStorage.removeItem('noor_institute_info');
+        }
+        const rawName = localStorage.getItem('noor_institute_name');
+        if (rawName && isMockStr(rawName)) {
+          localStorage.removeItem('noor_institute_name');
+        }
+        const rawEmail = localStorage.getItem('noor_email');
+        if (rawEmail && isMockStr(rawEmail)) {
+          localStorage.removeItem('noor_email');
+        }
+      } catch {}
+    }
 
     return info;
   },

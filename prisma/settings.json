@@ -1,0 +1,230 @@
+{
+  "storeName": "FAИTIИE BD",
+  "companyName": "FAИTIИE BD",
+  "storeLogo": "/logo_transparent.webp",
+  "storeTagline": "Skincare Solutions",
+  "topAnnouncementText": "WELCOME TO FAИTIИE BD",
+  "contactEmail": "fantinebd@gmail.com",
+  "contactPhone": "01303142147",
+  "storeAddress": "Banasree,Dhaka",
+  "footerDescription": "Skincare Solutions",
+  "gtmId": "",
+  "deliveryChargeInsideDhaka": 0,
+  "deliveryChargeOutsideDhaka": 0,
+  "bkashNumber": "",
+  "nagadNumber": "",
+  "categories": [
+    "Cleansers",
+    "Toners",
+    "Serums",
+    "Creams"
+  ],
+  "socialLinks": {
+    "facebook": "",
+    "instagram": "https://instagram.com",
+    "youtube": "https://youtube.com",
+    "twitter": "https://twitter.com",
+    "tiktok": "https://tiktok.com",
+    "linkedin": "https://linkedin.com",
+    "whatsapp": "01303142147"
+  },
+  "primaryColor": "#93c5fd",
+  "paymentGateways": [
+    {
+      "id": "gw-1",
+      "title": "Cash on Delivery",
+      "type": "Cash on Delivery",
+      "status": "Active",
+      "transactionFee": 0,
+      "discountAmount": 0,
+      "priority": 1,
+      "instruction": "Pay with cash upon delivery of your order.",
+      "updatedAt": "Jul 23, 2026",
+      "accountNumber": ""
+    }
+  ],
+  "deliveryMethods": [
+    {
+      "id": "dm-3",
+      "title": "All bangladesh - (Outside Dhaka)",
+      "status": "Active",
+      "mode": "Fixed",
+      "type": "Fixed",
+      "minimumCharge": 0,
+      "maximumCharge": 0,
+      "deliveryCharge": 110,
+      "updatedAt": "Jul 23, 2026"
+    }
+  ],
+  "heroBanners": [],
+  "promoCards": [
+    {
+      "id": "promo-1",
+      "title": "PREDATOR HELIOS NEO 16",
+      "badge": "PREDATOR",
+      "subtitle": "POWER. PRECISION. PREDATOR.",
+      "discountText": "3,20,000 BDT",
+      "imageUrl": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=500&auto=format&fit=crop&q=80"
+    },
+    {
+      "id": "promo-2",
+      "title": "MSI VECTOR A16 HX",
+      "badge": "MSI EDITION",
+      "subtitle": "POWER. PRECISION. VICTORY.",
+      "discountText": "2,59,999 BDT",
+      "imageUrl": "https://images.unsplash.com/photo-1524805444758-089113d48a6d?w=500&auto=format&fit=crop&q=80"
+    }
+  ],
+  "showViewCountOnWebsite": true,
+  "websiteViewsCount": 14200,
+  "landingViewsCount": 8900,
+  "aboutSettings": {
+    "title": "About us",
+    "subtitle": "# FANTINE — আপনার ত্বকের যত্নে কোরিয়ান স্কিনকেয়ারের বিশ্বস্ত ঠিকানা 🇰🇷✨",
+    "content": "\n\nFANTINE-এ আমরা বিশ্বাস করি, **ত্বকের যত্ন শুধু বাহ্যিক সৌন্দর্যের জন্য নয়; এটি নিজের প্রতি ভালোবাসা, আত্মবিশ্বাস এবং সুস্থ জীবনযাপনের একটি গুরুত্বপূর্ণ অংশ।** তাই আপনার ত্বকের যত্নের প্রতিটি ধাপে মানসম্মত পণ্য ও নির্ভরযোগ্য সেবা পৌঁছে দেওয়াই আমাদের অঙ্গীকার।\n\nদক্ষিণ কোরিয়ার আধুনিক স্কিনকেয়ার প্রযুক্তি ও ঐতিহ্যবাহী **হ্যানবাং (Hanbang) হার্বাল ফর্মুলেশন** থেকে অনুপ্রাণিত হয়ে আমরা নিয়ে এসেছি প্রিমিয়াম স্কিনকেয়ার পণ্যের সংগ্রহ। ত্বকের যত্নে আধুনিক বিজ্ঞান ও প্রাকৃতিক উপাদানের সমন্বয়কে গুরুত্ব দিয়ে আমরা চাই আপনার দৈনন্দিন স্কিনকেয়ার রুটিন হয়ে উঠুক আরও সহজ, কার্যকর এবং উপভোগ্য।\n\n### কেন FANTINE বেছে নেবেন?\n\n- **🇰🇷 কোরিয়ান স্কিনকেয়ার:** দক্ষিণ কোরিয়ার জনপ্রিয় স্কিনকেয়ার ট্রেন্ড ও ফর্মুলেশন থেকে অনুপ্রাণিত পণ্যের সংগ্রহ।\n- **🌿 হ্যানবাং হার্বাল ফর্মুলেশন:** ঐতিহ্যবাহী কোরিয়ান হার্বাল স্কিনকেয়ারের অনুপ্রেরণায় তৈরি পণ্যের অভিজ্ঞতা।\n- **✨ মানের প্রতি অঙ্গীকার:** পণ্যের সত্যতা, গুণগত মান এবং নির্ভরযোগ্য উৎসকে আমরা গুরুত্ব দিই।\n- **💧 আপনার ত্বকের যত্নে:** দৈনন্দিন স্কিনকেয়ার রুটিনকে আরও সুন্দর ও সহজ করতে উপযোগী পণ্য বেছে নেওয়ার সুযোগ।\n- **🇧🇩 বাংলাদেশজুড়ে স্কিনকেয়ার:** আন্তর্জাতিক মানের স্কিনকেয়ার পণ্য বাংলাদেশের গ্রাহকদের কাছে সহজলভ্য করে তোলাই আমাদের লক্ষ্য।\n- **🤍 গ্রাহক সন্তুষ্টি:** পণ্য নির্বাচন থেকে শুরু করে কেনাকাটার অভিজ্ঞতা পর্যন্ত প্রতিটি ধাপে গ্রাহকের আস্থা অর্জনে আমরা প্রতিশ্রুতিবদ্ধ।\n\n### আমাদের লক্ষ্য\n\nবাংলাদেশের প্রতিটি স্কিনকেয়ারপ্রেমীর কাছে মানসম্মত আন্তর্জাতিক স্কিনকেয়ার পণ্য পৌঁছে দেওয়া এবং সঠিক পণ্য নির্বাচনের মাধ্যমে নিজের ত্বকের যত্ন নেওয়ার অভিজ্ঞতাকে আরও সহজ ও আনন্দময় করে তোলা।\n\nআমরা চাই, আপনার স্কিনকেয়ার রুটিন শুধু একটি অভ্যাস হয়ে না থাকুক—এটি হয়ে উঠুক নিজের যত্ন নেওয়ার প্রতিদিনের সুন্দর একটি মুহূর্ত।\n\n**FANTINE — ভালোবাসা, যত্ন আর আত্মবিশ্বাসে উজ্জ্বল হোক আপনার ত্বক।** ✨",
+    "image": "/uploads/file-1792074657685-23449836.jpg",
+    "badge": "CLINICAL K-BEAUTY & BOTANICAL SCIENCE",
+    "heroTitle": "About us",
+    "heroSubtitle": "# FANTINE — আপনার ত্বকের যত্নে কোরিয়ান স্কিনকেয়ারের বিশ্বস্ত ঠিকানা 🇰🇷✨",
+    "heroImage": "/uploads/file-1792074657685-23449836.jpg",
+    "storyBadge": "PHILOSOPHY & LEGACY",
+    "storyTitle": "Clinical Botanical Purity with Proven Results",
+    "storySubtitle": "From Gangnam Research Labs to Global Beauty Aficionados",
+    "storyParagraph1": "\n\nFANTINE-এ আমরা বিশ্বাস করি, **ত্বকের যত্ন শুধু বাহ্যিক সৌন্দর্যের জন্য নয়; এটি নিজের প্রতি ভালোবাসা, আত্মবিশ্বাস এবং সুস্থ জীবনযাপনের একটি গুরুত্বপূর্ণ অংশ।** তাই আপনার ত্বকের যত্নের প্রতিটি ধাপে মানসম্মত পণ্য ও নির্ভরযোগ্য সেবা পৌঁছে দেওয়াই আমাদের অঙ্গীকার।\n\nদক্ষিণ কোরিয়ার আধুনিক স্কিনকেয়ার প্রযুক্তি ও ঐতিহ্যবাহী **হ্যানবাং (Hanbang) হার্বাল ফর্মুলেশন** থেকে অনুপ্রাণিত হয়ে আমরা নিয়ে এসেছি প্রিমিয়াম স্কিনকেয়ার পণ্যের সংগ্রহ। ত্বকের যত্নে আধুনিক বিজ্ঞান ও প্রাকৃতিক উপাদানের সমন্বয়কে গুরুত্ব দিয়ে আমরা চাই আপনার দৈনন্দিন স্কিনকেয়ার রুটিন হয়ে উঠুক আরও সহজ, কার্যকর এবং উপভোগ্য।\n\n### কেন FANTINE বেছে নেবেন?\n\n- **🇰🇷 কোরিয়ান স্কিনকেয়ার:** দক্ষিণ কোরিয়ার জনপ্রিয় স্কিনকেয়ার ট্রেন্ড ও ফর্মুলেশন থেকে অনুপ্রাণিত পণ্যের সংগ্রহ।\n- **🌿 হ্যানবাং হার্বাল ফর্মুলেশন:** ঐতিহ্যবাহী কোরিয়ান হার্বাল স্কিনকেয়ারের অনুপ্রেরণায় তৈরি পণ্যের অভিজ্ঞতা।\n- **✨ মানের প্রতি অঙ্গীকার:** পণ্যের সত্যতা, গুণগত মান এবং নির্ভরযোগ্য উৎসকে আমরা গুরুত্ব দিই।\n- **💧 আপনার ত্বকের যত্নে:** দৈনন্দিন স্কিনকেয়ার রুটিনকে আরও সুন্দর ও সহজ করতে উপযোগী পণ্য বেছে নেওয়ার সুযোগ।\n- **🇧🇩 বাংলাদেশজুড়ে স্কিনকেয়ার:** আন্তর্জাতিক মানের স্কিনকেয়ার পণ্য বাংলাদেশের গ্রাহকদের কাছে সহজলভ্য করে তোলাই আমাদের লক্ষ্য।\n- **🤍 গ্রাহক সন্তুষ্টি:** পণ্য নির্বাচন থেকে শুরু করে কেনাকাটার অভিজ্ঞতা পর্যন্ত প্রতিটি ধাপে গ্রাহকের আস্থা অর্জনে আমরা প্রতিশ্রুতিবদ্ধ।\n\n### আমাদের লক্ষ্য\n\nবাংলাদেশের প্রতিটি স্কিনকেয়ারপ্রেমীর কাছে মানসম্মত আন্তর্জাতিক স্কিনকেয়ার পণ্য পৌঁছে দেওয়া এবং সঠিক পণ্য নির্বাচনের মাধ্যমে নিজের ত্বকের যত্ন নেওয়ার অভিজ্ঞতাকে আরও সহজ ও আনন্দময় করে তোলা।\n\nআমরা চাই, আপনার স্কিনকেয়ার রুটিন শুধু একটি অভ্যাস হয়ে না থাকুক—এটি হয়ে উঠুক নিজের যত্ন নেওয়ার প্রতিদিনের সুন্দর একটি মুহূর্ত।\n\n**FANTINE — ভালোবাসা, যত্ন আর আত্মবিশ্বাসে উজ্জ্বল হোক আপনার ত্বক।** ✨",
+    "storyParagraph2": "Our dedicated laboratories in Seoul adhere to the strictest dermatological standards, ensuring micro-molecular absorption, continuous 72-hour moisture lock, and noticeable clinical fading of hyperpigmentation in 28 days.",
+    "storyParagraph3": "Every formulation is 100% cruelty-free, paraben-free, dermatologist-tested, and certified under Korean KFDA clean beauty standards.",
+    "storyImage": "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=1000&auto=format&fit=crop&q=85",
+    "pillarsTitle": "Our Four Pillars of Dermal Excellence",
+    "pillarsSubtitle": "Bridging timeless Korean wellness traditions with cutting-edge dermatology",
+    "pillars": [
+      {
+        "id": "p1",
+        "badge": "HERITAGE",
+        "title": "Hanbang Herbal Synergy",
+        "description": "Authentic Korean herbal medicine principles blended for cellular vitality, barrier defense, and deep radiant clarity.",
+        "icon": "Sprout"
+      },
+      {
+        "id": "p2",
+        "badge": "BIOTECH",
+        "title": "Micro Bio-Fermentation",
+        "description": "Micro-molecular cold fermentation allowing active nutrients to penetrate up to 10 dermal layers deep effortlessly.",
+        "icon": "FlaskConical"
+      },
+      {
+        "id": "p3",
+        "badge": "CLEAN DERMA",
+        "title": "EWG Green & Cruelty-Free",
+        "description": "Dermatologist-formulated with zero harsh parabens, artificial fragrances, or sulfates. Safe for the most sensitive skin.",
+        "icon": "ShieldCheck"
+      },
+      {
+        "id": "p4",
+        "badge": "RESTORATION",
+        "title": "5-Tier Barrier Defense",
+        "description": "Multi-molecular ceramides and phytosphingosine engineered to lock in deep hydration for 72 hours continuously.",
+        "icon": "Layers"
+      }
+    ],
+    "hqTitle": "Brandini Co., Ltd. Seoul Headquarters",
+    "hqSubtitle": "Global R&D Center & Innovation Hub",
+    "hqAddress": "9F, Gangnamjeil Bldg, 109, Teheran-ro, Gangnam-gu, Seoul, Republic of Korea",
+    "hqImage": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1200&auto=format&fit=crop&q=85",
+    "missionStatement": "We sincerely hope we can relieve your tensions and stresses, and give you a healthier and more peaceful life.",
+    "founderQuote": "True skin radiance is not an overnight illusion, but a harmonious balance between natural botanical resilience and scientific dermal precision.",
+    "founderName": "FANTINE Dermal Research Institute",
+    "founderTitle": "Clinical Formulation & Botanical Science Division",
+    "founderImage": "https://images.unsplash.com/photo-1594824813589-980f745e69e8?w=800&auto=format&fit=crop&q=85",
+    "stats": [
+      {
+        "id": "s1",
+        "value": "28 Days",
+        "label": "Skin Renewal Cycle"
+      },
+      {
+        "id": "s2",
+        "value": "100%",
+        "label": "K-Clean Certified"
+      },
+      {
+        "id": "s3",
+        "value": "5-Tier",
+        "label": "Ceramide Barrier Defense"
+      },
+      {
+        "id": "s4",
+        "value": "15+",
+        "label": "Herbal Bio-Actives"
+      }
+    ]
+  },
+  "flashSale": {
+    "enabled": true,
+    "productId": "prod-collagen-elastic-essence",
+    "badgeTag": "BRIGHTENING AND WHITENING SERIES",
+    "title": "FANTINE Whitening and Brightening Series",
+    "subtitle": "Instantly brightens and revitalizes the skin with just one application. Infused with six powerful botanical whitening extracts for a rosy and radiant complexion.",
+    "customImage": "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=1000&auto=format&fit=crop&q=90",
+    "flashPrice": 1800,
+    "originalPrice": 2500,
+    "endDate": "2026-10-31T04:50:00.000Z",
+    "buttonText": "SHOP NOW",
+    "showVideoSection": true,
+    "videoTitle": "Clinical Hanbang Formulation & Daily Application Ritual",
+    "videoSubtitle": "Watch how our Korean active formula penetrates deeply to soothe inflammation, rebuild the skin barrier, and restore glass-skin radiance.",
+    "videoType": "file",
+    "videoUrl": "https://assets.mixkit.co/videos/preview/mixkit-dropper-dropping-oil-into-a-glass-jar-42790-large.mp4"
+  },
+  "highlightSpotlight": {
+    "enabled": true,
+    "targetType": "product",
+    "productId": "prod-rapid-acne-treatment-essence",
+    "categoryName": "",
+    "badgeTag": "RAPID ACNE TREATMENT SERIES • SPOTLIGHT",
+    "title": "Rapid Acne Treatment Essence",
+    "subtitle": "Clinical rapid-action acne clarifying essence. Formulated with Salicylic Acid (BHA), Tea Tree, and Heartleaf to dissolve pore-clogging sebum, neutralize acne bacteria, relieve inflamed pimples, and prevent recurrent breakouts.",
+    "customImage": "",
+    "buttonText": "BUY NOW",
+    "buttonLink": ""
+  },
+  "categoryItems": [
+    {
+      "id": "cat-0",
+      "name": "Cleansers",
+      "order": 0,
+      "subcategories": []
+    },
+    {
+      "id": "cat-1",
+      "name": "Toners",
+      "order": 1,
+      "subcategories": []
+    },
+    {
+      "id": "cat-2",
+      "name": "Serums",
+      "order": 2,
+      "subcategories": []
+    },
+    {
+      "id": "cat-3",
+      "name": "Creams",
+      "order": 3,
+      "subcategories": []
+    }
+  ],
+  "maintenanceMode": false,
+  "instituteInfo": {
+    "name": "FAИTIИE BD",
+    "regNo": "",
+    "phone": "01303142147",
+    "email": "fantinebd@gmail.com",
+    "address": "Banasree,Dhaka",
+    "street": "Banasree,Dhaka",
+    "description": "Skincare Solutions",
+    "industry": "Cosmetics & Skincare",
+    "bearingRollLocation": "DHAKA",
+    "logo": "/logo_transparent.webp"
+  },
+  "pixelId": "1111677938108529"
+}

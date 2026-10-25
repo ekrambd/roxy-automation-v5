@@ -186,7 +186,7 @@ export default function PaymentSettingsManager() {
   }
 
   return (
-    <div className="space-y-6 font-sans max-w-5xl mx-auto text-slate-800 pb-16">
+    <div className="space-y-6 font-sans w-full text-slate-800 pb-16">
 
       {/* Top Header Card */}
       <div className="bg-white border border-slate-200/80 p-5 sm:p-6 rounded-3xl shadow-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -197,7 +197,7 @@ export default function PaymentSettingsManager() {
             </div>
             <div>
               <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">
-                Payment Gateway and method seTNs
+                Payment Gateways & Methods
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">
                 For customer checkout Payment options (Cash on delivery, development, cash etc) confeegar

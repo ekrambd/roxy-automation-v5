@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { 
-  Users, LogOut, Menu, X, Check, ShoppingBag, ShoppingCart, ClipboardList, Package, LayoutDashboard, User, Code, Truck, CreditCard, Tag, Boxes, Store, Globe, Layout, Layers, Bell, Coins, Send, Sparkles, Eye, Bookmark, Camera, HeartHandshake, Zap, Mail
+  Users, LogOut, Menu, X, Check, ShoppingBag, ShoppingCart, ClipboardList, Package, LayoutDashboard, User, Code, Truck, CreditCard, Tag, Boxes, Store, Globe, Layout, Layers, Bell, Coins, Send, Sparkles, Eye, Bookmark, Camera, HeartHandshake, Zap, Mail,
+  ChevronDown, FolderTree
 } from 'lucide-react';
 import { dbService, subscribeToOrders } from '../lib/dbService';
 import { ApiClient } from '../services/apiClient';
@@ -289,28 +290,188 @@ export default function AdminDashboard({ adminEmail, onLogout }: AdminDashboardP
     setCustomers(updatedCust);
   };
 
-  const menuItems = [
-    { id: 'dashboard' as const, label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'header_manage' as any, isHeader: true, label: 'E-commerce Management' },
-    { id: 'inventory' as const, label: 'Inventory', icon: Boxes },
-    { id: 'products' as const, label: 'Products', icon: Package },
-    { id: 'orders' as const, label: 'Orders', icon: ShoppingBag },
-    { id: 'customers' as const, label: 'Customers', icon: Users },
-    { id: 'contact_messages' as const, label: 'Messages', icon: Mail },
-    { id: 'coupons' as const, label: 'Coupons', icon: Tag },
-    { id: 'header_store' as any, isHeader: true, label: 'Store Setup' },
-    { id: 'flash_sale' as const, label: 'Flash Sale', icon: Zap },
-    { id: 'highlight_spotlight' as const, label: 'Highlights', icon: Sparkles },
-    { id: 'about_settings' as const, label: 'About Us', icon: HeartHandshake },
-    { id: 'category_management' as const, label: 'Categories', icon: Layers },
-    { id: 'brand_management' as const, label: 'Brands', icon: Bookmark },
-    { id: 'landing_setup' as const, label: 'Landing Pages', icon: Globe },
-    { id: 'payment_settings' as const, label: 'Payments', icon: CreditCard },
-    { id: 'delivery_settings' as const, label: 'Delivery', icon: Truck },
-    { id: 'courier_settings' as const, label: 'Courier', icon: Send },
-    { id: 'pixel_settings' as const, label: 'Google Tag/Pixel', icon: Code },
-    { id: 'profile' as const, label: 'Profile Settings', icon: User },
+  interface SidebarMenuItem {
+    id: ActiveTab | 'logout';
+    label: string;
+    icon: any;
+    isLogout?: boolean;
+    badge?: string;
+  }
+
+  interface SidebarGroup {
+    id: string;
+    title: string;
+    items: SidebarMenuItem[];
+  }
+
+  const sidebarGroups: SidebarGroup[] = [
+    {
+      id: 'group_core',
+      title: 'Dashboard & Products',
+      items: [
+        { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+        { id: 'inventory', label: 'Inventory', icon: Boxes },
+        { id: 'products', label: 'Product', icon: Package },
+      ]
+    },
+    {
+      id: 'group_sales',
+      title: 'Orders & Customers',
+      items: [
+        { id: 'orders', label: 'Order', icon: ShoppingBag, badge: orders.length > 0 ? `${orders.length}` : undefined },
+        { id: 'customers', label: 'Customer', icon: Users },
+        { id: 'contact_messages', label: 'Messages', icon: Mail },
+      ]
+    },
+    {
+      id: 'group_taxonomy',
+      title: 'Categories & Brands',
+      items: [
+        { id: 'category_management', label: 'Category', icon: Layers },
+        { id: 'subcategory_management', label: 'Sub Category', icon: FolderTree },
+        { id: 'brand_management', label: 'Brand', icon: Bookmark },
+      ]
+    },
+    {
+      id: 'group_marketing',
+      title: 'Promotions & Campaigns',
+      items: [
+        { id: 'coupons', label: 'Coupon', icon: Tag },
+        { id: 'flash_sale', label: 'Flash Sale', icon: Zap },
+        { id: 'highlight_spotlight', label: 'Highlight', icon: Sparkles },
+        { id: 'landing_setup', label: 'Landing', icon: Globe },
+        { id: 'about_settings', label: 'About Us', icon: HeartHandshake },
+      ]
+    },
+    {
+      id: 'group_logistics',
+      title: 'Logistics & Payments',
+      items: [
+        { id: 'courier_settings', label: 'Courier', icon: Send },
+        { id: 'delivery_settings', label: 'Delivery Method', icon: Truck },
+        { id: 'payment_settings', label: 'Payment', icon: CreditCard },
+      ]
+    },
+    {
+      id: 'group_settings',
+      title: 'Settings & System',
+      items: [
+        { id: 'profile', label: 'Profile', icon: User },
+        { id: 'pixel_settings', label: 'GTM', icon: Code },
+        { id: 'logout', label: 'Logout', icon: LogOut, isLogout: true },
+      ]
+    }
   ];
+
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
+    group_core: true,
+    group_sales: true,
+    group_taxonomy: true,
+    group_marketing: true,
+    group_logistics: true,
+    group_settings: true,
+  });
+
+  const toggleGroup = (groupId: string) => {
+    setExpandedGroups(prev => ({
+      ...prev,
+      [groupId]: !prev[groupId]
+    }));
+  };
+
+  // Keep active tab's parent group expanded
+  useEffect(() => {
+    const parentGroup = sidebarGroups.find(g => g.items.some(i => i.id === activeTab));
+    if (parentGroup && expandedGroups[parentGroup.id] === false) {
+      setExpandedGroups(prev => ({ ...prev, [parentGroup.id]: true }));
+    }
+  }, [activeTab]);
+
+  const renderSidebarNav = (isMobile = false) => (
+    <div className="space-y-2.5">
+      {sidebarGroups.map((group) => {
+        const isExpanded = expandedGroups[group.id] !== false;
+        const hasActiveItem = group.items.some(i => i.id === activeTab);
+
+        return (
+          <div key={group.id} className="rounded-xl transition-all">
+            {/* Collapsible Group Header Button */}
+            <button
+              type="button"
+              onClick={() => toggleGroup(group.id)}
+              className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-[10px] font-bold tracking-wider uppercase text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 transition-all select-none cursor-pointer group"
+            >
+              <span className={`truncate ${hasActiveItem ? 'text-teal-400 font-extrabold' : ''}`}>
+                {group.title}
+              </span>
+              <ChevronDown
+                className={`h-3.5 w-3.5 text-slate-500 group-hover:text-slate-300 transition-transform duration-200 shrink-0 ${
+                  isExpanded ? 'rotate-0' : '-rotate-90'
+                }`}
+              />
+            </button>
+
+            {/* Collapsible Submenu */}
+            {isExpanded && (
+              <div className="space-y-0.5 mt-1 ml-1.5 pl-1.5 border-l border-slate-800 animate-fadeIn">
+                {group.items.map((item) => {
+                  if (item.isLogout) {
+                    return (
+                      <button
+                        key="item-logout"
+                        type="button"
+                        onClick={() => {
+                          if (isMobile) setSidebarOpen(false);
+                          onLogout();
+                        }}
+                        className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-semibold text-rose-400 hover:bg-rose-950/40 hover:text-rose-300 transition-all cursor-pointer"
+                      >
+                        <div className="flex items-center min-w-0">
+                          <LogOut className="h-3.5 w-3.5 mr-2 shrink-0 text-rose-400" />
+                          <span className="truncate">{item.label}</span>
+                        </div>
+                      </button>
+                    );
+                  }
+
+                  const Icon = item.icon;
+                  const isActive = activeTab === item.id;
+
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => {
+                        setActiveTab(item.id as ActiveTab);
+                        if (isMobile) setSidebarOpen(false);
+                      }}
+                      className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-semibold cursor-pointer transition-all ${
+                        isActive
+                          ? 'bg-teal-600 text-white font-bold shadow-md shadow-teal-900/30'
+                          : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+                      }`}
+                    >
+                      <div className="flex items-center min-w-0">
+                        <Icon className={`h-3.5 w-3.5 mr-2 shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                        <span className="truncate">{item.label}</span>
+                      </div>
+                      {item.badge && (
+                        <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded-full ${
+                          isActive ? 'bg-white/20 text-white' : 'bg-slate-800 text-teal-400'
+                        }`}>
+                          {item.badge}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
 
   return (
     <div className="admin-scope min-h-screen bg-slate-50 flex font-sans text-slate-800">
@@ -358,7 +519,7 @@ export default function AdminDashboard({ adminEmail, onLogout }: AdminDashboardP
         )}
       </AnimatePresence>
 
-      <aside className="hidden lg:flex lg:flex-col lg:w-48 bg-slate-900 text-slate-400 border-r border-slate-800 shrink-0 sticky top-0 h-screen">
+      <aside className="hidden lg:flex lg:flex-col lg:w-56 bg-slate-900 text-slate-400 border-r border-slate-800 shrink-0 sticky top-0 h-screen">
         {/* Title / Header */}
         <div className="h-16 flex items-center px-4 border-b border-slate-800 space-x-2.5 text-white">
           <div className="h-8 w-8 rounded-lg bg-teal-500/20 text-teal-400 border border-teal-500/30 flex items-center justify-center font-bold shrink-0">
@@ -370,37 +531,9 @@ export default function AdminDashboard({ adminEmail, onLogout }: AdminDashboardP
           </div>
         </div>
 
-        {/* Navigation Items */}
-        <nav className="flex-1 px-2.5 py-4 space-y-1 overflow-y-auto">
-          {menuItems.map((item) => {
-            if (item.isHeader) {
-              return (
-                <div key={item.id} className="pt-4 pb-1 px-3">
-                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                    {item.label}
-                  </span>
-                </div>
-              );
-            }
-
-            const Icon = item.icon!;
-            const isActive = activeTab === item.id;
-
-            return (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                className={`w-full inline-flex items-center px-3 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-all ${
-                  isActive 
-                    ? 'bg-teal-600 text-white shadow-md shadow-teal-900/30 font-bold' 
-                    : 'hover:bg-slate-800 hover:text-slate-200'
-                }`}
-              >
-                <Icon className="h-4 w-4 mr-2.5 shrink-0" />
-                <span className="truncate">{item.label}</span>
-              </button>
-            );
-          })}
+        {/* Grouped Navigation Items */}
+        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+          {renderSidebarNav(false)}
         </nav>
 
         {/* Footer info & Logout */}
@@ -431,7 +564,7 @@ export default function AdminDashboard({ adminEmail, onLogout }: AdminDashboardP
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
-              className="relative flex flex-col w-52 bg-slate-900 text-slate-400 border-r border-slate-800 h-full"
+              className="relative flex flex-col w-64 bg-slate-900 text-slate-400 border-r border-slate-800 h-full"
             >
               <div className="absolute top-3.5 right-3">
                 <button onClick={() => setSidebarOpen(false)} className="text-slate-400 hover:text-white p-1">
@@ -447,39 +580,8 @@ export default function AdminDashboard({ adminEmail, onLogout }: AdminDashboardP
                 </div>
               </div>
 
-              <nav className="flex-1 px-2.5 py-4 space-y-1 overflow-y-auto">
-                {menuItems.map((item) => {
-                  if (item.isHeader) {
-                    return (
-                      <div key={item.id} className="pt-4 pb-1 px-3">
-                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                          {item.label}
-                        </span>
-                      </div>
-                    );
-                  }
-
-                  const Icon = item.icon!;
-                  const isActive = activeTab === item.id;
-
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => {
-                        setActiveTab(item.id);
-                        setSidebarOpen(false);
-                      }}
-                      className={`w-full inline-flex items-center px-3 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-all ${
-                        isActive 
-                          ? 'bg-teal-600 text-white shadow-md' 
-                          : 'hover:bg-slate-800 hover:text-slate-200'
-                      }`}
-                    >
-                      <Icon className="h-4 w-4 mr-2.5 shrink-0" />
-                      <span className="truncate">{item.label}</span>
-                    </button>
-                  );
-                })}
+              <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+                {renderSidebarNav(true)}
               </nav>
 
               <div className="p-3 border-t border-slate-800 space-y-2">
@@ -499,18 +601,18 @@ export default function AdminDashboard({ adminEmail, onLogout }: AdminDashboardP
       {/* Core Body Container */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Header */}
-        <header className="sticky top-0 z-30 h-16 sm:h-20 bg-white/95 backdrop-blur-md border-b border-slate-100 px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+        <header className="sticky top-0 z-30 h-16 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-6 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="p-2 -ml-2 text-slate-600 hover:bg-slate-50 rounded-xl lg:hidden cursor-pointer"
+              className="p-2 -ml-1 text-slate-600 hover:bg-slate-100 rounded-xl lg:hidden cursor-pointer"
               title="Open the menu"
             >
               <Menu className="h-6 w-6" />
             </button>
 
-            <div className="font-extrabold text-slate-900 text-sm sm:text-base lg:text-lg lg:ml-2">
-              {menuItems.find(m => m.id === activeTab)?.label || 'Dashboard'}
+            <div className="font-extrabold text-slate-900 text-sm sm:text-base lg:text-lg">
+              {sidebarGroups.flatMap(g => g.items).find(m => m.id === activeTab)?.label || 'Dashboard'}
             </div>
           </div>
 
@@ -520,7 +622,7 @@ export default function AdminDashboard({ adminEmail, onLogout }: AdminDashboardP
         </header>
 
         {/* Content canvas */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full max-w-full">
+        <main className="flex-1 overflow-y-auto w-full max-w-full px-4 py-5 sm:px-6 sm:py-6">
           {loading ? (
             <TabContentSkeleton />
           ) : (
@@ -545,6 +647,7 @@ export default function AdminDashboard({ adminEmail, onLogout }: AdminDashboardP
                 {activeTab === 'orders' && (
                   <OrderManager 
                     orders={orders}
+                    products={products}
                     onAddOrder={handleAddOrder}
                     onUpdateOrder={handleUpdateOrder}
                     onDeleteOrder={handleDeleteOrder}
@@ -564,7 +667,7 @@ export default function AdminDashboard({ adminEmail, onLogout }: AdminDashboardP
                 {activeTab === 'contact_messages' && (
                   <ContactMessagesManager />
                 )}
-                {activeTab === 'category_management' && (
+                {(activeTab === 'category_management' || activeTab === 'subcategory_management') && (
                   <CategoryManager />
                 )}
                 {activeTab === 'brand_management' && (

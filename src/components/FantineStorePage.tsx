@@ -265,18 +265,23 @@ const FANTINE_PRODUCTS: FantineProductItem[] = [
   }
 ];
 
-export const DEFAULT_FANTINE_FALLBACK_IMAGE = '/uploads/file-1791830876714-429462367.jpg';
+const LIVE_MEDIA_ORIGIN = (
+  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_MEDIA_BASE_URL) ||
+  (typeof import.meta !== 'undefined' && import.meta.env?.DEV ? 'https://fantinebd.com' : '')
+).replace(/\/$/, '');
+
+export const DEFAULT_FANTINE_FALLBACK_IMAGE = `${LIVE_MEDIA_ORIGIN}/uploads/file-1791830876714-429462367.jpg`;
 
 export const FANTINE_CURATED_IMAGES = [
-  '/uploads/file-1791830876714-429462367.jpg',
-  '/uploads/file-1791830762714-399075316.jpg',
-  '/uploads/file-1791830989305-696330059.jpg',
-  '/uploads/file-1791831243256-923954313.jpg',
-  '/uploads/file-1791830588893-187058483.jpg',
-  '/uploads/file-1791826953559-621616270.jpg',
-  '/uploads/file-1791822354692-346436357.jpg',
-  '/uploads/file-1791827320010-515338106.jpg',
-  '/uploads/file-1791823814770-967689183.jpg'
+  `${LIVE_MEDIA_ORIGIN}/uploads/file-1791830876714-429462367.jpg`,
+  `${LIVE_MEDIA_ORIGIN}/uploads/file-1791830762714-399075316.jpg`,
+  `${LIVE_MEDIA_ORIGIN}/uploads/file-1791830989305-696330059.jpg`,
+  `${LIVE_MEDIA_ORIGIN}/uploads/file-1791831243256-923954313.jpg`,
+  `${LIVE_MEDIA_ORIGIN}/uploads/file-1791830588893-187058483.jpg`,
+  `${LIVE_MEDIA_ORIGIN}/uploads/file-1791826953559-621616270.jpg`,
+  `${LIVE_MEDIA_ORIGIN}/uploads/file-1791822354692-346436357.jpg`,
+  `${LIVE_MEDIA_ORIGIN}/uploads/file-1791827320010-515338106.jpg`,
+  `${LIVE_MEDIA_ORIGIN}/uploads/file-1791823814770-967689183.jpg`
 ];
 
 export const getSafeSkincareImage = (rawImg?: any, indexOrSeed?: number | string): string => {

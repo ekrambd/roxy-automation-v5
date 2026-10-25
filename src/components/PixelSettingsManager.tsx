@@ -21,7 +21,9 @@ export default function PixelSettingsManager() {
     async function loadSettings() {
       try {
         const data = await dbService.getEcomSettings();
-        setSettings(data);
+        if (data) {
+          setSettings(data);
+        }
       } catch (err) {
         console.error('Failed to load pixel settings:', err);
       } finally {
@@ -55,20 +57,20 @@ export default function PixelSettingsManager() {
   }
 
   return (
-    <form onSubmit={handleSave} className="space-y-6 font-sans max-w-5xl mx-auto">
+    <form onSubmit={handleSave} className="space-y-6 font-sans w-full">
       {/* Top Header Card */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/80 shadow-xs">
         <div>
           <div className="flex items-center space-x-2.5">
-            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl">
+            <div className="p-2 bg-teal-50 text-teal-600 rounded-xl">
               <Code className="h-5 w-5" />
             </div>
             <h2 className="text-lg sm:text-xl font-bold text-slate-900">
-              GTM
+              Google Tag Manager & Pixel
             </h2>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            Google AnalyticsTXx and ad tracking confeeGarration
+            Configure Google Tag Manager (GTM), Google Analytics 4, and conversion ad tracking
           </p>
         </div>
 
@@ -91,7 +93,7 @@ export default function PixelSettingsManager() {
             ) : (
               <>
                 <Save className="h-4 w-4 mr-1.5" />
-                heTSave all
+                Save Changes
               </>
             )}
           </button>
@@ -100,43 +102,52 @@ export default function PixelSettingsManager() {
 
       <div className="grid grid-cols-1 gap-6">
         {/* Google Tag Manager & Web Analytics */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
+        <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-5">
           <div className="flex items-center space-x-3 pb-3 border-b border-slate-100">
             <div className="p-2.5 bg-amber-50 text-amber-600 rounded-xl">
               <Eye className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="font-bold text-slate-900 text-sm">GTM</h3>
-              <p className="text-[11px] text-slate-500">Google Analytics 4 and GADS Tracking</p>
+              <h3 className="font-bold text-slate-900 text-sm">GTM Container Configuration</h3>
+              <p className="text-[11px] text-slate-500">Google Analytics 4, Meta Pixel, and Google Ads Server-side & Client-side Tracking</p>
             </div>
           </div>
 
           <div className="space-y-4 text-xs">
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">
-                GTM Container ID
+              <label className="block font-semibold text-slate-700 mb-1.5">
+                GTM Container ID *
               </label>
               <input
                 type="text"
-                placeholder="Ex: GTM-XXXXXXX"
+                placeholder="e.g. GTM-XXXXXXX"
                 value={settings.gtmId || ''}
                 onChange={(e) => setSettings({ ...settings, gtmId: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:bg-white focus:outline-none font-mono text-slate-900"
+                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:bg-white focus:outline-none font-mono text-slate-900 font-semibold"
               />
-              <p className="text-[10px] text-slate-400 mt-1">
-                your GTM All tracking tags will be automatically loaded into Headex when the container ID is set।
+              <p className="text-[11px] text-slate-400 mt-1.5">
+                All tracking tags (Meta Pixel, Google Analytics 4, TikTok Pixel, Google Ads) configured inside your GTM container will automatically load on all pages.
               </p>
             </div>
 
-            <div className="p-3.5 bg-blue-50/60 border border-blue-100 rounded-xl space-y-1.5 text-blue-900">
-              <div className="flex items-center space-x-1.5 font-bold text-[11px]">
-                <ShieldCheck className="h-4 w-4 text-blue-600" />
-                <span>Automatic data layer events:</span>
+            <div className="p-4 bg-teal-50/60 border border-teal-100 rounded-xl space-y-2 text-teal-950">
+              <div className="flex items-center space-x-2 font-bold text-xs">
+                <ShieldCheck className="h-4 w-4 text-teal-600" />
+                <span>Automatic E-Commerce DataLayer Events Fired:</span>
               </div>
-              <ul className="list-disc list-inside text-[10px] space-y-0.5 text-blue-800">
-                <li><code>purchase</code> - Triggered upon order confirmation</li>
-                <li><code>begin_checkout</code> - Checkout opening time</li>
-                <li><code>view_item</code> - While browsing product details</li>
+              <ul className="grid grid-cols-1 md:grid-cols-3 gap-2 pt-1 text-[11px] text-teal-900 font-medium">
+                <li className="bg-white/80 p-2 rounded-lg border border-teal-200/50">
+                  <span className="font-mono font-bold text-teal-700">view_item</span>
+                  <div className="text-[10px] text-slate-600 mt-0.5">Fires on product view & detail modal</div>
+                </li>
+                <li className="bg-white/80 p-2 rounded-lg border border-teal-200/50">
+                  <span className="font-mono font-bold text-teal-700">begin_checkout</span>
+                  <div className="text-[10px] text-slate-600 mt-0.5">Fires when visiting checkout drawer or page</div>
+                </li>
+                <li className="bg-white/80 p-2 rounded-lg border border-teal-200/50">
+                  <span className="font-mono font-bold text-teal-700">purchase</span>
+                  <div className="text-[10px] text-slate-600 mt-0.5">Fires with full item & total values on success</div>
+                </li>
               </ul>
             </div>
           </div>

@@ -209,7 +209,7 @@ export default function LandingPageManager() {
     const totalEnabled = products.filter(p => landingStatusMap[p.id] !== false).length;
 
     return (
-      <div className="space-y-6 font-sans max-w-6xl mx-auto pb-16">
+      <div className="space-y-6 font-sans w-full pb-16">
         {/* Top Header */}
         <div className="bg-gradient-to-r from-slate-900 via-teal-950 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden border border-teal-800/40">
           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -391,7 +391,7 @@ export default function LandingPageManager() {
   const activeCampaignUrl = getCampaignUrl(data.slug);
 
   return (
-    <div className="space-y-6 font-sans max-w-4xl mx-auto pb-16">
+    <div className="space-y-6 font-sans w-full pb-16">
       {/* Top Banner Header */}
       <div className="bg-gradient-to-r from-slate-900 via-teal-950 to-slate-900 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden border border-teal-800/40">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">

@@ -757,15 +757,15 @@ export const updateStoreOrders = (newOrders: BookOrder[]) => {
 const SETTINGS_STORAGE_FILE = path.join(process.cwd(), 'prisma', 'settings.json');
 
 const DEFAULT_INITIAL_SETTINGS: EcomSettings = {
-  storeName: 'FAИTIИE Korea (Brandini Co., Ltd.)',
-  companyName: 'Brandini Co., Ltd.',
+  storeName: 'FAИTIИE BD',
+  companyName: 'FAИTIИE BD',
   storeLogo: '/logo_transparent.webp',
-  storeTagline: 'Luxury Hanbang Skincare & Clinical Botanical Whitening Solutions',
-  topAnnouncementText: 'WELCOME TO BRANDINI CO.,LTD',
-  contactEmail: 'FANTINE@BRANDINI.CO.KR',
-  contactPhone: '+82 (02) 884-9021',
-  storeAddress: '9F, Gangnamjeil Bldg, 109, Teheran-ro, Gangnam-gu, Seoul, Republic of Korea',
-  footerDescription: 'Brandini Co., Ltd. • Seoul, Republic of Korea. Clinical Hanbang Skincare & Botanical Whitening Solutions.',
+  storeTagline: 'Skincare Solutions',
+  topAnnouncementText: 'WELCOME TO FAИTIИE BD',
+  contactEmail: 'fantinebd@gmail.com',
+  contactPhone: '01303142147',
+  storeAddress: 'Banasree,Dhaka',
+  footerDescription: 'Skincare Solutions',
   gtmId: '',
   deliveryChargeInsideDhaka: 0,
   deliveryChargeOutsideDhaka: 0,

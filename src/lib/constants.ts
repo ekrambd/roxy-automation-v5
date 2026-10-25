@@ -829,15 +829,16 @@ export const DEFAULT_HIGHLIGHT_SPOTLIGHT_SETTINGS: HighlightSpotlightSettings = 
 };
 
 export const DEFAULT_ECOM_SETTINGS: EcomSettings = {
-  storeName: 'F A И T I И E',
-  companyName: 'Brandini Co., Ltd.',
+  storeName: 'FAИTIИE BD',
+  companyName: 'FAИTIИE BD',
   storeLogo: '/logo_transparent.webp',
-  storeTagline: 'Brandini Co., Ltd. • Seoul, Republic of Korea. Clinical Hanbang Skincare & Botanical Whitening Solutions.',
-  topAnnouncementText: 'WELCOME TO BRANDINI CO.,LTD',
-  contactEmail: 'FANTINE@BRANDINI.CO.KR',
-  contactPhone: '+82 (02) 884-9021',
-  storeAddress: '9F, Gangnamjeil Bldg, 109, Teheran-ro, Gangnam-gu, Seoul, Republic of Korea',
-  footerDescription: 'Brandini Co., Ltd. • Seoul, Republic of Korea. Clinical Hanbang Skincare & Botanical Whitening Solutions.',
+  storeTagline: 'Skincare Solutions',
+  storeDomain: 'fantinebd.com',
+  topAnnouncementText: 'WELCOME TO FAИTIИE BD',
+  contactEmail: 'fantinebd@gmail.com',
+  contactPhone: '01303142147',
+  storeAddress: 'Banasree,Dhaka',
+  footerDescription: 'Skincare Solutions',
   socialLinks: {
     facebook: '',
     instagram: 'https://instagram.com',
@@ -845,7 +846,7 @@ export const DEFAULT_ECOM_SETTINGS: EcomSettings = {
     twitter: 'https://twitter.com',
     tiktok: 'https://tiktok.com',
     linkedin: 'https://linkedin.com',
-    whatsapp: '+82 (02) 884-9021'
+    whatsapp: '01303142147'
   },
   primaryColor: '#93c5fd',
   gtmId: '',
@@ -867,16 +868,16 @@ export const DEFAULT_ECOM_SETTINGS: EcomSettings = {
 };
 
 export const DEFAULT_INSTITUTE_INFO: InstituteInfo = {
-  name: 'Brandini Co., Ltd.',
+  name: 'FAИTIИE BD',
   logo: '/logo_transparent.webp',
   regNo: '',
-  phone: '+82 (02) 884-9021',
-  email: 'FANTINE@BRANDINI.CO.KR',
-  address: '9F, Gangnamjeil Bldg, 109, Teheran-ro, Gangnam-gu, Seoul, Republic of Korea',
-  street: '109, Teheran-ro, Gangnam-gu, Seoul, Korea',
-  description: 'Brandini Co., Ltd. • Seoul, Republic of Korea. Clinical Hanbang Skincare & Botanical Whitening Solutions.',
+  phone: '01303142147',
+  email: 'fantinebd@gmail.com',
+  address: 'Banasree,Dhaka',
+  street: 'Banasree,Dhaka',
+  description: 'Skincare Solutions',
   industry: 'Cosmetics & Skincare',
-  bearingRollLocation: 'Seoul'
+  bearingRollLocation: 'Dhaka'
 };
 
 export const DEFAULT_LANDING_PAGE_SETTINGS: import('../types').LandingPageData = {
@@ -1074,3 +1075,41 @@ export const createDefaultLandingForProduct = (product: Product): import('../typ
     onlyCashOnDelivery: true
   };
 };
+
+/**
+ * Formats a phone number for WhatsApp international standard (e.g. Bangladesh 8801...)
+ */
+export function formatWhatsAppPhone(phone: string | undefined | null): string {
+  if (!phone) return '';
+  let clean = phone.replace(/\D/g, '');
+  if (!clean) return '';
+
+  if (clean.startsWith('880')) {
+    return clean;
+  }
+  if (clean.startsWith('88') && clean.length >= 12) {
+    return clean;
+  }
+  if (clean.startsWith('0')) {
+    return `880${clean.slice(1)}`;
+  }
+  if (clean.length === 10 && clean.startsWith('1')) {
+    return `880${clean}`;
+  }
+  return `880${clean.replace(/^0+/, '')}`;
+}
+
+export function formatWhatsAppLink(phone: string | undefined | null, text?: string): string {
+  const cleanPhone = formatWhatsAppPhone(phone);
+  if (!cleanPhone) return '#';
+  return text 
+    ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`
+    : `https://wa.me/${cleanPhone}`;
+}
+
+export function formatTelegramLink(phone: string | undefined | null): string {
+  const cleanPhone = formatWhatsAppPhone(phone);
+  if (!cleanPhone) return '#';
+  return `https://t.me/+${cleanPhone}`;
+}
+

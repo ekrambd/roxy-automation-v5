@@ -132,16 +132,20 @@ app.use((req, res, next) => {
 
 // ==================== VITE / STATIC SERVER ====================
 async function startServer() {
-  if (process.env.NODE_ENV !== "production") {
-    const vite = await createViteServer({
+  const isDev = process.env.NODE_ENV !== "production";
+  let vite: any = null;
+
+  if (isDev) {
+    vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
     });
     app.use(vite.middlewares);
-  } else {
-    const distPath = path.join(process.cwd(), 'dist');
+  }
 
-    // Static Assets Cache (Immutable 1-year cache for fingerprinted JS/CSS/Images, disable auto index.html to allow dynamic SSR injection)
+  // 1. Static Assets Cache from dist (Ensure fingerprinted JS/CSS are always served with proper MIME types)
+  const distPath = path.join(process.cwd(), 'dist');
+  if (fs.existsSync(distPath)) {
     app.use(express.static(distPath, {
       index: false,
       maxAge: '1y',
@@ -152,10 +156,45 @@ async function startServer() {
         }
       }
     }));
+  }
 
-    // Fallback static files directly from public directory
-    app.use(express.static(path.join(process.cwd(), 'public'), { index: false }));
+  // 2. Fallback static files directly from public directory
+  app.use(express.static(path.join(process.cwd(), 'public'), { index: false }));
 
+  // 3. Strict Guard: NEVER return HTML for missing scripts, styles, or static assets
+  app.use((req, res, next) => {
+    if (
+      req.path.startsWith('/assets/') ||
+      req.path.startsWith('/src/') ||
+      req.path.startsWith('/@') ||
+      req.path.match(/\.(js|mjs|cjs|ts|tsx|css|map|json|png|jpg|jpeg|webp|svg|ico|woff|woff2)$/i)
+    ) {
+      return res.status(404).type('text/plain').send('Asset not found');
+    }
+    next();
+  });
+
+  // 4. SPA Page Route Handlers (HTML only)
+  if (isDev) {
+    app.get('*', async (req, res, next) => {
+      if (req.path.startsWith('/api') || req.path.startsWith('/cdn') || req.path.startsWith('/uploads')) {
+        return res.status(404).json({ error: 'Endpoint not found' });
+      }
+      try {
+        const url = req.originalUrl;
+        let template = fs.readFileSync(path.resolve(process.cwd(), 'index.html'), 'utf-8');
+        template = await vite.transformIndexHtml(url, template);
+        template = injectTrackingScripts(template);
+        res.status(200).set({
+          'Content-Type': 'text/html; charset=utf-8',
+          'Cache-Control': 'no-cache, no-store, must-revalidate'
+        }).end(template);
+      } catch (e) {
+        vite.ssrFixStacktrace(e as Error);
+        next(e);
+      }
+    });
+  } else {
     const getIndexHtml = () => {
       let filePath = path.join(distPath, 'index.html');
       if (!fs.existsSync(filePath)) {
@@ -169,7 +208,6 @@ async function startServer() {
       return { html: null, etag: null };
     };
 
-    // SPA Page Route Handler with Dynamic Server-side Meta & Tracking Script Injection
     app.get('*', (req, res) => {
       if (req.path.startsWith('/api') || req.path.startsWith('/cdn') || req.path.startsWith('/uploads')) {
         return res.status(404).json({ error: 'Endpoint not found' });

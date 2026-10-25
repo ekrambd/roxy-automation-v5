@@ -61,14 +61,21 @@ const ResponsiveImage = React.memo(function ResponsiveImage({
   let normalizedSrc = src?.trim() || fallbackSrc;
 
   // Transform local /uploads/ images to use our KVM VPS CDN on the fly
+  const MEDIA_BASE_URL = (
+    (typeof import.meta !== 'undefined' && import.meta.env?.VITE_MEDIA_BASE_URL) ||
+    (typeof import.meta !== 'undefined' && import.meta.env?.DEV ? 'https://fantinebd.com' : '')
+  ).replace(/\/$/, '');
+
   if (normalizedSrc.startsWith('/uploads/') || normalizedSrc.startsWith('uploads/')) {
     const cleanPath = normalizedSrc.replace(/^\//, '');
     
     // Automatically generate srcSet for optimized webp delivery
     if (!srcSet) {
-      srcSet = `/cdn/${cleanPath}?w=400&format=webp 400w, /cdn/${cleanPath}?w=800&format=webp 800w, /cdn/${cleanPath}?format=webp 1200w`;
+      srcSet = `${MEDIA_BASE_URL}/cdn/${cleanPath}?w=400&format=webp 400w, ${MEDIA_BASE_URL}/cdn/${cleanPath}?w=800&format=webp 800w, ${MEDIA_BASE_URL}/cdn/${cleanPath}?format=webp 1200w`;
       sizes = sizes || '(max-width: 600px) 400px, (max-width: 1024px) 800px, 1200px';
-      normalizedSrc = `/cdn/${cleanPath}?w=800&format=webp`;
+      normalizedSrc = `${MEDIA_BASE_URL}/cdn/${cleanPath}?w=800&format=webp`;
+    } else {
+      normalizedSrc = `${MEDIA_BASE_URL}/${cleanPath}`;
     }
   }
 

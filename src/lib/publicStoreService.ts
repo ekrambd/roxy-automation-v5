@@ -4,6 +4,11 @@ import { DEFAULT_BRANDS, DEFAULT_PRODUCTS, DEFAULT_ECOM_SETTINGS, DEFAULT_INSTIT
 const memoryCache = new Map<string, { data: unknown; timestamp: number }>();
 const CACHE_TTL_MS = 60 * 1000; // 1 minute in-memory cache
 
+const LIVE_MEDIA_ORIGIN = (
+  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_MEDIA_BASE_URL) ||
+  (typeof import.meta !== 'undefined' && import.meta.env?.DEV ? 'https://fantinebd.com' : '')
+).replace(/\/$/, '');
+
 export function optimizeImageUrl(url?: string, width = 800): string {
   if (!url) return '';
   const trimmed = url.trim();
@@ -12,8 +17,9 @@ export function optimizeImageUrl(url?: string, width = 800): string {
     const base = trimmed.split('?')[0];
     return `${base}?auto=format&fit=crop&w=${width}&q=80`;
   }
-  if (trimmed.startsWith('/uploads/')) {
-    return `/cdn${trimmed}?w=${width}&format=webp&q=85`;
+  if (trimmed.startsWith('/uploads/') || trimmed.startsWith('uploads/')) {
+    const clean = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+    return `${LIVE_MEDIA_ORIGIN}/cdn${clean}?w=${width}&format=webp&q=85`;
   }
   return trimmed;
 }
@@ -21,10 +27,11 @@ export function optimizeImageUrl(url?: string, width = 800): string {
 export function getResponsiveImageProps(url?: string, baseWidth = 800) {
   if (!url) return { src: '' };
   const optimizedSrc = optimizeImageUrl(url, baseWidth);
-  if (url.startsWith('/uploads/')) {
-    const sm = `/cdn${url}?w=400&format=webp&q=80 400w`;
-    const md = `/cdn${url}?w=800&format=webp&q=85 800w`;
-    const lg = `/cdn${url}?w=1200&format=webp&q=85 1200w`;
+  if (url.startsWith('/uploads/') || url.startsWith('uploads/')) {
+    const clean = url.startsWith('/') ? url : `/${url}`;
+    const sm = `${LIVE_MEDIA_ORIGIN}/cdn${clean}?w=400&format=webp&q=80 400w`;
+    const md = `${LIVE_MEDIA_ORIGIN}/cdn${clean}?w=800&format=webp&q=85 800w`;
+    const lg = `${LIVE_MEDIA_ORIGIN}/cdn${clean}?w=1200&format=webp&q=85 1200w`;
     return {
       src: optimizedSrc,
       srcSet: `${sm}, ${md}, ${lg}`,

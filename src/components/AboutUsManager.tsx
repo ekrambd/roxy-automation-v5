@@ -144,7 +144,7 @@ export default function AboutUsManager() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-20">
+    <div className="w-full space-y-6 pb-20">
       
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 sm:p-6 rounded-2xl shadow-xs border border-slate-200">
@@ -153,9 +153,9 @@ export default function AboutUsManager() {
             <FileText className="w-6 h-6" />
           </span>
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-slate-900">about us</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900">About Us</h1>
             <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-              Enter your store contact and description with a simple text editor।
+              Manage your store story, about page content, and company description
             </p>
           </div>
         </div>

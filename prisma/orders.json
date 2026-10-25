@@ -1,0 +1,42 @@
+[
+  {
+    "id": "ORD-2026-1001",
+    "createdAt": "2026-10-25T10:16:16.466Z",
+    "status": "Delivered",
+    "_shardMeta": {
+      "shardIndex": 3,
+      "partition": "orders_2026_10"
+    },
+    "customerName": "Rakibul Hasan",
+    "phone": "01784067744",
+    "address": "Panchbarga",
+    "productTitle": "1x Retinol Anti-Aging Serum",
+    "price": 2200,
+    "deliveryCharge": 0,
+    "discountAmount": 0,
+    "quantity": 1,
+    "totalPrice": 2200,
+    "totalAmount": 2200,
+    "orderType": "physical",
+    "paymentMethod": "Cash",
+    "paymentStatus": "Paid",
+    "items": [
+      {
+        "product": {
+          "id": "prod-retinol-anti-aging-serum",
+          "title": "Retinol Anti-Aging Serum",
+          "price": 2200,
+          "coverImage": "/uploads/file-1791827320010-515338106.jpg"
+        },
+        "quantity": 1,
+        "unitPrice": 2200,
+        "totalPrice": 2200,
+        "title": "Retinol Anti-Aging Serum",
+        "image": "/uploads/file-1791827320010-515338106.jpg"
+      }
+    ],
+    "courierProvider": "",
+    "courierTrackingCode": "",
+    "notes": ""
+  }
+]

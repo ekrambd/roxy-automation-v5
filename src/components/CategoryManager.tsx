@@ -438,7 +438,7 @@ export default function CategoryManager() {
   const categoryItems = settings.categoryItems || [];
 
   return (
-    <div className="space-y-6 font-sans max-w-4xl mx-auto">
+    <div className="space-y-6 font-sans w-full">
       {/* Top Header Card */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/80 shadow-xs">
         <div>
@@ -447,7 +447,7 @@ export default function CategoryManager() {
               <Tag className="h-5 w-5" />
             </div>
             <h2 className="text-lg sm:text-xl font-bold text-slate-900">
-              category And Sub-Category Management
+              Category & Sub-Category Management
             </h2>
           </div>
           <p className="text-xs text-slate-500 mt-1">
